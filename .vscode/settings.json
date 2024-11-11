@@ -97,5 +97,6 @@
         "netfwd": "cpp",
         "socket": "cpp",
         "filesystem": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "enabled"
 }
