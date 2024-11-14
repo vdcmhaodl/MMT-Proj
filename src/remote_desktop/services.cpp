@@ -446,63 +446,96 @@ bool Services::getApplicationPathFromSearch(const std::string &appName, std::str
 //     return false;  
 // }  
 
-bool Services::startApplication(const std::string &appName) {  
-    std::string appPath;  
+// bool Services::startApplication(const std::string &appName) {  
+//     std::string appPath;  
 
-    // Tìm kiếm ứng dụng bằng tên  
-    if (getApplicationPathFromSearch(appName, appPath)) {  
-        // Nếu tìm thấy đường dẫn ứng dụng  
-        std::cout << "Starting application: " << appName << '\n';  
+//     // Tìm kiếm ứng dụng bằng tên  
+//     if (getApplicationPathFromSearch(appName, appPath)) {  
+//         // Nếu tìm thấy đường dẫn ứng dụng  
+//         std::cout << "Starting application: " << appName << '\n';  
 
-        // Thiết lập cấu trúc STARTUPINFO và PROCESS_INFORMATION  
-        STARTUPINFO si;  
-        PROCESS_INFORMATION pi;  
-        ZeroMemory(&si, sizeof(si));  
-        si.cb = sizeof(si);  
-        ZeroMemory(&pi, sizeof(pi));  
+//         // Thiết lập cấu trúc STARTUPINFO và PROCESS_INFORMATION  
+//         STARTUPINFO si;  
+//         PROCESS_INFORMATION pi;  
+//         ZeroMemory(&si, sizeof(si));  
+//         si.cb = sizeof(si);  
+//         ZeroMemory(&pi, sizeof(pi));  
 
-        // Tạo tiến trình  
-        if (!CreateProcess(appPath.c_str(), NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {  
-            std::cerr << "CreateProcess failed: " << GetLastError() << '\n';  
-            return false;  
-        }  
+//         // Tạo tiến trình  
+//         if (!CreateProcess(appPath.c_str(), NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {  
+//             std::cerr << "CreateProcess failed: " << GetLastError() << '\n';  
+//             return false;  
+//         }  
 
-        // Đợi cho tiến trình hoàn thành (tuỳ chọn)  
-        // WaitForSingleObject(pi.hProcess, INFINITE);  
+//         // Đợi cho tiến trình hoàn thành (tuỳ chọn)  
+//         // WaitForSingleObject(pi.hProcess, INFINITE);  
 
-        // Đóng handle vì chúng ta không sử dụng nữa  
-        CloseHandle(pi.hProcess);  
-        CloseHandle(pi.hThread);  
+//         // Đóng handle vì chúng ta không sử dụng nữa  
+//         CloseHandle(pi.hProcess);  
+//         CloseHandle(pi.hThread);  
 
-        return true;  
-    } else {  
-        std::cout << "Application " << appName << " not found" << '\n';  
-        return false;  
-    }  
-}  
+//         return true;  
+//     } else {  
+//         std::cout << "Application " << appName << " not found" << '\n';  
+//         return false;  
+//     }  
+// }
 
-bool Services::isApplicationRunning(const std::string &appName) {
-    std::string processName = extractAppName(appName);
-    bool isRunning = false;
-    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-
-    if (hSnapshot != INVALID_HANDLE_VALUE) {
-        PROCESSENTRY32 pe;
-        pe.dwSize = sizeof(PROCESSENTRY32);
-
-        if (Process32First(hSnapshot, &pe)) {
-            do {
-                std::wcout << pe.szExeFile << '\n';
-                if (strcmp(processName.c_str(), pe.szExeFile) == 0) {
-                    isRunning = true;
-                    break;
-                }
-            } while (Process32Next(hSnapshot, &pe));
-        }
-        CloseHandle(hSnapshot);
+std::string Services::exec(const char* cmd) {
+    std::array<char, 128> buffer;
+    std::string result;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+    if (!pipe) {
+        throw std::runtime_error("popen() failed!");
     }
-    return isRunning;
+    while (fgets(buffer.data(), static_cast<int>(buffer.size()), pipe.get()) != nullptr)
+        result += buffer.data();
+    return result;
 }
+
+bool Services::startApplication(const std::string &appName) {
+    // get appID
+    std::string cmd = "powershell -command \"Get-StartApps | Where-Object { $_.Name -like '*" + appName + "*' }\"";
+    std::string appID = exec(cmd.c_str());
+    if (appID == "") 
+        return false;
+    size_t pos1 = 0,
+           pos2 = 0;
+    
+    pos1 = appID.find("AppID");
+    for (int i = 0; i < 3; ++i) pos2 = appID.find("\n", pos2) + 1;
+    pos1 += pos2 - 1;
+    pos2 = appID.find("\n", pos1);
+    appID = appID.substr(pos1, pos2 - pos1);
+    std::string appPath = "shell:AppsFolder\\" + appID;
+
+    // open app
+    system(("start " + appPath).c_str());
+    return true;
+}
+
+// bool Services::isApplicationRunning(const std::string &appName) {
+//     std::string processName = extractAppName(appName);
+//     bool isRunning = false;
+//     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
+//     if (hSnapshot != INVALID_HANDLE_VALUE) {
+//         PROCESSENTRY32 pe;
+//         pe.dwSize = sizeof(PROCESSENTRY32);
+
+//         if (Process32First(hSnapshot, &pe)) {
+//             do {
+//                 std::wcout << pe.szExeFile << '\n';
+//                 if (strcmp(processName.c_str(), pe.szExeFile) == 0) {
+//                     isRunning = true;
+//                     break;
+//                 }
+//             } while (Process32Next(hSnapshot, &pe));
+//         }
+//         CloseHandle(hSnapshot);
+//     }
+//     return isRunning;
+// }
 
 bool Services::stopApplication(const std::string &appPath) {
     std::string processName = extractAppName(appPath);

@@ -17,6 +17,9 @@
 #include <map>
 #include <filesystem>
 #include <mutex>
+#include <array>
+#include <memory>
+#include <stdexcept>
 
 struct RunningApp {
     DWORD processID;
@@ -37,6 +40,7 @@ namespace Services {
     bool shutdownComputer(const std::string &saveFile);
     bool restartComputer(const std::string &saveFile);
     
+    std::string exec(const char* cmd);
     bool listApplications(const std::string &saveFile);
     bool startApplication(const std::string &appName);
     bool isApplicationRunning(const std::string &appName);
