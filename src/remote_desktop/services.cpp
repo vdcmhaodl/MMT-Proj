@@ -805,14 +805,144 @@ bool Services::deleteFile(const std::string &fileName) {
     return system(command.c_str()) == 0;
 }
 
-bool Services::startWebcam(const std::string &saveFile) {
-    std::ofstream fout(saveFile.c_str());
-    if (!fout.is_open()) {
+
+void clear(IGraphBuilder* &pGraph, ICaptureGraphBuilder2* &pBuilder, IBaseFilter* &pCap, IBaseFilter* &pAVIMux, IMediaControl* &pControl) {
+    if (pControl) pControl->Release();
+    if (pAVIMux) pAVIMux->Release();
+    if (pCap) pCap->Release();
+    if (pBuilder) pBuilder->Release();
+    if (pGraph) pGraph->Release();
+}
+bool startWebcam(const std::string &saveFile) {
+    // convert string --> wstring
+    std::wstring fileName (saveFile.begin(), saveFile.end());
+
+    IGraphBuilder* pGraph = nullptr;
+    ICaptureGraphBuilder2* pBuilder = nullptr;
+    IBaseFilter* pCap = nullptr;
+    IBaseFilter* pAVIMux = nullptr;
+    IMediaControl* pControl = nullptr;
+
+    // COM initialization
+    HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+    if (FAILED(hr)) {
+        std::cerr << "Failed to initialize COM library." << std::endl;
         return false;
     }
-    fout << "Start webcam success!\n";
-    fout.close();
-    return system("start microsoft.windows.camera:") == 0;
+
+    // Create Graph Builder
+    hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (void**)&pGraph);
+    if (FAILED(hr)) {
+        std::cerr << "Failed to create GraphBuilder." << std::endl;
+        clear(pGraph, pBuilder, pCap, pAVIMux, pControl);
+        CoUninitialize();
+        return false;
+    }
+
+    // Create Capture Graph Builder
+    hr = CoCreateInstance(CLSID_CaptureGraphBuilder2, NULL, CLSCTX_INPROC_SERVER, IID_ICaptureGraphBuilder2, (void**)&pBuilder);
+    if (FAILED(hr)) {
+        std::cerr << "Failed to create Capture Graph Builder." << std::endl;
+        clear(pGraph, pBuilder, pCap, pAVIMux, pControl);
+        CoUninitialize();
+        return false;
+    }
+    pBuilder->SetFiltergraph(pGraph);
+
+    //
+    ICreateDevEnum* pDevEnum = NULL;
+    IEnumMoniker* pEnum = NULL;
+    IMoniker* pMoniker = NULL;
+    hr = CoCreateInstance(CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC_SERVER, IID_ICreateDevEnum, (void**)&pDevEnum);
+    if (FAILED(hr)) {
+        std::cerr << "Failed to create video capture filter." << std::endl;
+        clear(pGraph, pBuilder, pCap, pAVIMux, pControl);
+        CoUninitialize();
+        return false;
+    }
+    hr = pDevEnum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory, &pEnum, 0);
+    if (hr == S_OK) {
+        hr = pEnum->Next(1, &pMoniker, NULL);
+        if (hr == S_OK) {
+            hr = pMoniker->BindToObject(0, 0, IID_IBaseFilter, (void**)&pCap);
+            pMoniker->Release();
+        }
+        pEnum->Release();
+    }
+    pDevEnum->Release();
+
+    // Add Video Capture Filter to Graph
+    hr = pGraph->AddFilter(pCap, L"Capture Filter");
+    if (FAILED(hr)) {
+        std::cerr << "Failed to add video capture filter to graph." << std::endl;
+        clear(pGraph, pBuilder, pCap, pAVIMux, pControl);
+        CoUninitialize();
+        return false;
+    }
+
+    // Add AVI filter to Graph
+    hr = CoCreateInstance(CLSID_AviDest, nullptr, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void**)&pAVIMux);
+    if (FAILED(hr)) {
+        std::cerr << "Failed to create AVI Multiplexer filter!\n";
+        clear(pGraph, pBuilder, pCap, pAVIMux, pControl);
+        CoUninitialize();
+        return false;
+    }
+    hr = pGraph->AddFilter(pAVIMux, L"AVI Mux");
+    if (FAILED(hr)) {
+        std::cerr << "Failed to add AVI Multiplexer filter to the graph!\n";
+        clear(pGraph, pBuilder, pCap, pAVIMux, pControl);
+        CoUninitialize();
+        return false;
+    }
+
+    // Save Video to File
+    IFileSinkFilter* pSink = nullptr;
+    hr = pBuilder->SetOutputFileName(&MEDIASUBTYPE_Avi, fileName.c_str(), &pAVIMux, &pSink);
+    if (FAILED(hr)) {
+        std::cerr << "Failed to set output file!\n";
+        clear(pGraph, pBuilder, pCap, pAVIMux, pControl);
+        CoUninitialize();
+        return false;
+    }
+    pSink->Release();
+
+    //
+    hr = pBuilder->RenderStream(&PIN_CATEGORY_CAPTURE, &MEDIATYPE_Video, pCap, NULL, pAVIMux);
+    if (FAILED(hr)) {
+        std::cerr << "Failed to render stream for preview." << std::endl;
+        clear(pGraph, pBuilder, pCap, pAVIMux, pControl);
+        CoUninitialize();
+        return false;
+    }
+
+    //
+    hr = pGraph->QueryInterface(IID_IMediaControl, (void**)&pControl);
+    if (FAILED(hr)) {
+        std::cerr << "Failed to query media control interface." << std::endl;
+        clear(pGraph, pBuilder, pCap, pAVIMux, pControl);
+        CoUninitialize();
+        return false;
+    }
+
+    // Running
+    hr = pControl->Run();
+    if (FAILED(hr)) {
+        std::cerr << "Failed to run graph." << std::endl;
+        clear(pGraph, pBuilder, pCap, pAVIMux, pControl);
+        CoUninitialize();
+        return false;
+    }
+
+    // Set time and Stop
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+    pControl->Stop();
+
+    // Clear anything
+    clear(pGraph, pBuilder, pCap, pAVIMux, pControl);
+    CoUninitialize();
+
+    return true;
 }
 
 bool Services::stopWebcam(const std::string &saveFile) {
