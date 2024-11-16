@@ -1,14 +1,14 @@
 CXX = g++
 
-CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic 
-
-LDFLAGS = -lgdi32 -lshcore -lws2_32 -lMswsock 
-
+CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic
+LDFLAGS = -lgdi32 -lshcore -lws2_32 -lMswsock -lstrmiids -lquartz -lole32 -luuid
 STATIC_LDFLAGS = -static -static-libgcc -static-libstdc++
-
 CURL-FLAGS = -I ../third_party/libcurl/include -L ../third_party/libcurl/lib -lcurl
 
 SRCS = $(wildcard *.cpp ./app/*.cpp ./mail/*.cpp ./socket/*.cpp)
+# SRCS = $(find RootFolderName -type f -iregex ".*\.cpp")
+
+$(info SRCS=$(SRCS))
 
 SRCS_MAIN_SERVER = $(filter-out main_client.cpp ./socket/client.cpp ./mail/Gmail.cpp ./app/UI.cpp,$(SRCS))
 SRCS_MAIN_CLIENT = $(filter-out main_server.cpp ./socket/server.cpp,$(SRCS))

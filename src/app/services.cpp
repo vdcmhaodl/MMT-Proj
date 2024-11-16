@@ -514,28 +514,28 @@ bool Services::startApplication(const std::string &appName) {
     return true;
 }
 
-// bool Services::isApplicationRunning(const std::string &appName) {
-//     std::string processName = extractAppName(appName);
-//     bool isRunning = false;
-//     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+bool Services::isApplicationRunning(const std::string &appName) {
+    std::string processName = extractAppName(appName);
+    bool isRunning = false;
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
-//     if (hSnapshot != INVALID_HANDLE_VALUE) {
-//         PROCESSENTRY32 pe;
-//         pe.dwSize = sizeof(PROCESSENTRY32);
+    if (hSnapshot != INVALID_HANDLE_VALUE) {
+        PROCESSENTRY32 pe;
+        pe.dwSize = sizeof(PROCESSENTRY32);
 
-//         if (Process32First(hSnapshot, &pe)) {
-//             do {
-//                 std::wcout << pe.szExeFile << '\n';
-//                 if (strcmp(processName.c_str(), pe.szExeFile) == 0) {
-//                     isRunning = true;
-//                     break;
-//                 }
-//             } while (Process32Next(hSnapshot, &pe));
-//         }
-//         CloseHandle(hSnapshot);
-//     }
-//     return isRunning;
-// }
+        if (Process32First(hSnapshot, &pe)) {
+            do {
+                std::wcout << pe.szExeFile << '\n';
+                if (strcmp(processName.c_str(), pe.szExeFile) == 0) {
+                    isRunning = true;
+                    break;
+                }
+            } while (Process32Next(hSnapshot, &pe));
+        }
+        CloseHandle(hSnapshot);
+    }
+    return isRunning;
+}
 
 bool Services::stopApplication(const std::string &appPath) {
     std::string processName = extractAppName(appPath);
@@ -806,14 +806,14 @@ bool Services::deleteFile(const std::string &fileName) {
 }
 
 
-void clear(IGraphBuilder* &pGraph, ICaptureGraphBuilder2* &pBuilder, IBaseFilter* &pCap, IBaseFilter* &pAVIMux, IMediaControl* &pControl) {
+void Services::clear(IGraphBuilder* &pGraph, ICaptureGraphBuilder2* &pBuilder, IBaseFilter* &pCap, IBaseFilter* &pAVIMux, IMediaControl* &pControl) {
     if (pControl) pControl->Release();
     if (pAVIMux) pAVIMux->Release();
     if (pCap) pCap->Release();
     if (pBuilder) pBuilder->Release();
     if (pGraph) pGraph->Release();
 }
-bool startWebcam(const std::string &saveFile) {
+bool Services::startWebcam(const std::string &saveFile) {
     // convert string --> wstring
     std::wstring fileName (saveFile.begin(), saveFile.end());
 
