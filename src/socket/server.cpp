@@ -1,4 +1,5 @@
 #include "server.h"
+#include <io.h>
 
 void serverSocket::broadcast() {
     socketAPI::initializeSocket();
@@ -24,7 +25,7 @@ void serverSocket::broadcast() {
         return;
     }
 
-    while(isConnecting == false) {
+    while(isDiscovered == false) {
         // Receive subnet mask
         char subnetmask[INET_ADDRSTRLEN];
         char clientIP[INET_ADDRSTRLEN];
@@ -36,7 +37,7 @@ void serverSocket::broadcast() {
 
         int len_subnetmask = recvfrom(serverBroadcast, subnetmask, INET_ADDRSTRLEN, 0, &sender, &len_sender);
         if (len_subnetmask == SOCKET_ERROR) {
-            std::cout << "recvfrom() failed: " << WSAGetLastError() << '\n';
+            std::cout << "Ahaha recvfrom() failed: " << WSAGetLastError() << '\n';
             closesocket(serverBroadcast);
             socketAPI::cleanup();
             return;
@@ -92,7 +93,7 @@ void serverSocket::broadcast() {
                     }
 
                     closesocket(serverBroadcast);
-                    isConnecting = true;
+                    isDiscovered = true;
                     break;
                 }
             }
@@ -160,7 +161,7 @@ bool serverSocket::initializeServer()
 }
 
 bool serverSocket::listenClient() {
-    #define MAXIMUM_CLIENT_CONNECT 5
+    #define MAXIMUM_CLIENT_CONNECT 1
     if (listen(listenSocket, MAXIMUM_CLIENT_CONNECT) == SOCKET_ERROR) {
         std::cout << "listen() failed: " << WSAGetLastError() << '\n';
         closesocket(listenSocket);
@@ -171,10 +172,35 @@ bool serverSocket::listenClient() {
     return true;
 }
 
+bool timeout_occurred = false;
+
+// Timer ID 
+#define TIMER_ID 1 
+// Signal handler for timeout 
+void handle_alarm(int sig) { 
+    timeout_occurred = true;
+} 
+// Timer callback function 
+void CALLBACK TimerProc(HWND hwnd, UINT message, UINT idTimer, DWORD dwTime) { 
+    raise(SIGINT); 
+}
+
 bool serverSocket::connectClient() {
+    std::signal(SIGINT, handle_alarm); 
+    UINT_PTR timerId = SetTimer(NULL, TIMER_ID, timeListen * 1000, (TIMERPROC)TimerProc); 
+    if (timerId == 0) { 
+        closesocket(listenSocket);
+        socketAPI::cleanup();
+        return false;
+    }
+
     sockaddr addr_client;
     int addr_len(0);
     client = accept(listenSocket, NULL, NULL);
+    if (timeout_occurred) {
+        return false;
+    }
+
     if (client == INVALID_SOCKET) {
         std::cout << "accept() failed: " << WSAGetLastError() << '\n';
         closesocket(listenSocket);

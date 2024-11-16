@@ -20,10 +20,6 @@
 #include <bitset>
 #include <algorithm>
 
-#pragma comment (lib, "Ws2_32.lib")
-#pragma comment (lib, "Mswsock.lib")
-#pragma comment (lib, "AdvApi32.lib")
-
 #define DEFAULT_PORT "42069"
 #define DEFAULT_BROADCAST 23127
 #define DEFAULT_BUFLEN 1024

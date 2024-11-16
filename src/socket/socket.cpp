@@ -92,7 +92,7 @@ bool socketAPI::sendMessage(SOCKET &connectSocket, std::string &message) {
         }
 
         byteSent += iResult;
-    } while (byteSent < message.size());
+    } while (byteSent < (int)message.size());
 
     uint32_t respond;
     iResult = recv(connectSocket, (char*)&respond, sizeof(uint32_t), 0); 
@@ -126,9 +126,9 @@ bool socketAPI::receiveMessage(SOCKET &connectSocket, std::string &message) {
             cleanup();
             return false;
         }
-    } while(iResult > 0 && byteRecv < dataLength);
+    } while(iResult > 0 && byteRecv < (int)dataLength);
 
-    uint32_t respond = (byteRecv == dataLength ? 200 : 400);
+    uint32_t respond = (byteRecv == (int)dataLength ? 200 : 400);
     respond = htonl(respond); 
     iResult = send(connectSocket, (char*)&respond, sizeof(uint32_t), 0);
     if (iResult == SOCKET_ERROR) {
@@ -137,7 +137,7 @@ bool socketAPI::receiveMessage(SOCKET &connectSocket, std::string &message) {
         return false;
     }
 
-    return (byteRecv == dataLength);
+    return (byteRecv == (int)dataLength);
 }
 
 bool socketAPI::sendFile(SOCKET &connectSocket, std::string &pathFile) {
@@ -229,5 +229,8 @@ bool socketAPI::receiveFile(SOCKET &connectSocket, std::string &pathFile) {
     }
     fout.write((char*)&content[0], sizeof(char) * content.size());
     fout.close();
+    //
+    pathFile = filename;
+    //
     return true;
 }

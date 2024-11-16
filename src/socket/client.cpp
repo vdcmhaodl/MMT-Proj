@@ -67,11 +67,6 @@ std::vector<std::pair<std::string, std::string>> clientSocket::broadcast(std::st
         listServer.emplace_back(serverIP, serverName);
     }
 
-    std::cout << "LIST SERVER:\n";
-    for (auto &[serverIP, serverName]: listServer) {
-        std::cout << serverIP << ": " << serverName << '\n';
-    }
-
     closesocket(clientBroadcast);
     socketAPI::cleanup();
     return listServer;
