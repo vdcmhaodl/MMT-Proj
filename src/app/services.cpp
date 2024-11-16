@@ -403,84 +403,6 @@ bool Services::listApplications(const std::string &saveFile) {
     return true;
 }
 
-bool Services::getApplicationPathFromSearch(const std::string &appName, std::string &appPath) {
-    char result[MAX_PATH];
-
-    // Tìm đường dẫn ứng dụng bằng tên thông qua Windows API
-    HINSTANCE hFind = FindExecutableA(appName.c_str(), NULL, result);
-    if ((hFind != NULL) && (hFind > (HINSTANCE)32)) {
-        appPath = result;
-        return true;
-    }
-    return false;
-}
-
-// bool Services::startApplication(const std::string &appName) {
-//     std::string appPath;
-
-//     // Tìm kiếm ứng dụng bằng tên
-//     if (getApplicationPathFromSearch(appName, appPath)) {
-//         // Nếu tìm thấy đường dẫn ứng dụng
-//         std::string command = "start \"\" \"" + appPath + "\"";
-//         std::cout << "Starting application: " << appName << '\n';
-//         return system(command.c_str());
-//     }
-//     else {
-//         std::cout << "Application " << appName << " not found" << '\n';
-//         return false;
-//     }
-// }
-
-// namespace fs = std::filesystem;  
-
-// bool Services::getApplicationPathFromSearch(const std::string &appName, std::string &appPath) {  
-//     // Nếu bạn không muốn sử dụng FindExecutableA, bạn có thể sử dụng filesystem  
-//     for (const auto& dir : {"C:\\Program Files", "C:\\Program Files (x86)", "C:\\Windows\\System32"}) {  
-//         for (const auto& entry : fs::directory_iterator(dir)) {  
-//             if (entry.path().filename() == appName) {  
-//                 appPath = entry.path().string();  
-//                 return true;  
-//             }  
-//         }  
-//     }  
-//     return false;  
-// }  
-
-// bool Services::startApplication(const std::string &appName) {  
-//     std::string appPath;  
-
-//     // Tìm kiếm ứng dụng bằng tên  
-//     if (getApplicationPathFromSearch(appName, appPath)) {  
-//         // Nếu tìm thấy đường dẫn ứng dụng  
-//         std::cout << "Starting application: " << appName << '\n';  
-
-//         // Thiết lập cấu trúc STARTUPINFO và PROCESS_INFORMATION  
-//         STARTUPINFO si;  
-//         PROCESS_INFORMATION pi;  
-//         ZeroMemory(&si, sizeof(si));  
-//         si.cb = sizeof(si);  
-//         ZeroMemory(&pi, sizeof(pi));  
-
-//         // Tạo tiến trình  
-//         if (!CreateProcess(appPath.c_str(), NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {  
-//             std::cerr << "CreateProcess failed: " << GetLastError() << '\n';  
-//             return false;  
-//         }  
-
-//         // Đợi cho tiến trình hoàn thành (tuỳ chọn)  
-//         // WaitForSingleObject(pi.hProcess, INFINITE);  
-
-//         // Đóng handle vì chúng ta không sử dụng nữa  
-//         CloseHandle(pi.hProcess);  
-//         CloseHandle(pi.hThread);  
-
-//         return true;  
-//     } else {  
-//         std::cout << "Application " << appName << " not found" << '\n';  
-//         return false;  
-//     }  
-// }
-
 std::string Services::exec(const char* cmd) {
     std::array<char, 128> buffer;
     std::string result;
@@ -514,28 +436,28 @@ bool Services::startApplication(const std::string &appName) {
     return true;
 }
 
-// bool Services::isApplicationRunning(const std::string &appName) {
-//     std::string processName = extractAppName(appName);
-//     bool isRunning = false;
-//     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+bool Services::isApplicationRunning(const std::string &appName) {
+    std::string processName = extractAppName(appName);
+    bool isRunning = false;
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
-//     if (hSnapshot != INVALID_HANDLE_VALUE) {
-//         PROCESSENTRY32 pe;
-//         pe.dwSize = sizeof(PROCESSENTRY32);
+    if (hSnapshot != INVALID_HANDLE_VALUE) {
+        PROCESSENTRY32 pe;
+        pe.dwSize = sizeof(PROCESSENTRY32);
 
-//         if (Process32First(hSnapshot, &pe)) {
-//             do {
-//                 std::wcout << pe.szExeFile << '\n';
-//                 if (strcmp(processName.c_str(), pe.szExeFile) == 0) {
-//                     isRunning = true;
-//                     break;
-//                 }
-//             } while (Process32Next(hSnapshot, &pe));
-//         }
-//         CloseHandle(hSnapshot);
-//     }
-//     return isRunning;
-// }
+        if (Process32First(hSnapshot, &pe)) {
+            do {
+                std::wcout << pe.szExeFile << '\n';
+                if (strcmp(processName.c_str(), pe.szExeFile) == 0) {
+                    isRunning = true;
+                    break;
+                }
+            } while (Process32Next(hSnapshot, &pe));
+        }
+        CloseHandle(hSnapshot);
+    }
+    return isRunning;
+}
 
 bool Services::stopApplication(const std::string &appPath) {
     std::string processName = extractAppName(appPath);
@@ -567,62 +489,46 @@ bool Services::listServices(const std::string &saveFile) {
     DWORD servicesCount = 0;
     DWORD resumeHandle = 0;
 
-    // Lần đầu gọi EnumServicesStatus để lấy số byte cần thiết
-    if (!EnumServicesStatus(scmHandle, SERVICE_TYPE_ALL, SERVICE_STATE_ALL, NULL, 0, &bytesNeeded, &servicesCount, &resumeHandle))
-    {
+    // Lần đầu gọi EnumServicesStatusEx để lấy kích thước bộ nhớ cần thiết
+    if (!EnumServicesStatusEx(scmHandle, SC_ENUM_PROCESS_INFO, SERVICE_TYPE_ALL, SERVICE_ACTIVE, NULL, 0, &bytesNeeded, &servicesCount, &resumeHandle, NULL)) {
         DWORD error = GetLastError();
-        if (error != ERROR_MORE_DATA) // Chỉ xử lý khi gặp lỗi khác
-        {
-            std::cerr << "Error calling EnumServicesStatus for size calculation: " << error << std::endl;
+        if (error != ERROR_MORE_DATA) {
+            std::cerr << "Error calling EnumServicesStatusEx for size calculation: " << error << std::endl;
             CloseServiceHandle(scmHandle);
             return false;
         }
     }
 
-    // Cấp phát bộ nhớ ban đầu
-    LPENUM_SERVICE_STATUS services = NULL;
-    services = (LPENUM_SERVICE_STATUS)LocalAlloc(LMEM_ZEROINIT, bytesNeeded);
-    if (services == NULL) {
+    // Cấp phát bộ nhớ
+    LPBYTE buffer = (LPBYTE)LocalAlloc(LMEM_ZEROINIT, bytesNeeded);
+    if (buffer == NULL) {
         std::cerr << "Error allocating memory" << std::endl;
         CloseServiceHandle(scmHandle);
         return false;
     }
 
-    // Lần gọi EnumServicesStatus để liệt kê các dịch vụ
-    if (!EnumServicesStatus(scmHandle, SERVICE_TYPE_ALL, SERVICE_STATE_ALL, services, bytesNeeded, &bytesNeeded, &servicesCount, &resumeHandle)) {
-        DWORD error = GetLastError();
-        if (error == ERROR_MORE_DATA) {
-            // Nếu thiếu bộ nhớ, cấp phát lại mà không in thông báo
-            services = (LPENUM_SERVICE_STATUS)LocalReAlloc(services, bytesNeeded, LMEM_ZEROINIT);
-            if (services == NULL) {
-                std::cerr << "Error reallocating memory" << std::endl;
-                CloseServiceHandle(scmHandle);
-                return false;
-            }
-
-            // Gọi lại EnumServicesStatus
-            if (!EnumServicesStatus(scmHandle, SERVICE_TYPE_ALL, SERVICE_STATE_ALL, services, bytesNeeded, &bytesNeeded, &servicesCount, &resumeHandle)) {
-                std::cerr << "Error enumerating services after reallocating memory: " << GetLastError() << std::endl;
-                LocalFree(services);
-                CloseServiceHandle(scmHandle);
-                return false;
-            }
-        }
-        else {
-            std::cerr << "Error enumerating services: " << error << std::endl;
-            LocalFree(services);
-            CloseServiceHandle(scmHandle);
-            return false;
-        }
+    // Gọi lại EnumServicesStatusEx để lấy danh sách dịch vụ
+    if (!EnumServicesStatusEx(scmHandle, SC_ENUM_PROCESS_INFO, SERVICE_TYPE_ALL, SERVICE_ACTIVE, buffer, bytesNeeded, &bytesNeeded, &servicesCount, &resumeHandle, NULL)) {
+        std::cerr << "Error enumerating services: " << GetLastError() << std::endl;
+        LocalFree(buffer);
+        CloseServiceHandle(scmHandle);
+        return false;
     }
 
-    // Hiển thị tên của các dịch vụ
+    // Chuyển đổi buffer sang ENUM_SERVICE_STATUS_PROCESS
+    LPENUM_SERVICE_STATUS_PROCESS services = (LPENUM_SERVICE_STATUS_PROCESS)buffer;
+
+    // In danh sách các dịch vụ ra màn hình
+    fout << std::setw(30) << std::left << "Service name" << "Process ID" << "\n\n";
     for (DWORD i = 0; i < servicesCount; i++) {
-        fout << services[i].lpServiceName << std::endl;
+        std::string serviceName = services[i].lpServiceName;
+        DWORD processId = services[i].ServiceStatusProcess.dwProcessId;
+
+        fout << std::setw(30) << std::left << serviceName << processId << std::endl;
     }
 
     // Giải phóng bộ nhớ và đóng handle của SCM
-    LocalFree(services);
+    LocalFree(buffer);
     CloseServiceHandle(scmHandle);
     fout.close();
 
@@ -636,29 +542,46 @@ bool Services::startService(const std::string &serviceName) {
         return false;
     }
 
-    // Chuyển std::string sang LPSTR (mảng char) cho API Windows
-    SC_HANDLE serviceHandle = OpenServiceA(scmHandle, serviceName.c_str(), SERVICE_START);
-    if (serviceHandle == NULL)
-    {
-        std::cerr << "Error opening service: " << GetLastError() << std::endl;
+    SC_HANDLE serviceHandle = OpenServiceA(scmHandle, serviceName.c_str(), SERVICE_START | SERVICE_QUERY_STATUS);
+    if (serviceHandle == NULL) {
+        DWORD dwError = GetLastError();
+        std::cerr << "Error opening service: " << dwError << std::endl;
         CloseServiceHandle(scmHandle);
         return false;
     }
 
-    // Bắt đầu dịch vụ
     if (!StartService(serviceHandle, 0, NULL)) {
-        std::cerr << "Error starting service: " << GetLastError() << std::endl;
+        DWORD dwError = GetLastError();
+        if (dwError == ERROR_SERVICE_ALREADY_RUNNING) {
+            std::cout << "Service " << serviceName << " is already running." << std::endl;
+        } else {
+            std::cerr << "Error starting service: " << dwError << std::endl;
+        }
         CloseServiceHandle(serviceHandle);
         CloseServiceHandle(scmHandle);
         return false;
     }
 
-    std::cout << "Service " << serviceName << " started successfully!" << std::endl;
+    // Kiểm tra trạng thái dịch vụ
+    SERVICE_STATUS_PROCESS ssp;
+    DWORD bytesNeeded;
+    do {
+        if (!QueryServiceStatusEx(serviceHandle, SC_STATUS_PROCESS_INFO, (LPBYTE)&ssp, sizeof(SERVICE_STATUS_PROCESS), &bytesNeeded)) {
+            std::cerr << "Error querying service status: " << GetLastError() << std::endl;
+            CloseServiceHandle(serviceHandle);
+            CloseServiceHandle(scmHandle);
+            return false;
+        }
+    } while (ssp.dwCurrentState == SERVICE_START_PENDING);
 
-    // Đóng handle
+    if (ssp.dwCurrentState == SERVICE_RUNNING) {
+        std::cout << "Service " << serviceName << " started successfully!" << std::endl;
+    } else {
+        std::cerr << "Service failed to start." << std::endl;
+    }
+
     CloseServiceHandle(serviceHandle);
     CloseServiceHandle(scmHandle);
-
     return true;
 }
 
@@ -669,13 +592,10 @@ bool Services::stopService(const std::string &serviceName) {
         return false;
     }
 
-    SC_HANDLE serviceHandle = OpenServiceA(scmHandle, serviceName.c_str(), SERVICE_STOP);
+    SC_HANDLE serviceHandle = OpenServiceA(scmHandle, serviceName.c_str(), SERVICE_STOP | SERVICE_QUERY_STATUS);
     if (serviceHandle == NULL) {
         DWORD dwError = GetLastError();
         std::cerr << "Error opening service: " << dwError << std::endl;
-        if (dwError == ERROR_ACCESS_DENIED) {
-            std::cerr << "Access Denied. Try running the program as Administrator." << std::endl;
-        }
         CloseServiceHandle(scmHandle);
         return false;
     }
@@ -683,17 +603,36 @@ bool Services::stopService(const std::string &serviceName) {
     SERVICE_STATUS status;
     if (!ControlService(serviceHandle, SERVICE_CONTROL_STOP, &status)) {
         DWORD dwError = GetLastError();
-        std::cerr << "Error stopping service: " << dwError << std::endl;
+        if (dwError == ERROR_SERVICE_NOT_ACTIVE) {
+            std::cout << "Service " << serviceName << " is not running." << std::endl;
+        } else {
+            std::cerr << "Error stopping service: " << dwError << std::endl;
+        }
         CloseServiceHandle(serviceHandle);
         CloseServiceHandle(scmHandle);
         return false;
     }
 
-    std::cout << "Service " << serviceName << " stopped successfully!" << std::endl;
+    // Kiểm tra trạng thái dịch vụ
+    SERVICE_STATUS_PROCESS ssp;
+    DWORD bytesNeeded;
+    do {
+        if (!QueryServiceStatusEx(serviceHandle, SC_STATUS_PROCESS_INFO, (LPBYTE)&ssp, sizeof(SERVICE_STATUS_PROCESS), &bytesNeeded)) {
+            std::cerr << "Error querying service status: " << GetLastError() << std::endl;
+            CloseServiceHandle(serviceHandle);
+            CloseServiceHandle(scmHandle);
+            return false;
+        }
+    } while (ssp.dwCurrentState == SERVICE_STOP_PENDING);
+
+    if (ssp.dwCurrentState == SERVICE_STOPPED) {
+        std::cout << "Service " << serviceName << " stopped successfully!" << std::endl;
+    } else {
+        std::cerr << "Service failed to stop." << std::endl;
+    }
 
     CloseServiceHandle(serviceHandle);
     CloseServiceHandle(scmHandle);
-
     return true;
 }
 
