@@ -5,9 +5,10 @@ size_t Gmail::headerCallback(char* buffer, size_t size, size_t nitems, std::stri
     return size * nitems;
 }
 
-std::string Gmail::searchNewEmail() {
+std::queue<std::string> Gmail::searchNewEmail() {
     CURL* handle;
     CURLcode res = CURLE_OK;
+    std::queue<std::string> qEmailNums;
     std::string searchResult;
 
     handle = curl_easy_init();
@@ -26,28 +27,30 @@ std::string Gmail::searchNewEmail() {
         res = curl_easy_perform(handle);
         if (res != CURLE_OK) {
             std::cerr << "Error: " << curl_easy_strerror(res) << "\n";
+            return qEmailNums;
         }
-        size_t pos1 = 0, pos2;
-        pos1 = searchResult.find("SEARCH", pos1 + 1);
-        pos1 = searchResult.find("SEARCH", pos1 + 1);
-        pos1 = searchResult.find(" ", pos1 + 1);
-        pos2 = searchResult.find(" ", pos1 + 1);
-        if (pos2 - pos1 < 7) {
-            std::cerr << "NO NEW EMAIL!\n";
-            std::cerr << "----------------------------\n";
-            searchResult = "";
-        } else {
-            std::cerr << "NEW EMAIL DETECTED!\n";
-            searchResult = searchResult.substr(pos1 + 1, pos2 - pos1 - 7);
+        // get email numbers
+        size_t pos1 = 0, pos2 = 0;
+        pos1 = searchResult.find("EXISTS", pos1);
+        pos1 = searchResult.find("SEARCH", pos1);
+        pos1 = searchResult.find(" ", pos1) + 1;
+        pos2 = searchResult.find("#", pos1);
+        searchResult = searchResult.substr(pos1, pos2 - pos1);
+
+        pos1 = pos2 = 0;
+        while (pos2 = searchResult.find(' ', pos2)) {
+            if (pos2 == std::string::npos) {
+                pos2 = searchResult.length();
+                qEmailNums.push(searchResult.substr(pos1, pos2 - pos1));
+                break;
+            }
+            qEmailNums.push(searchResult.substr(pos1, pos2 - pos1));
+            pos1 = ++pos2;
         }
 
         curl_easy_cleanup(handle);
     }
-    if (res != CURLE_OK) {
-        std::cerr << "Error: " << curl_easy_strerror(res) << "\n";
-        return ""; 
-    }
-    return searchResult;
+    return qEmailNums;
 }
 
 bool Gmail::sendEmail(const std::string &receiver, const std::string &subject, const std::string &content) {
@@ -236,16 +239,18 @@ void Gmail::autoCheckEmail() {
     std::string sender;
     std::string subject;
     std::string content;
-    std::string emailNumber;
+    std::queue<std::string> emailNumbers;
 
     while (true) {
         if (_kbhit()) {
             std::cout << "Key pressed. Stop check email!\n";
             break;
         }
-        emailNumber = this->searchNewEmail();
-        if (emailNumber != "") {
-            this->receiveEmail(sender, subject, content, emailNumber);
+        emailNumbers = this->searchNewEmail();
+        while (!emailNumbers.empty()) {
+            std::string eNum = emailNumbers.front();
+            emailNumbers.pop();
+            this->receiveEmail(sender, subject, content, eNum);
             std::cout << "New email structure: \n";
             std::cout << "\tSender: \t" << sender << "\n"
                       << "\tSubject: \t" << subject << "\n"
