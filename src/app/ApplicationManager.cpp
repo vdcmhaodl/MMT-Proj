@@ -62,6 +62,7 @@ bool ListApps(const std::string &saveFile) {
     return true;
 }
 
+
 std::string ReadCMD(const char* cmd) {
     std::array<char, 128> buffer;
     std::string result;
@@ -126,4 +127,3 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
     }
     return TRUE;
 }
-
