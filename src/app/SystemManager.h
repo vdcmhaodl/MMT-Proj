@@ -7,10 +7,14 @@
 #include <iomanip>
 #include <string>
 
-bool ShutdownComputer();
-bool RestartComputer();
-bool DelFile(const std::string &filePath);
+namespace Services{
+    bool shutdown(const std::string &saveFile);
+    bool restart(const std::string &saveFile);
 
-bool ListSers(const std::string &saveFile);
-bool StartSer(const std::string &serviceName);
-bool StopSer(const std::string &serviceName);
+    bool listFileAndFolder(const std::string &directory);
+    bool deleteFile(const std::string &filePath);
+
+    bool listServices(const std::string &saveFile);
+    bool startService(const std::string &serviceName);
+    bool stopService(const std::string &serviceName);
+}

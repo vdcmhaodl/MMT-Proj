@@ -2,10 +2,31 @@
 
 size_t Gmail::headerCallback(char* buffer, size_t size, size_t nitems, std::string* userdata) {
     userdata -> append(std::string(buffer, size * nitems));
+    userdata -> append("#");
     return size * nitems;
 }
 
-std::queue<std::string> Gmail::searchNewEmail() {
+void Gmail::readAdminEmail() {
+    std::ifstream fin ("AdminAccount");
+    if (!fin.is_open()) {
+        std::cerr << "Fail to read Admin's Email!\n";
+        return;
+    }
+
+    std::string s;
+    while (getline(fin, s)) {
+        adminEmail.insert(s);
+    }
+
+    fin.close();
+}
+
+bool Gmail::isValidAdminEmail(const std::string &sender) {
+    return (adminEmail.find(sender) != adminEmail.end());
+}
+
+std::queue<std::string> Gmail::searchNewEmail()
+{
     CURL* handle;
     CURLcode res = CURLE_OK;
     std::queue<std::string> qEmailNums;
@@ -251,7 +272,11 @@ void Gmail::autoCheckEmail() {
             std::string eNum = emailNumbers.front();
             emailNumbers.pop();
             this->receiveEmail(sender, subject, content, eNum);
-            std::cout << "New email structure: \n";
+            if (!isValidAdminEmail(sender)) {
+                std::cerr << "Not Admin!\n";
+                continue;
+            }
+            std::cout << "New email: \n";
             std::cout << "\tSender: \t" << sender << "\n"
                       << "\tSubject: \t" << subject << "\n"
                       << "\tContent: \t" << content << "\n";

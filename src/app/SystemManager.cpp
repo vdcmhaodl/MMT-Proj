@@ -1,18 +1,58 @@
 #include "SystemManager.h"
 
-bool ShutdownComputer() {
+bool Services::shutdown(const std::string &saveFile) {
     return system("shutdown /s /f /t 10") == 0;
 }
 
-bool RestartComputer() {
+bool Services::restart(const std::string &saveFile) {
     return system("shutdown /r /f /t 10") == 0;
 }
 
-bool DelFile(const std::string &filePath) {
+bool Services::listFileAndFolder(const std::string &directory) {
+    std::string saveFile = directory + "\\ListFileAndFolder.txt";
+
+    std::ofstream ofs (saveFile);
+    if (!ofs.is_open()) {
+        std::cout << "Fail to open file!\n";
+        return false;
+    }
+    
+    WIN32_FIND_DATAA findFileData;
+    HANDLE handle = FindFirstFileA((directory + "\\*").c_str(), &findFileData);
+    if (handle == INVALID_HANDLE_VALUE) {
+        std::cerr << "Error to access directory!\n";
+        return false;
+    }
+
+    do {
+        DWORD fileType = findFileData.dwFileAttributes;
+        std::string fileName = findFileData.cFileName;
+        
+        if (fileName == "." || fileName == "..")
+            continue;
+
+        ofs << std::setw(8);
+        if (fileType & FILE_ATTRIBUTE_DIRECTORY)
+            ofs << "[FOLDER]";
+        else 
+            ofs << "[FILE]";
+        ofs << std::setw(30) << (std::string)fileName 
+                  << std::setw(10) << findFileData.nFileSizeLow << " Byte\n";
+    } 
+    while (FindNextFileA(handle, &findFileData) != 0);
+
+    FindClose(handle);
+    ofs.close();
+
+    return true;
+}
+
+bool Services::deleteFile(const std::string &filePath)
+{
     return system(("Del \"" + filePath + "\"").c_str()) == 0;
 }
 
-// bool ListSers(const std::string &saveFile) {
+// bool Services::listServices(const std::string &saveFile) {
 //     std::ofstream fout(saveFile.c_str());
 //     if (!fout.is_open()) {
 //         return false;
@@ -74,7 +114,7 @@ bool DelFile(const std::string &filePath) {
 //     return true;
 // }
 
-bool StartSer(const std::string &serviceName) {
+bool Services::startService(const std::string &serviceName) {
     SC_HANDLE scmHandle = OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT);
     if (scmHandle == NULL) {
         std::cerr << "Error opening Service Control Manager: " << GetLastError() << std::endl;
@@ -124,7 +164,7 @@ bool StartSer(const std::string &serviceName) {
     return true;
 }
 
-bool StopSer(const std::string &serviceName) {
+bool Services::stopService(const std::string &serviceName) {
     SC_HANDLE scmHandle = OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT);
     if (scmHandle == NULL) {
         std::cerr << "Error opening Service Control Manager: " << GetLastError() << std::endl;

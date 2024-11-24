@@ -1,66 +1,12 @@
 #include "CatureOperator.h"
 
-HRESULT WebcamCapture(LPCWSTR filename) { 
-    IMFMediaSource* pSource = nullptr;
-    IMFSourceReader* pReader = nullptr;
-    IMFSinkWriter* pWriter = nullptr;
-    GUID pVideoFormat = MFVideoFormat_YUY2;
 
-    HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
-    if (FAILED(hr)) {
-        std::cerr << "Fail to init COM!\n";
-        goto done;
-    }
-    hr = MFStartup(MF_VERSION);
-    if (FAILED(hr)) {
-        std::cerr << "Failed to init MF\n";
-        goto done;
-    }
-
-    hr = GetWebcamMediaSource(&pSource);
-    if (FAILED(hr)) {
-        std::cerr << "Fail to get webcam's media source!\n";
-        goto done;
-    }
-
-    hr = InitializeAndFormatSourceReader(pSource, &pReader, &pVideoFormat);
-    if (FAILED(hr)) {
-        std::cerr << "Fail to init Source Reader!\n";
-        goto done;
-    }
-    DWORD streamIndex;
-    hr = InitializeAndFormatSinkWriter(filename, pVideoFormat, &pWriter, &streamIndex);
-    if (FAILED(hr)) {
-        std::cerr << "Fail to init Sink Writer!\n";
-        goto done;
-    }
-
-    hr = pWriter->BeginWriting();
-    if (FAILED(hr)) {
-        std::cerr << "Fail to begin writing!\n";
-        goto done;
-    }
-
-    hr = StartWebcamCapture(pReader, pWriter, streamIndex);
-    if (FAILED(hr)) {
-        std::cerr << "Fail to record!\n";
-        goto done;
-    }
-
-done:
-    pSource->Shutdown();
-    pWriter->Finalize();
-
-    SafeRelease(&pSource);
-    SafeRelease(&pReader);
-    SafeRelease(&pWriter);
-
-    MFShutdown();
-    CoUninitialize();
-    return 0;
+bool Services::webcamCapture(const std::string &fileName) {
+    std::wstring filename (fileName.begin(), fileName.end());
+    return SUCCEEDED(WebcamCapture(filename.c_str()));
 }
 
-bool TakeScreenShot(const std::string &filename) {
+bool Services::screenShot(const std::string &filename) {
     SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
     // Lấy kích thước màn hình
     UINT dpi = 96;
@@ -410,4 +356,64 @@ HRESULT StartWebcamCapture(IMFSourceReader *pReader, IMFSinkWriter *pWriter, DWO
     }
 
     return hr;
+}
+
+HRESULT WebcamCapture(LPCWSTR filename) { 
+    IMFMediaSource* pSource = nullptr;
+    IMFSourceReader* pReader = nullptr;
+    IMFSinkWriter* pWriter = nullptr;
+    GUID pVideoFormat = MFVideoFormat_YUY2;
+
+    HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+    if (FAILED(hr)) {
+        std::cerr << "Fail to init COM!\n";
+        goto done;
+    }
+    hr = MFStartup(MF_VERSION);
+    if (FAILED(hr)) {
+        std::cerr << "Failed to init MF\n";
+        goto done;
+    }
+
+    hr = GetWebcamMediaSource(&pSource);
+    if (FAILED(hr)) {
+        std::cerr << "Fail to get webcam's media source!\n";
+        goto done;
+    }
+
+    hr = InitializeAndFormatSourceReader(pSource, &pReader, &pVideoFormat);
+    if (FAILED(hr)) {
+        std::cerr << "Fail to init Source Reader!\n";
+        goto done;
+    }
+    DWORD streamIndex;
+    hr = InitializeAndFormatSinkWriter(filename, pVideoFormat, &pWriter, &streamIndex);
+    if (FAILED(hr)) {
+        std::cerr << "Fail to init Sink Writer!\n";
+        goto done;
+    }
+
+    hr = pWriter->BeginWriting();
+    if (FAILED(hr)) {
+        std::cerr << "Fail to begin writing!\n";
+        goto done;
+    }
+
+    hr = StartWebcamCapture(pReader, pWriter, streamIndex);
+    if (FAILED(hr)) {
+        std::cerr << "Fail to record!\n";
+        goto done;
+    }
+
+done:
+    pSource->Shutdown();
+    pWriter->Finalize();
+
+    SafeRelease(&pSource);
+    SafeRelease(&pReader);
+    SafeRelease(&pWriter);
+
+    MFShutdown();
+    CoUninitialize();
+    return 0;
 }

@@ -1,6 +1,6 @@
 #include "ApplicationManager.h"
 
-bool StartApp(const std::string &appName) {
+bool Services::startApplication(const std::string &appName) {
     // get appID
     std::string cmd = "powershell -command \"Get-StartApps | Where-Object { $_.Name -like '*" + appName + "*' }\"";
     std::string appID = ReadCMD(cmd.c_str());
@@ -20,7 +20,7 @@ bool StartApp(const std::string &appName) {
     return system(("powershell -command \"Start-Process " + appPath + "\"").c_str()) == 0;
 }
 
-bool StopApp(const std::string &appName) {
+bool Services::stopApplication(const std::string &appName) {
     // get ProcessName
     std::string cmd = "powershell -command \"get-process | where-object Name -like '*" 
                       + appName 
@@ -41,7 +41,7 @@ bool StopApp(const std::string &appName) {
     return system(cmd.c_str()) == 0;
 }
 
-bool ListApps(const std::string &saveFile) {
+bool Services::listApplications(const std::string &saveFile) {
     std::set<RunningApp> runningApps;
     EnumWindows(EnumWindowsProc, reinterpret_cast<LPARAM>(&runningApps));
 
