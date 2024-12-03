@@ -78,7 +78,7 @@ std::queue<std::string> GmailAccount::searchNewEmail() {
     return qEmailNums;
 }
 
-bool GmailAccount::repEmail(const Email &email, const std::string &filePath) {
+bool GmailAccount::repEmail(const Email &email, const std::string &content, const std::string &filePath) {
     CURL* handle;
     CURLcode res = CURLE_OK;
     struct curl_slist* listRecipients = nullptr;
@@ -119,7 +119,7 @@ bool GmailAccount::repEmail(const Email &email, const std::string &filePath) {
 
         // add contents
         part = curl_mime_addpart(mime);
-        curl_mime_data(part, email.content.c_str(), CURL_ZERO_TERMINATED);
+        curl_mime_data(part, content.c_str(), CURL_ZERO_TERMINATED);
 
         // send file
         if (filePath != "") {
@@ -144,7 +144,7 @@ bool GmailAccount::repEmail(const Email &email, const std::string &filePath) {
     return (res == CURLE_OK);
 }
 
-bool GmailAccount::sendEmail(const Email& email, const std::string &filePath) {
+bool GmailAccount::sendEmail(const Email& email, const std::string &content, const std::string &filePath) {
     CURL* handle;
     CURLcode res = CURLE_OK;
     struct curl_slist* listRecipients = nullptr;
@@ -183,7 +183,7 @@ bool GmailAccount::sendEmail(const Email& email, const std::string &filePath) {
 
         // add contents
         part = curl_mime_addpart(mime);
-        curl_mime_data(part, email.content.c_str(), CURL_ZERO_TERMINATED);
+        curl_mime_data(part, content.c_str(), CURL_ZERO_TERMINATED);
 
         // upload file
         if (filePath != "") {
@@ -207,7 +207,7 @@ bool GmailAccount::sendEmail(const Email& email, const std::string &filePath) {
     return (res == CURLE_OK);
 }
 
-bool GmailAccount::receiveEmail(Email &email, const std::string &emailNumber) {
+bool GmailAccount::receiveEmail(Email &email, std::string &content, const std::string &emailNumber) {
     CURL* handle;
     CURLcode res = CURLE_OK;
     std::string command;
@@ -263,19 +263,19 @@ bool GmailAccount::receiveEmail(Email &email, const std::string &emailNumber) {
         command = "FETCH " + emailNumber + " BODY[TEXT]";
         curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST, command.c_str());
         curl_easy_setopt(handle, CURLOPT_HEADERFUNCTION, headerCallback);
-        curl_easy_setopt(handle, CURLOPT_HEADERDATA, &email.content);
+        curl_easy_setopt(handle, CURLOPT_HEADERDATA, &content);
         res = curl_easy_perform(handle);
         if (res != CURLE_OK) {
             std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << "\n";
         }
-        pos1 = email.content.find("Content-Type", 0);
-        pos1 = email.content.find("#", pos1);
-        pos1 = email.content.find("#", pos1 + 1) + 1;
-        pos2 = email.content.find("#", pos1);
-        email.content = email.content.substr(pos1, pos2 - pos1 - 1);
-        pos1 = email.content.find_last_not_of(" \t\f\v\n\r");
+        pos1 = content.find("Content-Type", 0);
+        pos1 = content.find("#", pos1);
+        pos1 = content.find("#", pos1 + 1) + 1;
+        pos2 = content.find("#", pos1);
+        content = content.substr(pos1, pos2 - pos1 - 1);
+        pos1 = content.find_last_not_of(" \t\f\v\n\r");
         if (pos1 != std::string::npos)
-            email.content.erase(pos1 + 1);
+            content.erase(pos1 + 1);
 
         // get messageID
         command = "FETCH " + emailNumber + " BODY.PEEK[HEADER.FIELDS (MESSAGE-ID)]";

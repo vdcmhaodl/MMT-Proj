@@ -16,10 +16,9 @@ const std::string CAcert = "CAcertificate/cacert.pem";
 struct Email {
     std::string account;
     std::string subject;
-    std::string content;
     std::string messageID;
         
-    Email(): account(""), subject(""), content(""), messageID("") {}
+    Email(): account(""), subject(""), messageID("") {}
 };
 
 class GmailAccount {
@@ -36,8 +35,8 @@ class GmailAccount {
         GmailAccount(const std::string &Username, const std::string &Password): username(Username), password(Password) {if (adminEmail.empty()) readAdminEmail();}
 
         std::queue<std::string> searchNewEmail();
-        bool repEmail(const Email &email, const std::string &filePath = "");
-        bool sendEmail(const Email &email, const std::string &filePath = "");
-        bool receiveEmail(Email &email, const std::string &emailNumber);
+        bool repEmail(const Email &email, const std::string &content, const std::string &filePath = "");
+        bool sendEmail(const Email &email, const std::string &content, const std::string &filePath = "");
+        bool receiveEmail(Email &email, std::string &content, const std::string &emailNumber);
         // void autoCheckEmail();
 };
