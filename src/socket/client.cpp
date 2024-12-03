@@ -72,8 +72,7 @@ std::vector<std::pair<std::string, std::string>> clientSocket::broadcast(std::st
     return listServer;
 }
 
-bool clientSocket::initializeClient(const char *serverIP)
-{
+bool clientSocket::initializeClient(const char *serverIP) {
     struct addrinfo *result = nullptr, *ptr = nullptr, hints;
 
     ZeroMemory(&hints, sizeof(hints));

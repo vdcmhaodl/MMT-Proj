@@ -1,118 +1,108 @@
 #include "server.h"
 #include <io.h>
 
-void serverSocket::broadcast() {
-    socketAPI::initializeSocket();
+// void serverSocket::broadcast() {
+//     socketAPI::initializeSocket();
 
-    SOCKET serverBroadcast = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (serverBroadcast == INVALID_SOCKET) {
-        std::cout << "socket() failed: " << WSAGetLastError() << '\n';
-        socketAPI::cleanup();
-        return;
-    }
+//     SOCKET serverBroadcast = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+//     if (serverBroadcast == INVALID_SOCKET) {
+//         std::cout << "socket() failed: " << WSAGetLastError() << '\n';
+//         socketAPI::cleanup();
+//         return;
+//     }
 
-    struct sockaddr_in hints;
-    ZeroMemory(&hints, sizeof(sockaddr_in));
-    hints.sin_family = AF_INET;
-    hints.sin_port = htons(DEFAULT_BROADCAST);
-    hints.sin_addr.S_un.S_addr = ADDR_ANY;
+//     struct sockaddr_in hints;
+//     ZeroMemory(&hints, sizeof(sockaddr_in));
+//     hints.sin_family = AF_INET;
+//     hints.sin_port = htons(DEFAULT_BROADCAST);
+//     hints.sin_addr.S_un.S_addr = ADDR_ANY;
 
-    int iResult = bind(serverBroadcast, (sockaddr*)&hints, sizeof(hints));
-    if (iResult == SOCKET_ERROR) {
-        std::cout << "bind() failed: " << WSAGetLastError() << '\n';
-        closesocket(serverBroadcast);
-        socketAPI::cleanup();
-        return;
-    }
+//     int iResult = bind(serverBroadcast, (sockaddr*)&hints, sizeof(hints));
+//     if (iResult == SOCKET_ERROR) {
+//         std::cout << "bind() failed: " << WSAGetLastError() << '\n';
+//         closesocket(serverBroadcast);
+//         socketAPI::cleanup();
+//         return;
+//     }
 
-    while(isDiscovered == false) {
-        // Receive subnet mask
-        char subnetmask[INET_ADDRSTRLEN];
-        char clientIP[INET_ADDRSTRLEN];
-        sockaddr sender;
-        int len_sender = sizeof(sockaddr);
-        ZeroMemory(&sender, sizeof(sender));
-        ZeroMemory(subnetmask, sizeof(subnetmask));
-        ZeroMemory(clientIP, sizeof(clientIP));
+//     char hostname[256]{};
+//     if (gethostname(hostname, sizeof(hostname)) == SOCKET_ERROR) {
+//         std::cout << "gethostname() failed: " << WSAGetLastError() << '\n';
+//         closesocket(serverBroadcast);
+//         socketAPI::cleanup();
+//         return;
+//     }
+//     std::cout << hostname << '\n';
 
-        int len_subnetmask = recvfrom(serverBroadcast, subnetmask, INET_ADDRSTRLEN, 0, &sender, &len_sender);
-        if (len_subnetmask == SOCKET_ERROR) {
-            std::cout << "Ahaha recvfrom() failed: " << WSAGetLastError() << '\n';
-            closesocket(serverBroadcast);
-            socketAPI::cleanup();
-            return;
-        }
+//     addrinfo *result = nullptr, *ptr = nullptr, serverHints;
+//     ZeroMemory(&serverHints, sizeof(serverHints));
+//     serverHints.ai_family = AF_INET;
+//     serverHints.ai_socktype = SOCK_DGRAM;
+//     serverHints.ai_protocol = IPPROTO_UDP;
 
-        sockaddr_in *tmp = reinterpret_cast<sockaddr_in*>(&sender);
-        inet_ntop(AF_INET, &(tmp->sin_addr), clientIP, INET_ADDRSTRLEN);
+//     int iResult = getaddrinfo(hostname, DEFAULT_PORT, &serverHints, &result);
+//     if (iResult != 0) {
+//         std::cout << "getaddrinfo failed: " << iResult << '\n';
+//         closesocket(serverBroadcast);
+//         socketAPI::cleanup();
+//         return;
+//     }
 
-        char hostname[256]{};
-        if (gethostname(hostname, sizeof(hostname)) == SOCKET_ERROR) {
-            std::cout << "gethostname() failed: " << WSAGetLastError() << '\n';
-            closesocket(serverBroadcast);
-            socketAPI::cleanup();
-            return;
-        }
-        std::cout << hostname << '\n';
+//     char subnetmask[INET_ADDRSTRLEN];
+//     char clientIP[INET_ADDRSTRLEN];
+//     char hostIP[INET_ADDRSTRLEN];
+//     sockaddr sender;
+//     int len_sender = sizeof(sockaddr);
+//     ZeroMemory(&sender, sizeof(sender));
+//     ZeroMemory(subnetmask, sizeof(subnetmask));
 
-        addrinfo *result = nullptr, *ptr = nullptr, serverHints;
-        ZeroMemory(&serverHints, sizeof(serverHints));
-        serverHints.ai_family = AF_INET;
-        serverHints.ai_socktype = SOCK_DGRAM;
-        serverHints.ai_protocol = IPPROTO_UDP;
+//     while(isDiscovered == false) {
+//         int len_subnetmask = recvfrom(serverBroadcast, subnetmask, INET_ADDRSTRLEN, 0, &sender, &len_sender);
+//         if (len_subnetmask == SOCKET_ERROR) {
+//             std::cout << "Ahaha recvfrom() failed: " << WSAGetLastError() << '\n';
+//             closesocket(serverBroadcast);
+//             socketAPI::cleanup();
+//             return;
+//         }
 
-        int iResult = getaddrinfo(hostname, DEFAULT_PORT, &serverHints, &result);
-        if (iResult != 0) {
-            std::cout << "getaddrinfo failed: " << iResult << '\n';
-            closesocket(serverBroadcast);
-            socketAPI::cleanup();
-            return;
-        }
+//         socketAPI::getIPaddr(&sender, clientIP);
+        
+//         for (ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
+//             socketAPI::getIPaddr(ptr->ai_addr, hostIP);
+//             // std::cout << "IP Address: " << hostIP << '\n';
+//             if (socketAPI::sameSubnet(clientIP, hostIP, subnetmask)) {
+//                 std::string string_hostIP(hostIP);
+//                 std::string string_hostname(hostname);
+//                 std::string respond = string_hostIP + std::string(1, ' ') + string_hostname;
+//                 std::cout << "respond: " << respond << '\n';
+//                 int iResult = sendto(serverBroadcast, (char*)respond.c_str(), respond.size(), 0, &sender, sizeof(sender));
+//                 if (iResult == SOCKET_ERROR) {
+//                     std::cout << "sendto() failed: " << WSAGetLastError() << '\n';
+//                     closesocket(serverBroadcast);
+//                     socketAPI::cleanup();
+//                     return;
+//                 }
 
-        for (ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
-            if (ptr->ai_family == AF_INET && ptr->ai_protocol == IPPROTO_UDP && ptr->ai_socktype == SOCK_DGRAM) {
-                sockaddr_in* sockaddr_ipv4 = reinterpret_cast<sockaddr_in*>(ptr->ai_addr); 
-                char hostIP[INET_ADDRSTRLEN]; inet_ntop(AF_INET, &(sockaddr_ipv4->sin_addr), hostIP, INET_ADDRSTRLEN); 
-                // std::cout << "IP Address: " << hostIP << '\n';
-                if (socketAPI::sameSubnet(clientIP, hostIP, subnetmask)) {
-                    std::cout << "Broadcast from server completed!\n";
-                    std::cout << "Client IPv4: " << clientIP << '\n';
-                    std::cout << "Server IPv4: " << hostIP << '\n';
-                    std::cout << "Subnet mask: " << subnetmask << '\n';
+//                 closesocket(serverBroadcast);
+//                 isDiscovered = true;
+//                 break;
+//             }
+//         }
+//     }
 
-                    std::string string_hostIP(hostIP);
-                    std::string string_hostname(hostname);
-                    std::string respond = string_hostIP + std::string(1, ' ') + string_hostname;
-                    std::cout << "respond: " << respond << '\n';
-                    int iResult = sendto(serverBroadcast, (char*)respond.c_str(), respond.size(), 0, &sender, sizeof(sender));
-                    if (iResult == SOCKET_ERROR) {
-                        std::cout << "sendto() failed: " << WSAGetLastError() << '\n';
-                        closesocket(serverBroadcast);
-                        socketAPI::cleanup();
-                        return;
-                    }
+//     std::cout << "Shutting down...";
+//     socketAPI::cleanup();
+// }
 
-                    closesocket(serverBroadcast);
-                    isDiscovered = true;
-                    break;
-                }
-            }
-        }
-    }
+bool serverSocket::initializeServer(std::string IP) {
+    // addrinfo *result = nullptr, *ptr = nullptr;
+    // addrinfo hints;
 
-    std::cout << "Shutting down...";
-    socketAPI::cleanup();
-}
-
-bool serverSocket::initializeServer()
-{
-    addrinfo *result = nullptr, *ptr = nullptr, hints;
-
-    ZeroMemory(&hints, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_protocol = IPPROTO_TCP;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
+    // ZeroMemory(&hints, sizeof(hints));
+    // hints.ai_family = AF_INET;
+    // hints.ai_protocol = IPPROTO_TCP;
+    // hints.ai_socktype = SOCK_STREAM;
+    // hints.ai_flags = AI_PASSIVE;
 
     char hostname[256]{};
     if (gethostname(hostname, sizeof(hostname)) == SOCKET_ERROR) {
@@ -122,41 +112,46 @@ bool serverSocket::initializeServer()
     }
     // std::cout << hostname << '\n';
 
-    int iResult = getaddrinfo(hostname, DEFAULT_PORT, &hints, &result);
-    if (iResult != 0) {
-        std::cout << "getaddrinfo failed: " << iResult << '\n';
-        socketAPI::cleanup();
-        return false;
-    }
+    // int iResult = getaddrinfo(hostname, DEFAULT_PORT, &hints, &result);
+    // if (iResult != 0) {
+    //     std::cout << "getaddrinfo failed: " << iResult << '\n';
+    //     socketAPI::cleanup();
+    //     return false;
+    // }
 
-    listenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-    if (listenSocket == INVALID_SOCKET) {
-        std::cout << "Error at socket(): " << WSAGetLastError() << '\n';
-        freeaddrinfo(result);
-        socketAPI::cleanup();
-        return false;
-    }
+    listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    // if (listenSocket == INVALID_SOCKET) {
+    //     std::cout << "Error at socket(): " << WSAGetLastError() << '\n';
+    //     freeaddrinfo(result);
+    //     socketAPI::cleanup();
+    //     return false;
+    // }
 
-    std::cout << "-----------------------------------------------------------\n";
-    for (ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
-        if (ptr->ai_family == AF_INET) {
-            sockaddr_in* sockaddr_ipv4 = reinterpret_cast<sockaddr_in*>(ptr->ai_addr); 
-            char ipstr[INET_ADDRSTRLEN]; inet_ntop(AF_INET, &(sockaddr_ipv4->sin_addr), ipstr, INET_ADDRSTRLEN); 
-            std::cout << "IP Address: " << ipstr << '\n';
-        }
-    }
-    std::cout << "-----------------------------------------------------------\n";
+    // std::cout << "-----------------------------------------------------------\n";
+    // for (ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
+    //     if (ptr->ai_family == AF_INET) {
+    //         sockaddr_in* sockaddr_ipv4 = reinterpret_cast<sockaddr_in*>(ptr->ai_addr); 
+    //         char ipstr[INET_ADDRSTRLEN]; inet_ntop(AF_INET, &(sockaddr_ipv4->sin_addr), ipstr, INET_ADDRSTRLEN); 
+    //         std::cout << "IP Address: " << ipstr << '\n';
+    //     }
+    // }
+    // std::cout << "-----------------------------------------------------------\n";
 
-    iResult = bind(listenSocket, result->ai_addr, (int)result->ai_addrlen);
+    sockaddr_in hints;
+    hints.sin_family = AF_INET;
+    hints.sin_port = htons(DEFAULT_PORT);
+    hints.sin_addr.S_un.S_addr = socketAPI::getBinaryIP((char*)IP.c_str());
+
+    int iResult = bind(listenSocket, (sockaddr*)&hints, sizeof(hints));
     if (iResult == SOCKET_ERROR) {
         std::cout << "bind failed with error: " << WSAGetLastError() << '\n';
-        freeaddrinfo(result);
+        // freeaddrinfo(result);
         closesocket(listenSocket);
         socketAPI::cleanup();
         return false;
     }
 
-    freeaddrinfo(result);
+    // freeaddrinfo(result);
     return true;
 }
 
@@ -169,46 +164,58 @@ bool serverSocket::listenClient() {
         return false;
     }
 
+    // Non-blocking connect()
+    unsigned long mode = 1; 
+    ioctlsocket(listenSocket, FIONBIO, &mode);
+
     return true;
 }
 
-bool timeout_occurred = false;
+// bool timeout_occurred = false;
 
-// Timer ID 
-#define TIMER_ID 1 
-// Signal handler for timeout 
-void handle_alarm(int sig) { 
-    timeout_occurred = true;
-} 
-// Timer callback function 
-void CALLBACK TimerProc(HWND hwnd, UINT message, UINT idTimer, DWORD dwTime) { 
-    raise(SIGINT); 
+// // Timer ID 
+// #define TIMER_ID 1 
+// // Signal handler for timeout 
+// void handle_alarm(int sig) { 
+//     timeout_occurred = true;
+// } 
+// // Timer callback function 
+// void CALLBACK TimerProc(HWND hwnd, UINT message, UINT idTimer, DWORD dwTime) { 
+//     raise(SIGINT); 
+// }
+
+bool serverSocket::anyPendingConnection() {
+    return false;
 }
 
-bool serverSocket::connectClient() {
-    std::signal(SIGINT, handle_alarm); 
-    UINT_PTR timerId = SetTimer(NULL, TIMER_ID, timeListen * 1000, (TIMERPROC)TimerProc); 
-    if (timerId == 0) { 
-        closesocket(listenSocket);
-        socketAPI::cleanup();
-        return false;
-    }
+bool serverSocket::connectClient()
+{
+    // std::signal(SIGINT, handle_alarm); 
+    // UINT_PTR timerId = SetTimer(NULL, TIMER_ID, timeListen * 1000, (TIMERPROC)TimerProc); 
+    // if (timerId == 0) { 
+    //     closesocket(listenSocket);
+    //     socketAPI::cleanup();
+    //     return false;
+    // }
 
     sockaddr addr_client;
     int addr_len(0);
     client = accept(listenSocket, NULL, NULL);
-    if (timeout_occurred) {
-        return false;
-    }
 
-    if (client == INVALID_SOCKET) {
-        std::cout << "accept() failed: " << WSAGetLastError() << '\n';
-        closesocket(listenSocket);
-        socketAPI::cleanup();
-        return false;
+    if (client == INVALID_SOCKET) { 
+        if (WSAGetLastError() == WSAEWOULDBLOCK) { 
+            // No pending connections; continue loop 
+            std::cout << "No pending connections. Checking again..." << std::endl; 
+            // Sleep for a short time before checking again continue; 
+            } else { 
+                // An actual error occurred 
+            std::cerr << "accept() failed: " << WSAGetLastError() << std::endl; 
+        }
     }
+    // if (timeout_occurred) {
+    //     return false;
+    // }
 
-    std::cout << "close complete!\n";
     return true;
 }
 

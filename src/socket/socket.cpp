@@ -234,3 +234,100 @@ bool socketAPI::receiveFile(SOCKET &connectSocket, std::string &pathFile) {
     //
     return true;
 }
+
+void socketAPI::getIPaddr(sockaddr *socket_addr, char IP_addr[INET_ADDRSTRLEN]) {
+    ZeroMemory(IP_addr, sizeof(char) * INET_ADDRSTRLEN);
+    sockaddr_in *tmp = reinterpret_cast<sockaddr_in*>(socket_addr);
+    inet_ntop(AF_INET, &(tmp->sin_addr), IP_addr, INET_ADDRSTRLEN);
+}
+
+bool socketAPI::isClientMessage(std::string message) {
+    return message.substr(0, 6) == "client";
+}
+
+bool socketAPI::isServerMessage(std::string message) {
+    return message.substr(0, 6) == "server";
+}
+
+std::string socketAPI::createClientMessage(std::string subnetMask) {
+    std::string delim = "\n";
+    return std::string("client") + delim + subnetMask;
+}
+
+std::string socketAPI::createServerMessage(std::string IP_addr, std::string name, std::string status) {
+    std::string delim = "\n";
+    return std::string("server") + delim + IP_addr + delim + name + delim + status;
+}
+
+void socketAPI::decipherClientMessage(std::string message, std::string &subnetMask) {
+    std::stringstream ss;
+    std::string header;
+    ss << message;
+    ss >> header >> subnetMask;
+    assert(header == "client");
+}
+
+void socketAPI::decipherServerMessage(std::string message, std::string &IP_addr, std::string &name, std::string &status) {
+    std::stringstream ss;
+    std::string header;
+    ss << message;
+    ss >> header >> IP_addr >> name >> status;
+    assert(header == "server");
+}
+
+std::vector<std::pair<sockaddr, int>> socketAPI::getaddrinfo_IP(const char *nodename, const char *servname, const addrinfo *hints) {
+    addrinfo *result, *ptr = NULL;
+    int iResult = getaddrinfo(nodename, servname, hints, &result);
+    if (iResult != 0) {
+        return std::vector<std::pair<sockaddr, int>>();
+    }
+
+    std::cout << "AVAILABLE:\n";
+    std::vector<std::pair<sockaddr, int>> listIP;
+    for (ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
+        listIP.emplace_back(*(ptr->ai_addr), (int)ptr->ai_addrlen);
+        char tmp[INET_ADDRSTRLEN];
+        getIPaddr(ptr->ai_addr, tmp);
+        std::cout << tmp << '\n';
+    }
+
+    freeaddrinfo(result);
+    return listIP;
+}
+
+std::string socketAPI::getAvailableIP(const char *nodename, const char *servname, const addrinfo *hints) {
+    std::vector<std::pair<sockaddr, int>> listIP = getaddrinfo_IP(nodename, servname, hints);
+    char IP_addr[INET_ADDRSTRLEN];
+    getIPaddr(&listIP[0].first, IP_addr);
+    return std::string(IP_addr);
+}
+
+uint32_t socketAPI::getBinaryAvailableIP(const char *nodename, const char *servname, const addrinfo *hints) {
+    std::vector<std::pair<sockaddr, int>> listIP = getaddrinfo_IP(nodename, servname, hints);
+    char IP_addr[INET_ADDRSTRLEN];
+    getIPaddr(&listIP[0].first, IP_addr);
+    return getBinaryIP(IP_addr);
+}
+
+std::string socketAPI::findSuitableIP(const char *nodename, const char *servname, const addrinfo *hints, std::string IP_sender, std::string subnetMask) {
+    std::vector<std::pair<sockaddr, int>> listIP = getaddrinfo_IP(nodename, servname, hints);
+    char hostIP[INET_ADDRSTRLEN];
+    for (auto &[addr, len_addr] : listIP) {
+        socketAPI::getIPaddr(&addr, hostIP);
+        // std::cout << "IP Address: " << hostIP << '\n';
+        if (socketAPI::sameSubnet((char*)IP_sender.c_str(), hostIP, (char*)subnetMask.c_str())) {
+            return hostIP;
+        }
+    }
+
+    return std::string();
+}
+
+void socketAPI::update_list(std::map<std::string, std::pair<std::string, std::string>> &listIP, std::string IP, std::string hostname, std::string status) {
+    auto it = listIP.find(IP);
+    if (it == listIP.end()) {
+        return;
+    }
+
+    it->second = make_pair(hostname, status);
+}

@@ -10,15 +10,17 @@ extern bool timeout_occurred;
 struct serverSocket {
     SOCKET listenSocket = INVALID_SOCKET;
     SOCKET client = INVALID_SOCKET;
-    int timeListen = 60;
+    // int timeListen = 60;
 
-    bool isConnecting = false;
-    bool isDiscovered = false;
-    void broadcast();
+    // void broadcast();
 
-    bool initializeServer();
+    bool initializeServer(std::string IP);
     bool listenClient();
+
+    bool anyPendingConnection();
     bool connectClient();
+
+
     bool disconnect();
     bool serverCleanup();
 };

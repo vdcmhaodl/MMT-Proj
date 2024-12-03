@@ -1,0 +1,75 @@
+#include "text.h"
+
+TextWindow::TextWindow(int WIDTH, int HEIGHT) : BaseWindow<TextWindow>(WIDTH, HEIGHT) {}
+
+void TextWindow::appendTextToEdit(LPCSTR newText)
+{
+    int TextLen = SendMessageW(hEdit, WM_GETTEXTLENGTH, 0, 0);
+    SendMessageW(hEdit, EM_SETSEL, (WPARAM)TextLen, (LPARAM)TextLen);
+    SendMessageW(hEdit, EM_REPLACESEL, FALSE, (LPARAM)(newText));
+}
+
+void TextWindow::getNewMessage(std::string text) {
+    std::ofstream logFile(filepath.c_str(), std::ios::app);
+    logFile << text + "\n";
+    if (hEdit != NULL) {
+        appendTextToEdit("\r\n");
+        appendTextToEdit(text.c_str());
+    }
+}
+
+PCSTR TextWindow::ClassName() const { return "Text Window Class"; }
+
+LRESULT TextWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    switch (uMsg)
+    {
+    case WM_CREATE: {
+        std::ifstream logFile(filepath.c_str()); 
+        std::string line;
+        std::string logContent; 
+
+        std::getline(logFile, line);
+        logContent += line;
+        while (std::getline(logFile, line)) { 
+            logContent += "\r\n" + line; 
+        }
+
+        // MessageBoxA(NULL, logContent.c_str(), "LOG", MB_OK);
+        logFile.close(); 
+        hEdit = CreateWindowExA(0, "EDIT", logContent.c_str(), 
+        WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY, 
+        10, 10, 360, 240, m_hwnd, (HMENU)1, GetModuleHandle(NULL), NULL ); 
+    } break;
+
+    case WM_DESTROY:
+        m_hwnd = NULL;
+        // PostQuitMessage(0);
+        return 0;
+
+    case WM_PAINT: {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(m_hwnd, &ps);
+        FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_WINDOW+1));
+        EndPaint(m_hwnd, &ps);
+    } return 0;
+    
+    case WM_NCHITTEST: { // Prevent resizing with the mouse 
+        LRESULT hit = DefWindowProc(m_hwnd, uMsg, wParam, lParam); 
+        if (hit == HTBOTTOM || 
+            hit == HTRIGHT || 
+            hit == HTBOTTOMRIGHT || 
+            hit == HTLEFT || 
+            hit == HTTOP || 
+            hit == HTTOPLEFT || 
+            hit == HTTOPRIGHT || 
+            hit == HTBOTTOMLEFT) { 
+            return HTCLIENT; 
+        } 
+        return hit;
+    } 
+
+    default:
+        return DefWindowProc(m_hwnd, uMsg, wParam, lParam);
+    }
+    return TRUE;
+}
