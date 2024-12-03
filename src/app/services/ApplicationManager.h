@@ -33,3 +33,4 @@ bool isSystemApp(const std::string &windowTitle, const std::string &executableNa
 
 std::string extractAppName(const std::string &path);
 BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam);
+bool isSystemApp(const std::string &windowTitle, const std::string &executableName);
