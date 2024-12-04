@@ -14,7 +14,7 @@ void countdown_condition(int s) {
 }
 
 int main(int argc, char** argv) {
-    std::thread T(countdown);
+    // std::thread T(countdown);
 
     P2P_Socket S;
     if (argc > 1) {
@@ -37,21 +37,24 @@ int main(int argc, char** argv) {
         S.initialize((char*)IP.c_str(), (char*)subnetMask.c_str());
     }
 
-    std::cout << "Hey!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    // std::cout << "Hey!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
     S.start("Hello");
-    std::cout << "Done detachhhhhhhhhhhhhhhhhhhhhhhhhhhhhh\n";
+    // std::cout << "Done detachhhhhhhhhhhhhhhhhhhhhhhhhhhhhh\n";
 
     // int cnt = 0;
-    while(isRunning) {
+    while(true) {
         // std::string inp = std::string(argv[1]) + std::string(" ") + std::to_string(cnt);
         std::string inp;
         std::cin >> inp;
         S.addMessage(inp);
+        if (inp == "exit") {
+            break;
+        }
         // std::thread waitforlove(countdown_condition, 1);
         // waitforlove.join();
         // ++cnt;
     }
     S.forceClose();
 
-    T.join();
+    // T.join();
 }

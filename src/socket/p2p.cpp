@@ -1,5 +1,7 @@
 #include "p2p.h"
 
+std::string multicastIP = "229.7.17.37";
+
 bool P2P_Socket::getMessage(std::string &msg) {
     return queueMessage.try_pop(msg);
 }
@@ -34,33 +36,45 @@ void P2P_Socket::initialize(char *IP_addr, char *subnetMask) {
 
     gethostname(hostname, sizeof(hostname));
 
-    ZeroMemory(&broadcastHints, sizeof(broadcastHints));
-    broadcastHints.ai_family = AF_INET;
-    broadcastHints.ai_socktype = SOCK_DGRAM;
-    broadcastHints.ai_protocol = IPPROTO_UDP;
+    // ZeroMemory(&broadcastHints, sizeof(broadcastHints));
+    // broadcastHints.ai_family = AF_INET;
+    // broadcastHints.ai_socktype = SOCK_DGRAM;
+    // broadcastHints.ai_protocol = IPPROTO_UDP;
 
-    int broadcastEnable = 1; 
-    setsockopt(sendSocket, SOL_SOCKET, SO_BROADCAST, (char*)&broadcastEnable, sizeof(broadcastEnable));
+    int optVal = 1; 
+    setsockopt(sendSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&optVal, sizeof(optVal));
+    setsockopt(recvSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&optVal, sizeof(optVal));
 
-    ZeroMemory(&recvHints, sizeof(sockaddr_in));
+    //Set target address 
+    ZeroMemory(&sendHints, sizeof(sendHints));
+    sendHints.sin_family = AF_INET;
+    // inet_pton(AF_INET, (PCSTR)(multicastIP.c_str()), &sendHints.sin_addr.s_addr);
+    sendHints.sin_port = htons(DEFAULT_BROADCAST);
+    sendHints.sin_addr.s_addr = socketAPI::getBinaryIP((char*)multicastIP.c_str());
+
+    ZeroMemory(&recvHints, sizeof(recvHints));
     recvHints.sin_family = AF_INET;
     recvHints.sin_port = htons(DEFAULT_BROADCAST);
-    recvHints.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
+    recvHints.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    ZeroMemory(&sendHints, sizeof(sockaddr_in));
-    sendHints.sin_family = AF_INET;
-    sendHints.sin_port = htons(DEFAULT_BROADCAST);
-    sendHints.sin_addr.S_un.S_addr = (IP_addr != NULL && subnetMask != NULL ? 
-        socketAPI::getBinaryBroadcast(IP_addr, subnetMask, NULL) : 
-        socketAPI::getBinaryAvailableIP(hostname, (char*)(std::to_string(DEFAULT_PORT)).c_str(), &broadcastHints));
-        
-    int reuse = 1; 
-    if (setsockopt(recvSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&reuse, sizeof(reuse)) == -1) {
-        perror("setsockopt");
-    }
-    if (bind(recvSocket, (sockaddr*)&recvHints, sizeof(recvHints)) == SOCKET_ERROR) {
-        std::cout << "bind() failed: " << WSAGetLastError() << '\n';
-    }
+    // ZeroMemory(&sendHints, sizeof(sockaddr_in));
+    // sendHints.sin_family = AF_INET;
+    // sendHints.sin_port = htons(DEFAULT_BROADCAST);
+    // sendHints.sin_addr.S_un.S_addr = (IP_addr != NULL && subnetMask != NULL ? 
+    //     socketAPI::getBinaryBroadcast(IP_addr, subnetMask, NULL) : 
+    //     socketAPI::getBinaryAvailableIP(hostname, (char*)(std::to_string(DEFAULT_BROADCAST)).c_str(), &broadcastHints));
+
+    // Bind socket
+    bind(recvSocket, (struct sockaddr*)&recvHints, sizeof(recvHints));
+
+    // Membership setting
+    // inet_pton(AF_INET, (PCSTR)(multicastIP.c_str()), &JoinReq.imr_multiaddr.s_addr);
+    JoinReq.imr_multiaddr.s_addr = socketAPI::getBinaryIP((char*)multicastIP.c_str());
+    // This can be used to restrict to only receive form particular sender
+    JoinReq.imr_interface.s_addr = htonl(INADDR_ANY);
+
+    // Join membership
+    setsockopt(recvSocket, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&JoinReq, sizeof(JoinReq));
 }
 
 void P2P_Socket::start(std::string init_msg) {
@@ -77,7 +91,7 @@ void P2P_Socket::startSend() {
     while(isRunning) {
         std::string msg;
         if (getMessage(msg)) {
-            int iResult = sendto(sendSocket, (char*)msg.c_str(), msg.size(), 0, (sockaddr*)&sendHints, sizeof(sendHints));
+            int iResult = sendto(sendSocket, msg.c_str(), msg.size(), 0, (struct sockaddr*)&sendHints, sizeof(sendHints));
             if (iResult == SOCKET_ERROR) {
                 break;
             }

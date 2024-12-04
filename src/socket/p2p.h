@@ -1,6 +1,8 @@
 #pragma once
 #include "socket.h"
 
+extern std::string multicastIP;
+
 struct P2P_Socket {
     std::atomic<bool> debugger = false;
     std::atomic<bool> isRunning = true;
@@ -8,6 +10,7 @@ struct P2P_Socket {
 
     SOCKET sendSocket = INVALID_SOCKET;
     SOCKET recvSocket = INVALID_SOCKET;
+    ip_mreq JoinReq;
 
     char hostname[256];
     char* IP_addr = NULL;

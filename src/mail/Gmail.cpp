@@ -212,7 +212,7 @@ bool GmailAccount::receiveEmail(Email &email, std::string &content, const std::s
     CURLcode res = CURLE_OK;
     std::string command;
 
-    email.account = email.subject = email.content = email.messageID = "";
+    email.account = email.subject = content = email.messageID = "";
 
     handle = curl_easy_init();
     if(handle) {
