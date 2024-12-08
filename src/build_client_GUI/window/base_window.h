@@ -83,5 +83,5 @@ protected:
     HWND m_hwnd_parent;
 };
 
-
+COPYDATASTRUCT wrapperData(std::string content, DWORD dataType);
 

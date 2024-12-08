@@ -1,5 +1,7 @@
 #pragma once
 #include "socket.h"
+#include "ipconfig.h"
+#include <tuple>
 
 extern std::string multicastIP;
 
@@ -29,13 +31,14 @@ struct P2P_Socket {
     P2P_Socket();
     virtual ~P2P_Socket();
 
-    virtual bool makeRespond(std::string IPsender, std::string msg, std::string &respond);
+    virtual bool makeRespond(std::string IPsender, std::string msg, std::string &respond) = 0;
 
     void initialize(char* IP_addr = NULL, char* subnetMask = NULL);
     void start(std::string init_msg);
+    virtual void start() = 0;
     void startSend();
     void startRecv();
-    void forceClose();
+    virtual void forceClose();
 };
 
 struct P2P_serverSocket : public P2P_Socket {
@@ -55,7 +58,8 @@ struct P2P_serverSocket : public P2P_Socket {
 };
 
 struct P2P_clientSocket : public P2P_Socket {
-    std::map<std::string, std::pair<std::string, std::string>> listIP;
+    ListIPData listIP;
+    concurrent_queue<IPStatusMsg> updateStatusIP;
 
     bool makeRespond(std::string IPsender, std::string msg, std::string &respond);
     void start();

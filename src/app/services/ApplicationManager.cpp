@@ -127,18 +127,3 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
     }
     return TRUE;
 }
-
-bool isSystemApp(const std::string &windowTitle, const std::string &executableName) {
-    std::vector<std::string> excludedTitles = {"Settings", "Program Manager", "Windows Input Experience"};
-    std::vector<std::string> excludedExecutables = {"SystemSettings.exe", "explorer.exe", "TextInputHost.exe", "ApplicationFrameHost.exe"};
-    for (const std::string &title : excludedTitles) {
-        if (windowTitle.find(title) != std::string::npos)
-            return true;
-    }
-    for (const std::string &exe : excludedExecutables) {
-        if (executableName.find(exe) != std::string::npos)
-            return true;
-    }
-
-    return false;
-}

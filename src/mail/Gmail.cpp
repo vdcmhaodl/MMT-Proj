@@ -27,7 +27,19 @@ bool GmailAccount::isValidAdminEmail(const std::string &sender) {
     return (adminEmail.find(sender) != adminEmail.end());
 }
 
-std::queue<std::string> GmailAccount::searchNewEmail() {
+GmailAccount::GmailAccount(std::string Username, std::string Password) {
+    initializeInfo(Username, Password);
+}
+
+void GmailAccount::initializeInfo(std::string &Username, std::string &Password) {
+    this->username = Username;
+    this->password = Password;
+    if (adminEmail.empty()) 
+        readAdminEmail();
+}
+
+std::queue<std::string> GmailAccount::searchNewEmail()
+{
     CURL* handle;
     CURLcode res = CURLE_OK;
     std::queue<std::string> qEmailNums;
@@ -76,6 +88,11 @@ std::queue<std::string> GmailAccount::searchNewEmail() {
         curl_easy_cleanup(handle);
     }
     return qEmailNums;
+}
+
+std::queue<Email> GmailAccount::getEmailQueue() {
+    // TODO: Tao 1 hang queue chua cac Email la cac mail moi
+    return std::queue<Email>();
 }
 
 bool GmailAccount::repEmail(const Email &email, const std::string &content, const std::string &filePath) {

@@ -1,5 +1,7 @@
 #include "list_view.h"
 
+ListViewData list_IP_addr;
+
 ListViewWindow::ListViewWindow(int WIDTH, int HEIGHT) : BaseWindow<ListViewWindow>(WIDTH, HEIGHT) {}
 
 void ListViewWindow::InitListView()
@@ -31,7 +33,8 @@ void ListViewWindow::UpdateListView() {
     lvItem.mask = LVIF_TEXT;
 
     int i = 0;
-    for (const auto& entry : list_IP_addr) {
+    ListViewData tmp = list_IP_addr;
+    for (const auto& entry : tmp) {
         lvItem.iItem = i;
         lvItem.iSubItem = 0;
         lvItem.pszText = const_cast<char*>(entry.first.c_str());
@@ -70,6 +73,17 @@ LRESULT ListViewWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             UpdateListView();
         }
             break;
+    case WM_COMMAND: {
+        int identifier = LOWORD(wParam);
+        switch (identifier) {
+        case UPDATE_LIST_VIEW:
+            UpdateListView();
+            break;
+        
+        default:
+            break;
+        }
+    } break;
 
     case WM_DESTROY:
         m_hwnd = NULL;

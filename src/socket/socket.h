@@ -26,13 +26,26 @@
 #include <shared_mutex>
 #include <queue>
 #include <map>
-#include "share_queue.h"
+#include <atomic>
+#include <syncstream>
+#include "../share_queue.h"
 
 #define DEFAULT_PORT 42069
 #define DEFAULT_BROADCAST 23127
 #define DEFAULT_BUFLEN 1024
 #define OK_RESPOND 200
 #define ERROR_RESPOND 400
+
+using ListIPData = std::map<std::string, std::pair<std::string, std::string>>;
+using IPStatusMsg = std::tuple<std::string, std::string, std::string>;
+
+class STATUS {
+public:
+    static constexpr char CREATE_SOCKET[] = "CREATE";
+    static constexpr char DELETE_SOCKET[] = "DELETE";
+    static constexpr char IN_CONNECTION_SOCKET[] = "CONNECTING";
+    static constexpr char FREE_SOCKET[] = "FREE";
+};
 
 namespace socketAPI {
     bool initializeSocket();
@@ -57,10 +70,10 @@ namespace socketAPI {
     void decipherClientMessage(std::string message, std::string &subnetMask);
     void decipherServerMessage(std::string message, std::string &IP_addr, std::string &name, std::string &status);
 
-    std::vector<std::pair<sockaddr, int>> getaddrinfo_IP(const char *nodename, const char *servname, const addrinfo *hints);
+    std::vector<std::string> getaddrinfo_IP(const char *nodename, const char *servname, const addrinfo *hints);
     std::string getAvailableIP(const char *nodename, const char *servname, const addrinfo *hints);
     uint32_t getBinaryAvailableIP(const char *nodename, const char *servname, const addrinfo *hints);
     std::string findSuitableIP(const char *nodename, const char *servname, const addrinfo *hints, std::string IP_sender, std::string subnetMask);
 
-    void update_list(std::map<std::string, std::pair<std::string, std::string>> &listIP, std::string IP, std::string hostname, std::string status);
+    bool update_list(ListIPData &listIP, std::string IP, std::string hostname, std::string status);
 }

@@ -11,6 +11,7 @@
 #include <array>
 #include <memory>
 #include <vector>
+#include "serviceCommand.h"
 
 struct RunningApp {
     DWORD processID;
@@ -23,6 +24,9 @@ struct RunningApp {
 };
 
 namespace Services {
+    class ApplicationCommand : public Command {
+
+    };
     bool startApplication(const std::string &appName);
     bool stopApplication(const std::string &appName);
     bool listApplications(const std::string &saveFile);

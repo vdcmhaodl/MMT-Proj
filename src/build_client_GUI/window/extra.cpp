@@ -1,5 +1,9 @@
 #include "extra.h"
 
+void ExtraWindow::setMode(bool mode) {
+    this->mode = mode;
+}
+
 ExtraWindow::ExtraWindow(int WIDTH, int HEIGHT, int mode) : BaseWindow<ExtraWindow>(WIDTH, HEIGHT), mode(mode) {}
 
 void ExtraWindow::createAutomatic() {
@@ -107,13 +111,8 @@ std::string ExtraWindow::readManual() {
 }
 
 std::string ExtraWindow::sendCommand() {
-    COPYDATASTRUCT cds;
-    cds.dwData = 4;
-    cds.cbData = query.size() + 1;
-    cds.lpData = (void*)query.c_str();
-
+    COPYDATASTRUCT cds = wrapperData(query, 4);
     SendMessage(m_hwnd_parent, WM_COPYDATA, (WPARAM)m_hwnd, (LPARAM)&cds);
-
     return std::string();
 }
 

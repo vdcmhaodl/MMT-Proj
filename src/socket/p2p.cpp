@@ -23,9 +23,9 @@ P2P_Socket::~P2P_Socket() {
     socketAPI::cleanup();
 }
 
-bool P2P_Socket::makeRespond(std::string IPsender, std::string msg, std::string &respond) {
-    return false;
-}
+// bool P2P_Socket::makeRespond(std::string IPsender, std::string msg, std::string &respond) {
+//     return false;
+// }
 
 void P2P_Socket::initialize(char *IP_addr, char *subnetMask) {
     this->IP_addr = IP_addr;
@@ -36,10 +36,10 @@ void P2P_Socket::initialize(char *IP_addr, char *subnetMask) {
 
     gethostname(hostname, sizeof(hostname));
 
-    // ZeroMemory(&broadcastHints, sizeof(broadcastHints));
-    // broadcastHints.ai_family = AF_INET;
-    // broadcastHints.ai_socktype = SOCK_DGRAM;
-    // broadcastHints.ai_protocol = IPPROTO_UDP;
+    ZeroMemory(&broadcastHints, sizeof(broadcastHints));
+    broadcastHints.ai_family = AF_INET;
+    broadcastHints.ai_socktype = SOCK_DGRAM;
+    broadcastHints.ai_protocol = IPPROTO_UDP;
 
     int optVal = 1; 
     setsockopt(sendSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&optVal, sizeof(optVal));
@@ -79,7 +79,7 @@ void P2P_Socket::initialize(char *IP_addr, char *subnetMask) {
 
 void P2P_Socket::start(std::string init_msg) {
     addMessage(init_msg);
-    std::cout << "Init message: " << init_msg << '\n';
+    std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "INIT MSG: " << init_msg << '\n';
     std::thread send(&P2P_serverSocket::startSend, this);
     std::thread recv(&P2P_serverSocket::startRecv, this);
     send.detach();
@@ -87,7 +87,7 @@ void P2P_Socket::start(std::string init_msg) {
 }
 
 void P2P_Socket::startSend() {
-    std::cout << "Start send message\n";
+    std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "Start send message\n";
     while(isRunning) {
         std::string msg;
         if (getMessage(msg)) {
@@ -103,7 +103,7 @@ void P2P_Socket::startSend() {
 }
 
 void P2P_Socket::startRecv() {
-    std::cout << "Start receive message\n";
+    std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "Start receive message\n";
     sockaddr sender;
     int len_sender = sizeof(sockaddr);
     ZeroMemory(&sender, sizeof(sender));
@@ -121,11 +121,9 @@ void P2P_Socket::startRecv() {
 
         char IPsender[INET_ADDRSTRLEN];
         socketAPI::getIPaddr(&sender, IPsender);
+        std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << IPsender << ": " << msg << '\n';
 
-        if (debugger) {
-            std::cout << IPsender << ": " << msg << '\n';
-        }
-        else {
+        if (!debugger) {
             std::string respond;
             if (makeRespond(IPsender, msg, respond)) {
                 addMessage(respond);
@@ -143,7 +141,7 @@ void P2P_Socket::forceClose() {
     shutdown(sendSocket, SD_BOTH);    
     closesocket(sendSocket);
     
-    std::cout << "Fully clean!\n";
+    std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "Fully clean!\n";
 }
 
 /////////////////////////////////////////////////////////////////
@@ -175,23 +173,28 @@ bool P2P_serverSocket::makeRespond(std::string IPsender, std::string msg, std::s
     socketAPI::decipherClientMessage(msg, subnetMask);
 
     if (get_true_IP_addr() == "xxx.xxx.xxx.xxx") {
-        assgin_true_IP_addr(socketAPI::findSuitableIP(hostname, (char*)(std::to_string(DEFAULT_PORT)).c_str(), &broadcastHints, IPsender, subnetMask));
+        std::string ret = socketAPI::findSuitableIP(hostname, (char*)(std::to_string(DEFAULT_PORT)).c_str(), &broadcastHints, IPsender, subnetMask);
+        if (ret.empty()) {
+            ret = socketAPI::findSuitableIP(IPsender, subnetMask);
+        }
+        assgin_true_IP_addr(ret);
     }
-    respond = socketAPI::createServerMessage(get_true_IP_addr(), hostname, getState() ? "CONNECTING" : "FREE");
+    respond = socketAPI::createServerMessage(get_true_IP_addr(), hostname, getState() ? STATUS::IN_CONNECTION_SOCKET : STATUS::FREE_SOCKET);
     return true;
 }
 
 void P2P_serverSocket::start() {
-    P2P_Socket::start(socketAPI::createServerMessage(get_true_IP_addr(), hostname, "NEW"));
+    P2P_Socket::start(socketAPI::createServerMessage(get_true_IP_addr(), hostname, STATUS::CREATE_SOCKET));
 }
 
 void P2P_serverSocket::createMessage(std::string status) {
     addMessage(socketAPI::createServerMessage(get_true_IP_addr(), hostname, status));
 }
 
-void P2P_serverSocket::forceClose()
-{
-    addMessage(socketAPI::createServerMessage(get_true_IP_addr(), hostname, "DELETE"));
+void P2P_serverSocket::forceClose() {
+    std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << ' ' << "Closing...........\n";
+    addMessage(socketAPI::createServerMessage(get_true_IP_addr(), hostname, STATUS::DELETE_SOCKET));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     P2P_Socket::forceClose();
 }
 
@@ -213,7 +216,11 @@ bool P2P_clientSocket::makeRespond(std::string IPsender, std::string msg, std::s
         return true;
     }
     else {
-        socketAPI::update_list(listIP, IP, hostname, status);
+        // socketAPI::update_list(listIP, IP, hostname, status);
+        if (socketAPI::update_list(listIP, IP, hostname, status)) {
+            updateStatusIP.push(std::make_tuple(IP, hostname, status));
+        }
+        
         return false;
     }
 }

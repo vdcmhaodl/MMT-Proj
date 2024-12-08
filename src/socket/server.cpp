@@ -142,6 +142,9 @@ bool serverSocket::initializeServer(std::string IP) {
     hints.sin_port = htons(DEFAULT_PORT);
     hints.sin_addr.S_un.S_addr = socketAPI::getBinaryIP((char*)IP.c_str());
 
+    int optval = 1;
+    setsockopt(listenSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&optval, sizeof(optval));
+
     int iResult = bind(listenSocket, (sockaddr*)&hints, sizeof(hints));
     if (iResult == SOCKET_ERROR) {
         std::cout << "bind failed with error: " << WSAGetLastError() << '\n';
@@ -185,22 +188,9 @@ bool serverSocket::listenClient() {
 // }
 
 bool serverSocket::anyPendingConnection() {
-    return false;
-}
-
-bool serverSocket::connectClient()
-{
-    // std::signal(SIGINT, handle_alarm); 
-    // UINT_PTR timerId = SetTimer(NULL, TIMER_ID, timeListen * 1000, (TIMERPROC)TimerProc); 
-    // if (timerId == 0) { 
-    //     closesocket(listenSocket);
-    //     socketAPI::cleanup();
-    //     return false;
-    // }
-
-    sockaddr addr_client;
-    int addr_len(0);
     client = accept(listenSocket, NULL, NULL);
+
+    // std::cout << (client == INVALID_SOCKET) << '\n';
 
     if (client == INVALID_SOCKET) { 
         if (WSAGetLastError() == WSAEWOULDBLOCK) { 
@@ -211,7 +201,24 @@ bool serverSocket::connectClient()
                 // An actual error occurred 
             std::cerr << "accept() failed: " << WSAGetLastError() << std::endl; 
         }
+        
+        return false;
     }
+    return true;
+}
+
+bool serverSocket::connectClient() {
+    // std::signal(SIGINT, handle_alarm); 
+    // UINT_PTR timerId = SetTimer(NULL, TIMER_ID, timeListen * 1000, (TIMERPROC)TimerProc); 
+    // if (timerId == 0) { 
+    //     closesocket(listenSocket);
+    //     socketAPI::cleanup();
+    //     return false;
+    // }
+
+    // sockaddr addr_client;
+    // int addr_len(0);
+    
     // if (timeout_occurred) {
     //     return false;
     // }
@@ -220,28 +227,41 @@ bool serverSocket::connectClient()
 }
 
 bool serverSocket::disconnect() {
-    int iResult = shutdown(client, SD_SEND);
+    int iResult = shutdown(client, SD_BOTH);
     if (iResult == SOCKET_ERROR) {
         std::cout << "shutdown() failed: " << WSAGetLastError() << '\n';
         closesocket(client);
         socketAPI::cleanup();
         return false;
     }
-    return true;
-}
 
-bool serverSocket::serverCleanup() {
-    int iResult = closesocket(listenSocket);
-    if (iResult != 0) {
-        std::cout << "closesocket() failed: " << WSAGetLastError() << '\n';
-        return false;
-    }
-    
     iResult = closesocket(client);
     if (iResult != 0) {
         std::cout << "closesocket() failed: " << WSAGetLastError() << '\n';
         return false;
     }
-    
+
+    client = INVALID_SOCKET;
+    return true;
+}
+
+bool serverSocket::cleanup() {
+    int iResult;
+
+    if (listenSocket != INVALID_SOCKET){
+        iResult = closesocket(listenSocket);
+        if (iResult != 0) {
+            std::cout << "closesocket() failed: " << WSAGetLastError() << '\n';
+            return false;
+        }
+    }
+
+    if (client != INVALID_SOCKET){
+        iResult = closesocket(client);
+        if (iResult != 0) {
+            std::cout << "closesocket() failed: " << WSAGetLastError() << '\n';
+            return false;
+        }
+    }
     return true;
 }

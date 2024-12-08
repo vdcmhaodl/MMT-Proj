@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../socket/socket.h"
 #include "window/base_window.h"
 #include "window/input.h"
 #include "window/list_view.h"
@@ -14,6 +15,7 @@ public:
     static const int IP_BUTTON = 3;
     static const int LOG_BUTTON = 4;
     static const int EXTRA_BUTTON = 5;
+    static const int IP_UPDATE_MESSAGE = 6;
 
     static const DWORD INFO_MESSAGE = 1;
     static const DWORD IP_MESSAGE = 2;
@@ -32,4 +34,6 @@ public:
     MainWindow(int WIDTH = CW_USEDEFAULT, int HEIGHT = CW_USEDEFAULT, int mode = AUTOMATIC);
     PCSTR  ClassName() const { return "Client Window Class"; }
     LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
-}win(1280, 720);
+};
+
+extern concurrent_queue<std::string> queueExtra;

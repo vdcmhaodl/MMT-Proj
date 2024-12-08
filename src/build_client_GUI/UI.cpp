@@ -2,6 +2,7 @@
 
 void MainWindow::setMode(int mode) {
     this->mode = mode;
+    EXTRA.setMode(mode);
 }
 
 MainWindow::MainWindow(int WIDTH, int HEIGHT, int mode) : BaseWindow<MainWindow>(WIDTH, HEIGHT),
@@ -32,6 +33,7 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     
     case WM_COMMAND: {
         int identifier = LOWORD(wParam);
+        std::osyncstream(std::cout) << identifier << '\n';
         switch (identifier) {
         case INFO_BUTTON:
             // MessageBoxW(m_hwnd, L"Info button!", L"Child Window", MB_OK);
@@ -79,6 +81,13 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             }
             break;
         
+        case IP_UPDATE_MESSAGE: {
+            // MessageBoxA(INFO.Window(), "Receive new status!", "WM_COMMAND", MB_OK);
+            if (IP.Window() != NULL) {
+                SendMessageA(IP.Window(), WM_COMMAND, MAKEWORD(ListViewWindow::UPDATE_LIST_VIEW, 0), 0);
+            }
+        } break;
+        
         default:
             break;
         }
@@ -86,12 +95,19 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_COPYDATA: {
         PCOPYDATASTRUCT pCDS = (PCOPYDATASTRUCT)lParam;
-        switch (pCDS->dwData)
-        {
+        std::string content((char*)pCDS->lpData);
+        switch (pCDS->dwData) {
+        case IP_MESSAGE: {
+            std::string IP_addr, name, status;
+            socketAPI::decipherServerMessage(content, IP_addr, name, status);
+            MessageBoxA(m_hwnd, (char*)content.c_str(), "IP message", MB_OK);
+            
+            break;
+        }
         case EXTRA_MESSAGE:{
-            std::string content((char*)pCDS->lpData);
+            queueExtra.push(content);
             std::string message = content + std::string("; RECEIVED TEXT!");
-            MessageBoxA(m_hwnd, (char*)message.c_str(), "Test WM_COPYDATA", MB_OK);
+            MessageBoxA(m_hwnd, (char*)message.c_str(), "Extra message", MB_OK);
             break;
         }
         default:
@@ -155,3 +171,5 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     }
     return TRUE;
 }
+
+concurrent_queue<std::string> queueExtra;

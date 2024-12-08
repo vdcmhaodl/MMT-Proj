@@ -1,4 +1,5 @@
 #include "socket.h"
+#include "ipconfig.h"
 
 bool socketAPI::initializeSocket() {
     WSAData wsadata;
@@ -202,8 +203,9 @@ bool socketAPI::receiveFile(SOCKET &connectSocket, std::string &pathFile) {
     if (!resultFilename) {
         return false;
     }
+    pathFile += filename;
 
-    HANDLE hFile = CreateFileA(filename.c_str(), 
+    HANDLE hFile = CreateFileA(pathFile.c_str(), 
                                GENERIC_WRITE,
                                FILE_SHARE_READ,
                                NULL,
@@ -222,7 +224,7 @@ bool socketAPI::receiveFile(SOCKET &connectSocket, std::string &pathFile) {
         return false;
     }
 
-    std::ofstream fout(filename.c_str(), std::ios::binary);
+    std::ofstream fout(pathFile.c_str(), std::ios::binary);
     if (!fout.is_open()) {
         std::cout << "Cannot open file!\n";
         return false;
@@ -230,7 +232,7 @@ bool socketAPI::receiveFile(SOCKET &connectSocket, std::string &pathFile) {
     fout.write((char*)&content[0], sizeof(char) * content.size());
     fout.close();
     //
-    pathFile = filename;
+    // pathFile = filename;
     //
     return true;
 }
@@ -250,12 +252,12 @@ bool socketAPI::isServerMessage(std::string message) {
 }
 
 std::string socketAPI::createClientMessage(std::string subnetMask) {
-    std::string delim = "\n";
+    std::string delim = "|";
     return std::string("client") + delim + subnetMask;
 }
 
 std::string socketAPI::createServerMessage(std::string IP_addr, std::string name, std::string status) {
-    std::string delim = "\n";
+    std::string delim = "|";
     return std::string("server") + delim + IP_addr + delim + name + delim + status;
 }
 
@@ -263,7 +265,8 @@ void socketAPI::decipherClientMessage(std::string message, std::string &subnetMa
     std::stringstream ss;
     std::string header;
     ss << message;
-    ss >> header >> subnetMask;
+    std::getline(ss, header, '|');
+    std::getline(ss, subnetMask);
     assert(header == "client");
 }
 
@@ -271,24 +274,27 @@ void socketAPI::decipherServerMessage(std::string message, std::string &IP_addr,
     std::stringstream ss;
     std::string header;
     ss << message;
-    ss >> header >> IP_addr >> name >> status;
+    std::getline(ss, header, '|');
+    std::getline(ss, IP_addr, '|');
+    std::getline(ss, name, '|');
+    std::getline(ss, status);
     assert(header == "server");
 }
 
-std::vector<std::pair<sockaddr, int>> socketAPI::getaddrinfo_IP(const char *nodename, const char *servname, const addrinfo *hints) {
+std::vector<std::string> socketAPI::getaddrinfo_IP(const char *nodename, const char *servname, const addrinfo *hints) {
     addrinfo *result, *ptr = NULL;
     int iResult = getaddrinfo(nodename, servname, hints, &result);
     if (iResult != 0) {
-        return std::vector<std::pair<sockaddr, int>>();
+        return std::vector<std::string>();
     }
 
-    std::cout << "AVAILABLE:\n";
-    std::vector<std::pair<sockaddr, int>> listIP;
+    // std::cout << "AVAILABLE:\n";
+    char IP[INET_ADDRSTRLEN];
+    std::vector<std::string> listIP;
     for (ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
-        listIP.emplace_back(*(ptr->ai_addr), (int)ptr->ai_addrlen);
-        char tmp[INET_ADDRSTRLEN];
-        getIPaddr(ptr->ai_addr, tmp);
-        std::cout << tmp << '\n';
+        getIPaddr(ptr->ai_addr, IP);
+        listIP.emplace_back(IP);
+        // std::cout << IP << '\n';
     }
 
     freeaddrinfo(result);
@@ -296,26 +302,20 @@ std::vector<std::pair<sockaddr, int>> socketAPI::getaddrinfo_IP(const char *node
 }
 
 std::string socketAPI::getAvailableIP(const char *nodename, const char *servname, const addrinfo *hints) {
-    std::vector<std::pair<sockaddr, int>> listIP = getaddrinfo_IP(nodename, servname, hints);
-    char IP_addr[INET_ADDRSTRLEN];
-    getIPaddr(&listIP[0].first, IP_addr);
-    return std::string(IP_addr);
+    std::vector<std::string> listIP = getaddrinfo_IP(nodename, servname, hints);
+    return listIP[rand() % (int)listIP.size()];
 }
 
 uint32_t socketAPI::getBinaryAvailableIP(const char *nodename, const char *servname, const addrinfo *hints) {
-    std::vector<std::pair<sockaddr, int>> listIP = getaddrinfo_IP(nodename, servname, hints);
-    char IP_addr[INET_ADDRSTRLEN];
-    getIPaddr(&listIP[0].first, IP_addr);
-    return getBinaryIP(IP_addr);
+    std::vector<std::string> listIP = getaddrinfo_IP(nodename, servname, hints);
+    return getBinaryIP((char*)listIP[rand() % (int)listIP.size()].c_str());
 }
 
 std::string socketAPI::findSuitableIP(const char *nodename, const char *servname, const addrinfo *hints, std::string IP_sender, std::string subnetMask) {
-    std::vector<std::pair<sockaddr, int>> listIP = getaddrinfo_IP(nodename, servname, hints);
-    char hostIP[INET_ADDRSTRLEN];
-    for (auto &[addr, len_addr] : listIP) {
-        socketAPI::getIPaddr(&addr, hostIP);
+    std::vector<std::string> listIP = getaddrinfo_IP(nodename, servname, hints);
+    for (auto &hostIP : listIP) {
         // std::cout << "IP Address: " << hostIP << '\n';
-        if (socketAPI::sameSubnet((char*)IP_sender.c_str(), hostIP, (char*)subnetMask.c_str())) {
+        if (socketAPI::sameSubnet((char*)IP_sender.c_str(), (char*)hostIP.c_str(), (char*)subnetMask.c_str())) {
             return hostIP;
         }
     }
@@ -323,11 +323,25 @@ std::string socketAPI::findSuitableIP(const char *nodename, const char *servname
     return std::string();
 }
 
-void socketAPI::update_list(std::map<std::string, std::pair<std::string, std::string>> &listIP, std::string IP, std::string hostname, std::string status) {
+bool socketAPI::update_list(ListIPData &listIP, std::string IP, std::string hostname, std::string status) {
     auto it = listIP.find(IP);
     if (it == listIP.end()) {
-        return;
+        listIP.insert({IP, make_pair(hostname, STATUS::FREE_SOCKET)});
+        return true;
     }
 
-    it->second = make_pair(hostname, status);
+    auto new_update = make_pair(hostname, status);
+    if (new_update != it->second) {
+        if (status == STATUS::CREATE_SOCKET) {
+            it->second = make_pair(hostname, STATUS::FREE_SOCKET);
+        }
+        else if (status == STATUS::DELETE_SOCKET) {
+            listIP.erase(it);
+        }
+        else {
+            it->second = new_update;
+        }
+        return true;
+    }
+    return false;
 }

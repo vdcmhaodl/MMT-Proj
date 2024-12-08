@@ -1,5 +1,9 @@
 #include "text.h"
 
+void TextWindow::setFilePath(std::string filePath) {
+    this->filepath = filePath;
+}
+
 TextWindow::TextWindow(int WIDTH, int HEIGHT) : BaseWindow<TextWindow>(WIDTH, HEIGHT) {}
 
 void TextWindow::appendTextToEdit(LPCSTR newText)
@@ -25,6 +29,7 @@ LRESULT TextWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     {
     case WM_CREATE: {
         std::ifstream logFile(filepath.c_str()); 
+        std::cerr << "filepath: " << filepath << '\n';
         std::string line;
         std::string logContent; 
 
@@ -40,6 +45,20 @@ LRESULT TextWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY, 
         10, 10, 360, 240, m_hwnd, (HMENU)1, GetModuleHandle(NULL), NULL ); 
     } break;
+
+    case WM_COPYDATA: {
+        PCOPYDATASTRUCT pCDS = (PCOPYDATASTRUCT)lParam;
+        std::string content((char*)pCDS->lpData);
+        switch (pCDS->dwData) {
+        case UPDATE_MESSAGE: {
+            getNewMessage(content);
+            break;
+        }
+        default:
+            break;
+        }
+        break;
+    }
 
     case WM_DESTROY:
         m_hwnd = NULL;

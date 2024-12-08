@@ -1,1 +1,0 @@
-g++ -std=c++20 -Wall -Wextra main.cpp socket.cpp p2p.cpp -o test.exe -lgdi32 -lshcore -lws2_32 -lMswsock -lwinmm -static -static-libgcc -static-libstdc++

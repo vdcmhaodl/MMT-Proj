@@ -6,8 +6,13 @@
 #include <fstream>
 #include <iomanip>
 #include <string>
+#include "serviceCommand.h"
 
 namespace Services{
+    class SystemCommand : public Command {
+
+    };
+
     bool shutdown(const std::string &saveFile);
     bool restart(const std::string &saveFile);
 

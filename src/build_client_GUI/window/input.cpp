@@ -29,6 +29,11 @@ LRESULT InputWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                 WS_CHILD | WS_VISIBLE,
                 50, 150, 100, 25,
                 m_hwnd, NULL, NULL, NULL);
+            
+            hwndDesc4 = CreateWindowW(L"STATIC", L"Password:",
+                WS_CHILD | WS_VISIBLE,
+                50, 190, 100, 25,
+                m_hwnd, NULL, NULL, NULL);
 
             // Create child windows with a distinct background
             hwndInput1 = CreateWindowExW(0,
@@ -52,10 +57,17 @@ LRESULT InputWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                                         175, 150, 300, 25,
                                         m_hwnd, NULL, NULL, NULL);
             
+            hwndInput4 = CreateWindowExW(0,
+                                        L"EDIT",
+                                        L"",
+                                        WS_CHILD | WS_VISIBLE | WS_BORDER,
+                                        175, 190, 300, 25,
+                                        m_hwnd, NULL, NULL, NULL);
+            
             // Create a combo box for selection
             hwndComboBox = CreateWindowW(L"COMBOBOX", NULL,
                 WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_BORDER,
-                175, 190, 100, 100,
+                175, 230, 100, 100,
                 m_hwnd, (HMENU) 2, NULL, NULL);
 
             // Add items to the combo box
@@ -65,14 +77,14 @@ LRESULT InputWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             // Create a static control for the combo box description
             hwndComboDesc = CreateWindowW(L"STATIC", L"Mode:",
                 WS_CHILD | WS_VISIBLE,
-                50, 190, 100, 25,
+                50, 230, 100, 25,
                 m_hwnd, NULL, NULL, NULL);
             
             hwndButton = CreateWindowExW(0,
                                         L"BUTTON",
                                         L"Submit",
                                         WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-                                        150, 230, 100, 30,
+                                        150, 270, 100, 30,
                                         m_hwnd, (HMENU)INPUT_BUTTON, NULL, NULL);
             
             // // Set background color to make areas stand out
@@ -100,6 +112,9 @@ LRESULT InputWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             GetWindowTextA(hwndInput3, buffer, 256);
             mail = std::string(buffer);
 
+            GetWindowTextA(hwndInput4, buffer, 256);
+            password = std::string(buffer);
+
             // Get the selected option from the combo box
             int itemIndex = SendMessageA(hwndComboBox, CB_GETCURSEL, 0, 0);
             char itemText[256];
@@ -110,12 +125,14 @@ LRESULT InputWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             DestroyWindow(hwndInput1);
             DestroyWindow(hwndInput2);
             DestroyWindow(hwndInput3);
+            DestroyWindow(hwndInput4);
             DestroyWindow(hwndComboBox);
             DestroyWindow(hwndButton);
             DestroyWindow(hwndHeader);
             DestroyWindow(hwndDesc1);
             DestroyWindow(hwndDesc2);
             DestroyWindow(hwndDesc3);
+            DestroyWindow(hwndDesc4);
             DestroyWindow(hwndComboDesc);
             inputCollected = true;
 

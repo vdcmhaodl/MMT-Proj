@@ -8,6 +8,7 @@
 #include <mfreadwrite.h> 
 #include <mferror.h> 
 #include <shellscalingapi.h>
+#include "serviceCommand.h"
 
 #pragma comment(lib, "mfplat.lib") 
 #pragma comment(lib, "mf.lib") 
@@ -23,6 +24,9 @@ void SafeRelease(T **ppT) {
 }
 
 namespace Services {
+    class CaptureCommand : public Command {
+
+    };
     bool webcamCapture(const std::string &filename);
     bool screenShot(const std::string &filename);
 }

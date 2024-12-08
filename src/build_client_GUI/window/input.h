@@ -4,10 +4,10 @@
 class InputWindow : public BaseWindow<InputWindow>
 {
 private:
-    HWND hwndInput1, hwndInput2, hwndInput3, hwndComboBox;
+    HWND hwndInput1, hwndInput2, hwndInput3, hwndInput4, hwndComboBox;
     HWND hwndButton;
     HWND hwndHeader; 
-    HWND hwndDesc1, hwndDesc2, hwndDesc3, hwndComboDesc; 
+    HWND hwndDesc1, hwndDesc2, hwndDesc3, hwndDesc4, hwndComboDesc; 
     static const int INPUT_BUTTON = 1;
     bool inputCollected = false;
     std::vector<std::wstring> inputs = std::vector<std::wstring>(3);

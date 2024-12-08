@@ -13,6 +13,7 @@ private:
     static const int INPUT_BUTTON = 1;
 public:
     bool mode;
+    void setMode(bool mode);
     std::string newUsername;
     std::string newPassword;
     std::string IP;

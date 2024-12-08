@@ -1,4 +1,4 @@
-#include "client_background.h"
+#include "console_bg.h"
 
 int main() {
     socketAPI::initializeSocket();
@@ -6,8 +6,8 @@ int main() {
     std::vector<std::string> signinInput = getInputInfo();
 
     if (signinInput.empty()) {
-        std::wstring respond = L"Co vay cung nhap sai";
-        MessageBoxW(NULL, respond.c_str(), L"Ga", MB_OK);
+        // std::wstring respond = L"Co vay cung nhap sai";
+        // MessageBoxW(NULL, respond.c_str(), L"Ga", MB_OK);
         return 0;
     }
 
@@ -24,6 +24,4 @@ int main() {
     UIThread.join();
 
     socketAPI::cleanup();
-
-    return 0;
 }
