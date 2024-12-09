@@ -68,8 +68,8 @@ bool Services::listServices(const std::string &saveFile) {
     DWORD servicesCount = 0;
     DWORD resumeHandle = 0;
 
-    // Lần đầu gọi EnumServicesStatusEx để lấy kích thước bộ nhớ cần thiết
-    if (!EnumServicesStatusEx(scmHandle, SC_ENUM_PROCESS_INFO, SERVICE_TYPE_ALL, SERVICE_ACTIVE, NULL, 0, &bytesNeeded, &servicesCount, &resumeHandle, NULL)) {
+    // Gọi EnumServicesStatusEx để lấy kích thước bộ nhớ cần thiết
+    if (!EnumServicesStatusEx(scmHandle, SC_ENUM_PROCESS_INFO, SERVICE_WIN32, SERVICE_ACTIVE, NULL, 0, &bytesNeeded, &servicesCount, &resumeHandle, NULL)) {
         DWORD error = GetLastError();
         if (error != ERROR_MORE_DATA) {
             std::cerr << "Error calling EnumServicesStatusEx for size calculation: " << error << std::endl;
@@ -78,7 +78,6 @@ bool Services::listServices(const std::string &saveFile) {
         }
     }
 
-    // Cấp phát bộ nhớ
     LPBYTE buffer = (LPBYTE)LocalAlloc(LMEM_ZEROINIT, bytesNeeded);
     if (buffer == NULL) {
         std::cerr << "Error allocating memory" << std::endl;
@@ -87,26 +86,21 @@ bool Services::listServices(const std::string &saveFile) {
     }
 
     // Gọi lại EnumServicesStatusEx để lấy danh sách dịch vụ
-    if (!EnumServicesStatusEx(scmHandle, SC_ENUM_PROCESS_INFO, SERVICE_TYPE_ALL, SERVICE_ACTIVE, buffer, bytesNeeded, &bytesNeeded, &servicesCount, &resumeHandle, NULL)) {
+    if (!EnumServicesStatusEx(scmHandle, SC_ENUM_PROCESS_INFO, SERVICE_WIN32, SERVICE_ACTIVE, buffer, bytesNeeded, &bytesNeeded, &servicesCount, &resumeHandle, NULL)) {
         std::cerr << "Error enumerating services: " << GetLastError() << std::endl;
         LocalFree(buffer);
         CloseServiceHandle(scmHandle);
         return false;
     }
 
-    // Chuyển đổi buffer sang ENUM_SERVICE_STATUS_PROCESS
     LPENUM_SERVICE_STATUS_PROCESS services = (LPENUM_SERVICE_STATUS_PROCESS)buffer;
 
-    // In danh sách các dịch vụ ra màn hình
-    fout << std::setw(30) << std::left << "Service name" << "Process ID" << "\n\n";
+    fout << std::setw(35) << std::left << "Service name" << std::setw(65) << std::left << "Display name" << "PID" << "\n";
     for (DWORD i = 0; i < servicesCount; i++) {
-        std::string serviceName = services[i].lpServiceName;
-        DWORD processId = services[i].ServiceStatusProcess.dwProcessId;
-
-        fout << std::setw(30) << std::left << serviceName << processId << std::endl;
+        fout << std::setw(35) << std::left << services[i].lpServiceName << std::setw(65) << std::left 
+             << services[i].lpDisplayName << services[i].ServiceStatusProcess.dwProcessId << std::endl;
     }
 
-    // Giải phóng bộ nhớ và đóng handle của SCM
     LocalFree(buffer);
     CloseServiceHandle(scmHandle);
     fout.close();
@@ -124,8 +118,7 @@ bool Services::startService(const std::string &serviceName)
 
     SC_HANDLE serviceHandle = OpenServiceA(scmHandle, serviceName.c_str(), SERVICE_START | SERVICE_QUERY_STATUS);
     if (serviceHandle == NULL) {
-        DWORD dwError = GetLastError();
-        std::cerr << "Error opening service: " << dwError << std::endl;
+        std::cerr << "Error opening service: " << GetLastError() << std::endl;
         CloseServiceHandle(scmHandle);
         return false;
     }
@@ -174,8 +167,7 @@ bool Services::stopService(const std::string &serviceName) {
 
     SC_HANDLE serviceHandle = OpenServiceA(scmHandle, serviceName.c_str(), SERVICE_STOP | SERVICE_QUERY_STATUS);
     if (serviceHandle == NULL) {
-        DWORD dwError = GetLastError();
-        std::cerr << "Error opening service: " << dwError << std::endl;
+        std::cerr << "Error opening service: " << GetLastError() << std::endl;
         CloseServiceHandle(scmHandle);
         return false;
     }
