@@ -21,6 +21,11 @@ struct Email {
     Email(): account(""), subject(""), messageID("") {}
 };
 
+struct Mail {
+    Email sender;
+    std::string content;
+};
+
 class GmailAccount {
     private:
         std::string username;
@@ -37,7 +42,7 @@ class GmailAccount {
         void initializeInfo(std::string &Username, std::string &Password);
 
         std::queue<std::string> searchNewEmail();
-        std::queue<Email> getEmailQueue();
+        std::queue<Mail> getEmailQueue();
         bool repEmail(const Email &email, const std::string &content, const std::string &filePath = "");
         bool sendEmail(const Email &email, const std::string &content, const std::string &filePath = "");
         bool receiveEmail(Email &email, std::string &content, const std::string &emailNumber);

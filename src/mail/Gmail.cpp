@@ -92,9 +92,20 @@ std::queue<std::string> GmailAccount::searchNewEmail()
     return qEmailNums;
 }
 
-std::queue<Email> GmailAccount::getEmailQueue() {
-    // TODO: Tao 1 hang queue chua cac Email la cac mail moi
-    return std::queue<Email>();
+std::queue<Mail> GmailAccount::getEmailQueue() {
+    std::queue<std::string> listEmailNumber = searchNewEmail();
+    std::queue<Mail> listMail;
+
+    while(!listEmailNumber.empty()) {
+        std::string emailNumber = listEmailNumber.front();
+        listEmailNumber.pop();
+
+        Email email;
+        std::string content;
+        receiveEmail(email, content, emailNumber);
+        listMail.push(Mail{email, content});
+    }
+    return listMail;
 }
 
 bool GmailAccount::repEmail(const Email &email, const std::string &content, const std::string &filePath) {
@@ -332,11 +343,11 @@ bool GmailAccount::receiveEmail(Email &email, std::string &content, const std::s
 
         pos1 = 0; pos2 = temp.find(seperateLine, 0);
         while (pos2 != std::string::npos) {
-            email.content += temp.substr(pos1, pos2 - pos1);
+            content += temp.substr(pos1, pos2 - pos1);
             pos1 = pos2 + seperateLine.length();
             pos2 = temp.find(seperateLine, pos1);
         }
-        email.content += temp.substr(pos1);
+        content += temp.substr(pos1);
 
         // get messageID
         command = "FETCH " + emailNumber + " BODY.PEEK[HEADER.FIELDS (MESSAGE-ID)]";
