@@ -33,6 +33,6 @@ namespace Services {
 HRESULT GetWebcamMediaSource(IMFMediaSource **ppSource);
 HRESULT InitializeAndFormatSourceReader(IMFMediaSource *pSource, IMFSourceReader** pReader, GUID *pVideoFormat);
 HRESULT InitializeAndFormatSinkWriter(LPCWSTR filename, GUID pVideoFormat, IMFSinkWriter **ppWriter, DWORD* pStreamIndex);
-HRESULT StartWebcamCapture(IMFSourceReader *pReader, IMFSinkWriter *pWriter, DWORD streamIndex);
+HRESULT StartRecord(IMFSourceReader *pReader, IMFSinkWriter *pWriter, DWORD streamIndex);
 HRESULT WebcamCapture(LPCWSTR filename);
 

@@ -1,10 +1,12 @@
 #include "Gmail.h"
 
+const std::string seperateLine = "#*^";
+
 std::set<std::string> GmailAccount::adminEmail;
 
 size_t GmailAccount::headerCallback(char* buffer, size_t size, size_t nitems, std::string* userdata) {
     userdata -> append(std::string(buffer, size * nitems));
-    userdata -> append("#");
+    userdata -> append(seperateLine);
     return size * nitems;
 }
 
@@ -68,7 +70,7 @@ std::queue<std::string> GmailAccount::searchNewEmail()
         pos1 = searchResult.find("EXISTS", pos1);
         pos1 = searchResult.find("SEARCH", pos1);
         pos1 = searchResult.find(" ", pos1) + 1;
-        pos2 = searchResult.find("#", pos1);
+        pos2 = searchResult.find(seperateLine, pos1);
         searchResult = searchResult.substr(pos1, pos2 - pos1);
         pos1 = searchResult.find_last_not_of(" \t\f\v\n\r");
         if (pos1 != std::string::npos)
@@ -119,6 +121,8 @@ bool GmailAccount::repEmail(const Email &email, const std::string &content, cons
         curl_easy_setopt(handle, CURLOPT_PASSWORD, password.c_str());
         curl_easy_setopt(handle, CURLOPT_URL, "smtp://smtp.gmail.com:587");
         curl_easy_setopt(handle, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
+        curl_easy_setopt(handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+
         curl_easy_setopt(handle, CURLOPT_MAIL_FROM, ("<" + username + ">").c_str());
         curl_easy_setopt(handle, CURLOPT_CAINFO, CAcert.c_str());
         // curl_easy_setopt(handle, CURLOPT_VERBOSE, 1L);
@@ -140,6 +144,16 @@ bool GmailAccount::repEmail(const Email &email, const std::string &content, cons
 
         // send file
         if (filePath != "") {
+            std::ifstream file(filePath.c_str(), std::ios::binary);
+            if (!file.is_open()) {
+                std::cerr << "File Error!\n";
+                curl_mime_free(mime);
+                curl_slist_free_all(headers);
+                curl_slist_free_all(listRecipients);
+                curl_easy_cleanup(handle); 
+                return false;
+            }
+            file.close();
             part = curl_mime_addpart(mime);
             curl_mime_filedata(part, filePath.c_str());
             curl_mime_encoder(part, "base64");
@@ -183,6 +197,8 @@ bool GmailAccount::sendEmail(const Email& email, const std::string &content, con
         curl_easy_setopt(handle, CURLOPT_PASSWORD, password.c_str());
         curl_easy_setopt(handle, CURLOPT_URL, "smtp://smtp.gmail.com:587");
         curl_easy_setopt(handle, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
+        curl_easy_setopt(handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+
         curl_easy_setopt(handle, CURLOPT_MAIL_FROM, ("<" + username + ">").c_str());
         curl_easy_setopt(handle, CURLOPT_CAINFO, CAcert.c_str());
         // curl_easy_setopt(handle, CURLOPT_VERBOSE, 1L);
@@ -204,6 +220,16 @@ bool GmailAccount::sendEmail(const Email& email, const std::string &content, con
 
         // upload file
         if (filePath != "") {
+            std::ifstream file(filePath.c_str(), std::ios::binary);
+            if (!file.is_open()) {
+                std::cerr << "File Error!\n";
+                curl_mime_free(mime);
+                curl_slist_free_all(headers);
+                curl_slist_free_all(listRecipients);
+                curl_easy_cleanup(handle); 
+                return false;
+            }
+            file.close();
             part = curl_mime_addpart(mime);
             curl_mime_filedata(part, filePath.c_str());
             curl_mime_encoder(part, "base64");
@@ -237,6 +263,7 @@ bool GmailAccount::receiveEmail(Email &email, std::string &content, const std::s
         curl_easy_setopt(handle, CURLOPT_PASSWORD, password.c_str());
         curl_easy_setopt(handle, CURLOPT_URL, "imaps://imap.gmail.com:993/INBOX");
         curl_easy_setopt(handle, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+        curl_easy_setopt(handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
         curl_easy_setopt(handle, CURLOPT_CAINFO, CAcert.c_str());
         // curl_easy_setopt(handle, CURLOPT_VERBOSE, 1L);
 
@@ -270,29 +297,46 @@ bool GmailAccount::receiveEmail(Email &email, std::string &content, const std::s
             std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << "\n";
         }
         pos1 = email.subject.find(":", 0);
-        pos2 = email.subject.find("#", pos1);
+        pos2 = email.subject.find(seperateLine, pos1);
         email.subject = email.subject.substr(pos1 + 2, pos2 - pos1);
         pos1 = email.subject.find_last_not_of(" \t\f\v\n\r");
         if (pos1 != std::string::npos)
             email.subject.erase(pos1 + 1);
 
         // get content
+        std::string temp = "";
         command = "FETCH " + emailNumber + " BODY[TEXT]";
         curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST, command.c_str());
         curl_easy_setopt(handle, CURLOPT_HEADERFUNCTION, headerCallback);
-        curl_easy_setopt(handle, CURLOPT_HEADERDATA, &content);
+        curl_easy_setopt(handle, CURLOPT_HEADERDATA, &temp);
         res = curl_easy_perform(handle);
         if (res != CURLE_OK) {
             std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << "\n";
         }
-        pos1 = content.find("Content-Type", 0);
-        pos1 = content.find("#", pos1);
-        pos1 = content.find("#", pos1 + 1) + 1;
-        pos2 = content.find("#", pos1);
-        content = content.substr(pos1, pos2 - pos1 - 1);
-        pos1 = content.find_last_not_of(" \t\f\v\n\r");
+        pos1 = temp.find("Content-Type", 0);
+        if (temp.find("Content-Transfer-Encoding", pos1) != std::string::npos)
+            pos1 = temp.find("Content-Transfer-Encoding", pos1);
+        pos1 = temp.find(seperateLine, pos1);
+        pos1 = temp.find(seperateLine, pos1 + 1);
+
+        pos2 = temp.find("@gmail.com>", pos1 + 1);
+        if (pos2 == std::string::npos || pos2 > (size_t)temp.find("--000", pos1 + 1))
+            pos2 = temp.find("--000", pos1 + 1);
+
+        temp = temp.substr(pos1 + seperateLine.length(), pos2 - pos1);
+        pos2 = temp.find_last_of(seperateLine); temp.erase(pos2 - 2);
+        pos2 = temp.find_last_of(seperateLine); temp.erase(pos2 - 2);
+        pos1 = temp.find_last_not_of(" \t\f\v\n\r");
         if (pos1 != std::string::npos)
-            content.erase(pos1 + 1);
+            temp.erase(pos1 + 1);
+
+        pos1 = 0; pos2 = temp.find(seperateLine, 0);
+        while (pos2 != std::string::npos) {
+            email.content += temp.substr(pos1, pos2 - pos1);
+            pos1 = pos2 + seperateLine.length();
+            pos2 = temp.find(seperateLine, pos1);
+        }
+        email.content += temp.substr(pos1);
 
         // get messageID
         command = "FETCH " + emailNumber + " BODY.PEEK[HEADER.FIELDS (MESSAGE-ID)]";
@@ -305,7 +349,7 @@ bool GmailAccount::receiveEmail(Email &email, std::string &content, const std::s
         }
         pos1 = email.messageID.find("Message-ID", 0);
         pos1 = email.messageID.find(" ", pos1) + 1;
-        pos2 = email.messageID.find("#", pos1);
+        pos2 = email.messageID.find(seperateLine, pos1);
         email.messageID = email.messageID.substr(pos1, pos2 - pos1);
         pos1 = email.messageID.find_last_not_of(" \t\f\v\n\r");
         if (pos1 != std::string::npos) 

