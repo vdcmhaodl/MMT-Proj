@@ -309,7 +309,7 @@ bool GmailAccount::receiveEmail(Email &email, std::string &content, const std::s
         }
         pos1 = email.subject.find(":", 0);
         pos2 = email.subject.find(seperateLine, pos1);
-        email.subject = email.subject.substr(pos1 + 2, pos2 - pos1);
+        email.subject = email.subject.substr(pos1 + 2, pos2 - pos1 - seperateLine.length());
         pos1 = email.subject.find_last_not_of(" \t\f\v\n\r");
         if (pos1 != std::string::npos)
             email.subject.erase(pos1 + 1);
