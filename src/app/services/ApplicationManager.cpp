@@ -14,7 +14,7 @@ bool Services::startApplication(const std::string &appName) {
     pos1 += pos2 - 1;
     pos2 = appID.find("\n", pos1);
     appID = appID.substr(pos1, pos2 - pos1);
-    std::string appPath = "shell:AppsFolder\\" + appID;
+    std::string appPath = "'shell:AppsFolder\\" + appID + "'";
 
     // open app
     return system(("powershell -command \"Start-Process " + appPath + "\"").c_str()) == 0;
