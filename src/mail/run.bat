@@ -1,0 +1,1 @@
+g++ -o test_gmail.exe main.cpp Gmail.cpp -std=c++20 -Wall -Wextra -I ../../third_party/libcurl/include -L ../../third_party/libcurl/lib -lcurl

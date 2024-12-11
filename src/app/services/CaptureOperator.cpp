@@ -165,6 +165,7 @@ HRESULT InitializeAndFormatSourceReader(IMFMediaSource *pSource, IMFSourceReader
 
     // get video format (SUBTYPE: GUID)
     hr = pSReader->GetNativeMediaType((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, &pVideoType);
+    // hr = pSReader->GetCurrentMediaType((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, &pVideoType);
     if (FAILED(hr)) {
         std::cerr << "Cannot get media type of Source Reader!\n";
         goto done;
@@ -215,7 +216,7 @@ HRESULT InitializeAndFormatSinkWriter(LPCWSTR filename, GUID pInputVideoFormat, 
     const UINT32 VIDEO_WIDTH = 1920;
     const UINT32 VIDEO_HEIGHT = 1080;
     const UINT32 VIDEO_FPS = 30;
-    const UINT32 VIDEO_BIT_RATE = 1000000;
+    const UINT32 VIDEO_BIT_RATE = 2500000;
     const GUID   VIDEO_ENCODING_FORMAT = MFVideoFormat_H264;
     const GUID   VIDEO_INPUT_FORMAT = pInputVideoFormat;
 
@@ -224,18 +225,7 @@ HRESULT InitializeAndFormatSinkWriter(LPCWSTR filename, GUID pInputVideoFormat, 
     IMFMediaType *pMediaTypeOut = nullptr;   
     IMFMediaType *pMediaTypeIn = nullptr;
     IMFAttributes *pAttributes = nullptr;
-    DWORD streamIndex = (DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM;
-
-    // hr = MFCreateAttributes(&pAttributes, 1);
-    // if (FAILED(hr)) {
-    //     std::cerr << "Cannot create attributes!\n";
-    //     goto done;
-    // }
-    // hr = pAttributes->SetUINT32(MF_SINK_WRITER_DISABLE_THROTTLING, TRUE);
-    // if (FAILED(hr)) {
-    //     std::cerr << "Cannot setup Attributes!\n";
-    //     goto done;
-    // }
+    DWORD streamIndex;
 
     hr = MFCreateSinkWriterFromURL(filename, nullptr, pAttributes, &pSWriter);
     if (FAILED(hr)) {
@@ -324,7 +314,7 @@ done:
     return hr;
 }
 
-HRESULT StartWebcamCapture(IMFSourceReader *pReader, IMFSinkWriter *pWriter, DWORD streamIndex) {
+HRESULT StartRecord(IMFSourceReader *pReader, IMFSinkWriter *pWriter, DWORD streamIndex) {
     HRESULT hr = S_OK;
     DWORD flags = 0;
     IMFSample* pSample = nullptr;
@@ -334,7 +324,7 @@ HRESULT StartWebcamCapture(IMFSourceReader *pReader, IMFSinkWriter *pWriter, DWO
 
     videoDuration *= 1e7;
     while (time < videoDuration) {        
-        hr = pReader->ReadSample(streamIndex, 0, nullptr, &flags, nullptr, &pSample);
+        hr = pReader->ReadSample((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, nullptr, &flags, nullptr, &pSample);
         if (FAILED(hr)) {
             std::cerr << "Read sample error!\n";
             break;
@@ -352,6 +342,7 @@ HRESULT StartWebcamCapture(IMFSourceReader *pReader, IMFSinkWriter *pWriter, DWO
             }
         }
         SafeRelease(&pSample);
+        if (FAILED(hr)) break;
         time += sampleTimeStamp;
     }
 
@@ -399,7 +390,7 @@ HRESULT WebcamCapture(LPCWSTR filename) {
         goto done;
     }
 
-    hr = StartWebcamCapture(pReader, pWriter, streamIndex);
+    hr = StartRecord(pReader, pWriter, streamIndex);
     if (FAILED(hr)) {
         std::cerr << "Fail to record!\n";
         goto done;
