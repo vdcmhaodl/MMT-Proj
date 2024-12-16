@@ -165,7 +165,6 @@ HRESULT InitializeAndFormatSourceReader(IMFMediaSource *pSource, IMFSourceReader
 
     // get video format (SUBTYPE: GUID)
     hr = pSReader->GetNativeMediaType((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, &pVideoType);
-    // hr = pSReader->GetCurrentMediaType((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, &pVideoType);
     if (FAILED(hr)) {
         std::cerr << "Cannot get media type of Source Reader!\n";
         goto done;

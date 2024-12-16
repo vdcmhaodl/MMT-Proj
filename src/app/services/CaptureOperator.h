@@ -30,6 +30,8 @@ namespace Services {
     bool webcamCapture(const std::string &filename);
     bool screenShot(const std::string &filename);
 }
+
+
 HRESULT GetWebcamMediaSource(IMFMediaSource **ppSource);
 HRESULT InitializeAndFormatSourceReader(IMFMediaSource *pSource, IMFSourceReader** pReader, GUID *pVideoFormat);
 HRESULT InitializeAndFormatSinkWriter(LPCWSTR filename, GUID pVideoFormat, IMFSinkWriter **ppWriter, DWORD* pStreamIndex);

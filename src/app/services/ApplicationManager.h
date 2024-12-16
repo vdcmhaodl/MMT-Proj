@@ -33,8 +33,7 @@ namespace Services {
 }
 
 std::string ReadCMD(const char* cmd);
-bool isSystemApp(const std::string &windowTitle, const std::string &executableName);
 
+bool isSystemApp(const std::string &windowTitle, const std::string &executableName);
 std::string extractAppName(const std::string &path);
 BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam);
-bool isSystemApp(const std::string &windowTitle, const std::string &executableName);
