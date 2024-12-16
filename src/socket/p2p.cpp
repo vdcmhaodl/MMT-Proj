@@ -30,6 +30,8 @@ P2P_Socket::~P2P_Socket() {
 void P2P_Socket::initialize(char *IP_addr, char *subnetMask) {
     this->IP_addr = IP_addr;
     this->subnetMask = subnetMask;
+    // std::cout << "IP address: " << this->IP_addr << '\n';
+    // std::cout << "Subnet mask: " << this->subnetMask << '\n';
 
     sendSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     recvSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -155,7 +157,8 @@ void P2P_serverSocket::flipState() {
 }
 
 std::string P2P_serverSocket::get_true_IP_addr() {
-    std::shared_lock lock(mtx);
+    // std::osyncstream(std::cout) << "TRUE IP\n";
+    std::unique_lock lock(mtx);
     return true_IP_addr;
 }
 
@@ -165,7 +168,9 @@ void P2P_serverSocket::assgin_true_IP_addr(std::string IPaddr) {
 }
 
 bool P2P_serverSocket::makeRespond(std::string IPsender, std::string msg, std::string &respond) {
+    std::osyncstream(std::cout) << "Receive msg: " << msg << '\n';
     if (socketAPI::isServerMessage(msg)) {
+        std::osyncstream(std::cout) << "This is server message anyway " << '\n';
         return false;
     } 
 
@@ -177,6 +182,7 @@ bool P2P_serverSocket::makeRespond(std::string IPsender, std::string msg, std::s
         if (ret.empty()) {
             ret = socketAPI::findSuitableIP(IPsender, subnetMask);
         }
+        std::osyncstream(std::cout) << "Found IP: " << ret << '\n';
         assgin_true_IP_addr(ret);
     }
     respond = socketAPI::createServerMessage(get_true_IP_addr(), hostname, getState() ? STATUS::IN_CONNECTION_SOCKET : STATUS::FREE_SOCKET);
@@ -226,6 +232,7 @@ bool P2P_clientSocket::makeRespond(std::string IPsender, std::string msg, std::s
 }
 
 void P2P_clientSocket::start() {
+    std::osyncstream(std::cout) << "START " << subnetMask << '\n';
     P2P_Socket::start(socketAPI::createClientMessage(subnetMask));
 }
 

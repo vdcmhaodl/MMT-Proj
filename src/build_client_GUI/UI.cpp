@@ -1,19 +1,20 @@
 #include "UI.h"
 
-void MainWindow::setMode(int mode) {
+void UI::setMode(int mode) {
     this->mode = mode;
     EXTRA.setMode(mode);
 }
 
-MainWindow::MainWindow(int WIDTH, int HEIGHT, int mode) : BaseWindow<MainWindow>(WIDTH, HEIGHT),
+UI::UI(int WIDTH, int HEIGHT, int mode, Mediator* mediator, std::string name) : BaseWindow<UI>(WIDTH, HEIGHT),
                                                           INFO(640, 360),
                                                           HELP(640, 360),
                                                           IP(640, 360),
                                                           LOG(640, 360),
                                                           EXTRA(640, 360, mode),
-                                                          mode(mode) {}
+                                                          mode(mode),
+                                                          Participant(mediator, name) {}
 
-LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
@@ -83,15 +84,20 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         
         case IP_UPDATE_MESSAGE: {
             // MessageBoxA(INFO.Window(), "Receive new status!", "WM_COMMAND", MB_OK);
-            if (IP.Window() != NULL) {
-                SendMessageA(IP.Window(), WM_COMMAND, MAKEWORD(ListViewWindow::UPDATE_LIST_VIEW, 0), 0);
-            }
+            // if (IP.Window() != NULL) {
+            //     SendMessageA(IP.Window(), WM_COMMAND, MAKEWORD(ListViewWindow::UPDATE_LIST_VIEW, 0), 0);
+            // }
         } break;
         
         default:
             break;
         }
     } break;
+
+    case WM_IP_REQUEST: {
+        mediator->Forward(COMPONENT::UI_COMPONENT, COMPONENT::BROADCAST_COMPONENT, "request");
+        break;
+    }
 
     case WM_COPYDATA: {
         PCOPYDATASTRUCT pCDS = (PCOPYDATASTRUCT)lParam;
@@ -105,7 +111,7 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             break;
         }
         case EXTRA_MESSAGE:{
-            queueExtra.push(content);
+            
             std::string message = content + std::string("; RECEIVED TEXT!");
             MessageBoxA(m_hwnd, (char*)message.c_str(), "Extra message", MB_OK);
             break;
@@ -115,6 +121,35 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
         break;
     }
+
+    case WM_FRONTEND_NOTIFY: {
+        switch(wParam) {
+            case INFO_UPDATE_MESSAGE: {
+                if (INFO.Window() != NULL) {
+                    SendMessageA(IP.Window(), WM_TEXT_APPEND, 0, lParam);
+                }
+                break;
+            }
+            case IP_UPDATE_MESSAGE: {
+                std::osyncstream(std::cout) << "Recieve frontend message IP\n";
+                if (IP.Window() != NULL) {
+                    SendMessageA(IP.Window(), WM_IP_NOTIFY, 0, lParam);
+                }
+                break;
+            }
+            case LOG_UPDATE_MESSAGE: {
+                std::osyncstream(std::cout) << "Recieve frontend message LOG\n";
+                std::any* any_ptr = reinterpret_cast<std::any*>(lParam);
+                std::string text = std::any_cast<std::string>(*any_ptr);
+                // std::osyncstream(std::cout) << "LOG text: " << text << '\n';
+                LOG.getNewMessage(text);
+                // if (LOG.Window() != NULL) {
+                //     SendMessageA(LOG.Window(), WM_TEXT_APPEND, 0, lParam);
+                // }
+                break;
+            }
+        }
+    } break;
 
     case WM_DESTROY:{
         std::string resultINFO = (INFO.Window() == NULL ? "SUCCESS" : "FAIL");
@@ -161,6 +196,8 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
                 SendMessageA(LOG.Window(), WM_CLOSE, 0, 0);
                 SendMessageA(EXTRA.Window(), WM_CLOSE, 0, 0);
                 DestroyWindow(m_hwnd);
+
+                mediator->Broadcast(this, "exit");
             }
             // Else: User canceled. Do nothing.
             return 0;
@@ -172,4 +209,70 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     return TRUE;
 }
 
-concurrent_queue<std::string> queueExtra;
+void UI::initialize(std::vector<std::string> &signinInput) {
+    setMode(signinInput[4] == "AUTOMATIC" ? AUTOMATIC : MANUAL);
+    INFO.setFilePath("INFO.txt");
+    HELP.setFilePath("HELP.txt");
+    LOG.setFilePath("LOG.txt");
+}
+
+void UI::start() {
+    if (!Create("Learn to Program Windows", 
+        WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX, WS_EX_CLIENTEDGE)) {
+        return;
+    }
+
+    INFO.update_hwnd_parent(Window());
+    HELP.update_hwnd_parent(Window());
+    IP.update_hwnd_parent(Window());
+    LOG.update_hwnd_parent(Window());
+    EXTRA.update_hwnd_parent(Window());
+
+    ShowWindow(Window(), SW_SHOWDEFAULT);
+
+    MSG msg = { };
+    while (GetMessage(&msg, NULL, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    // isRunning = false;
+    
+    return;
+}
+
+void UI::Send(std::string msg) {
+}
+
+void UI::Send(std::string msg, std::string receiver) {
+}
+
+void UI::Receive(std::string msg) {
+}
+
+void UI::Send(std::any *ptr) {
+}
+
+void UI::Send(std::any *ptr, std::string dest) {
+}
+
+void UI::Send(std::any *ptr, std::string type, std::string dest) {
+}
+
+void UI::Receive(std::any *ptr) {
+}
+
+void UI::Receive(std::any *ptr, std::string type) {
+    std::osyncstream(std::cout) << "Receive ptr " << ptr << ' ' << type << '\n';
+    if (type == "IP") {
+        SendMessageA(m_hwnd, WM_FRONTEND_NOTIFY, IP_UPDATE_MESSAGE, (LPARAM)ptr);
+    }
+    else if (type == "INFO") {
+        SendMessageA(m_hwnd, WM_FRONTEND_NOTIFY, INFO_UPDATE_MESSAGE, (LPARAM)ptr);
+    }
+    else if (type == "LOG") {
+        std::string text = std::any_cast<std::string>(*ptr);
+        std::osyncstream(std::cout) << "Append " << text << '\n';
+        SendMessageA(m_hwnd, WM_FRONTEND_NOTIFY, LOG_UPDATE_MESSAGE, (LPARAM)ptr);
+    }
+}

@@ -79,7 +79,7 @@ bool socketAPI::sendMessage(SOCKET &connectSocket, std::string &message) {
 
     iResult = send(connectSocket, (char*)&messageLength, sizeof(uint32_t), 0);
     if (iResult == SOCKET_ERROR) {
-        std::cout << "send() failed: " << WSAGetLastError() << '\n';
+        std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "send() failed: " << WSAGetLastError() << '\n';
         cleanup();
         return false;
     }
@@ -87,7 +87,7 @@ bool socketAPI::sendMessage(SOCKET &connectSocket, std::string &message) {
     do {
         iResult = send(connectSocket, message.c_str() + byteSent, message.size() - byteSent, 0);
         if (iResult == SOCKET_ERROR) {
-            std::cout << "send() failed: " << WSAGetLastError() << '\n';
+            std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "send() failed: " << WSAGetLastError() << '\n';
             cleanup();
             return false;
         }
@@ -95,16 +95,17 @@ bool socketAPI::sendMessage(SOCKET &connectSocket, std::string &message) {
         byteSent += iResult;
     } while (byteSent < (int)message.size());
 
-    uint32_t respond;
-    iResult = recv(connectSocket, (char*)&respond, sizeof(uint32_t), 0); 
-    if (iResult == SOCKET_ERROR) { 
-        std::cout << "recv() failed: " << WSAGetLastError() << '\n'; 
-        cleanup(); 
-        return false; 
-    }
-    respond = ntohl(respond);
+    // uint32_t respond;
+    // iResult = recv(connectSocket, (char*)&respond, sizeof(uint32_t), 0); 
+    // if (iResult == SOCKET_ERROR) { 
+    //     std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "recv() failed: " << WSAGetLastError() << '\n'; 
+    //     cleanup(); 
+    //     return false; 
+    // }
+    // respond = ntohl(respond);
 
-    return (respond == 200);
+    // return (respond == 200);
+    return true;
 }
 
 bool socketAPI::receiveMessage(SOCKET &connectSocket, std::string &message) {
@@ -129,14 +130,14 @@ bool socketAPI::receiveMessage(SOCKET &connectSocket, std::string &message) {
         }
     } while(iResult > 0 && byteRecv < (int)dataLength);
 
-    uint32_t respond = (byteRecv == (int)dataLength ? 200 : 400);
-    respond = htonl(respond); 
-    iResult = send(connectSocket, (char*)&respond, sizeof(uint32_t), 0);
-    if (iResult == SOCKET_ERROR) {
-        std::cout << "send() failed: " << WSAGetLastError() << '\n';
-        cleanup();
-        return false;
-    }
+    // uint32_t respond = (byteRecv == (int)dataLength ? 200 : 400);
+    // respond = htonl(respond); 
+    // iResult = send(connectSocket, (char*)&respond, sizeof(uint32_t), 0);
+    // if (iResult == SOCKET_ERROR) {
+    //     std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "send() failed: " << WSAGetLastError() << '\n';
+    //     cleanup();
+    //     return false;
+    // }
 
     return (byteRecv == (int)dataLength);
 }
@@ -185,16 +186,17 @@ bool socketAPI::sendFile(SOCKET &connectSocket, std::string &pathFile) {
         return false;
     }
 
-    uint32_t respond;
-    iResult = recv(connectSocket, (char*)&respond, sizeof(uint32_t), 0); 
-    if (iResult == SOCKET_ERROR) { 
-        std::cout << "recv() failed: " << WSAGetLastError() << '\n'; 
-        closesocket(connectSocket);
-        cleanup(); 
-        return false; 
-    }
-    respond = ntohl(respond);
-    return (respond == 200);
+    // uint32_t respond;
+    // iResult = recv(connectSocket, (char*)&respond, sizeof(uint32_t), 0); 
+    // if (iResult == SOCKET_ERROR) { 
+    //     std::cout << "recv() failed: " << WSAGetLastError() << '\n'; 
+    //     closesocket(connectSocket);
+    //     cleanup(); 
+    //     return false; 
+    // }
+    // respond = ntohl(respond);
+    // return (respond == 200);
+    return true;
 }
 
 bool socketAPI::receiveFile(SOCKET &connectSocket, std::string &pathFile) {

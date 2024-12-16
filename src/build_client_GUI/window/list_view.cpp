@@ -1,7 +1,5 @@
 #include "list_view.h"
 
-ListViewData list_IP_addr;
-
 ListViewWindow::ListViewWindow(int WIDTH, int HEIGHT) : BaseWindow<ListViewWindow>(WIDTH, HEIGHT) {}
 
 void ListViewWindow::InitListView()
@@ -71,6 +69,8 @@ LRESULT ListViewWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
             // Update the List-View with example data
             UpdateListView();
+
+            SendMessage(m_hwnd_parent, WM_IP_REQUEST, 0, 0);
         }
             break;
     case WM_COMMAND: {
@@ -84,6 +84,14 @@ LRESULT ListViewWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             break;
         }
     } break;
+
+    case WM_IP_NOTIFY: {
+        std::any* any_ptr = reinterpret_cast<std::any*>(lParam);
+        list_IP_addr = std::any_cast<ListViewData>(*any_ptr);
+        delete any_ptr;
+        UpdateListView();
+        break;
+    }
 
     case WM_DESTROY:
         m_hwnd = NULL;

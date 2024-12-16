@@ -6,8 +6,12 @@
 #include "window/list_view.h"
 #include "window/text.h"
 #include "window/extra.h"
+#include "mediator.h"
+#include <any>
 
-class MainWindow : public BaseWindow<MainWindow>
+#define WM_FRONTEND_NOTIFY (WM_USER + 1)
+
+class UI : public BaseWindow<UI>, public Participant
 {
 public:
     static const int INFO_BUTTON = 1;
@@ -16,6 +20,8 @@ public:
     static const int LOG_BUTTON = 4;
     static const int EXTRA_BUTTON = 5;
     static const int IP_UPDATE_MESSAGE = 6;
+    static const int LOG_UPDATE_MESSAGE = 7;
+    static const int INFO_UPDATE_MESSAGE = 8;
 
     static const DWORD INFO_MESSAGE = 1;
     static const DWORD IP_MESSAGE = 2;
@@ -31,9 +37,20 @@ public:
 
     int mode;
     void setMode(int mode);
-    MainWindow(int WIDTH = CW_USEDEFAULT, int HEIGHT = CW_USEDEFAULT, int mode = AUTOMATIC);
+    UI(int WIDTH, int HEIGHT, int mode, Mediator* mediator, std::string name);
     PCSTR  ClassName() const { return "Client Window Class"; }
     LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
-};
 
-extern concurrent_queue<std::string> queueExtra;
+    void initialize(std::vector<std::string> &signinInput);
+    void start();
+
+    void Send(std::string msg);
+    void Send(std::string msg, std::string receiver);
+    void Receive(std::string msg);
+
+    void Send(std::any *ptr);
+    void Send(std::any *ptr, std::string dest);
+    void Send(std::any *ptr, std::string type, std::string dest);
+    void Receive(std::any *ptr);
+    void Receive(std::any *ptr, std::string type);
+};

@@ -7,38 +7,95 @@
 #include "UI.h"
 #include "../mail/Gmail.h"
 #include "../share_queue.h"
+#include "mediator.h"
+#include <any>
 
-class FullCommand : public Command {
-    
+class FullCommand {
+public:
+    Command command;
+    Email email;
+private:
 };
 
-extern std::string clientIPv4;
-extern std::string subnetMask;
-extern std::string username;
-extern std::string password;
-extern GmailAccount clientMail;
-extern concurrent_queue<std::string> queueQuery;
-extern concurrent_queue<Email> queueMail;
-extern concurrent_queue<std::string> queueLog;
-extern ListIPData ListIP;
-extern P2P_clientSocket broadcast;
-extern MainWindow win;
+class AppMediator : public Mediator {
+public:
+    std::string clientIPv4;
+    std::string subnetMask;
+    std::string username;
+    std::string password;
+    concurrent_queue<std::string> queueQuery;
+    concurrent_queue<FullCommand> queueCommand;
+    concurrent_queue<std::string> queueLog;
+    ListIPData ListIP;
+private:
+};
+
+class Broadcast : public Participant {
+protected:
+    std::atomic<bool> isRunning;
+    
+    ListIPData listIP;
+public:
+    P2P_clientSocket broadcast;
+    Broadcast();
+    Broadcast(Mediator* mediator, std::string name);
+    void initialize(std::vector<std::string> &signinInput);
+    void start();
+
+    // void Send(std::string msg);
+    // void Send(std::string msg, std::string receiver);
+    void Receive(std::string msg);
+    void Receive(std::string msg, std::string sender);
+
+    // void Send(Visitor* visitor);
+    // void Send(Visitor* visitor, std::string dest);
+    // void Receive(Visitor* visitor);
+};
+
+class Gmail : public Participant {
+protected:
+    GmailAccount clientMail;
+    std::atomic<bool> isRunning;
+    concurrent_queue<Mail> queueMail;
+public:
+    Gmail();
+    Gmail(Mediator* mediator, std::string name);
+    void initialize(std::vector<std::string> &signinInput);
+    void start();
+
+    Command constructCommand(Mail &mail);
+
+    // void Send(std::string msg);
+    // void Send(std::string msg, std::string receiver);
+    void Receive(std::string msg);
+
+    // void Send(Visitor* visitor);
+    // void Send(Visitor* visitor, std::string dest);
+    // void Receive(Visitor* visitor);
+};
+
+class Client : public Participant {
+protected:
+    std::atomic<bool> isRunning;
+    std::atomic<bool> IPdata;
+    ListViewData listIP;
+    concurrent_queue<FullCommand> queueCommand;
+public:
+    Client();
+    Client(Mediator* mediator, std::string name);
+    void initialize(std::vector<std::string> &signinInput);
+    void start();
+    void resolveCommand(FullCommand FC);
+
+    // void Send(std::string msg);
+    // void Send(std::string msg, std::string receiver);
+    void Receive(std::string msg);
+    void Receive(std::any *ptr);
+    void Receive(std::any *ptr, std::string type);
+
+    // void Send(Visitor* visitor);
+    // void Send(Visitor* visitor, std::string dest);
+    // void Receive(Visitor* visitor);
+};
 
 std::vector<std::string> getInputInfo();
-
-void initializeBroadcast(std::vector<std::string> &signinInput);
-void initializeClient(std::vector<std::string> &signinInput);
-void initializeMail(std::vector<std::string> &signinInput);
-void initializeUI(std::vector<std::string> &signinInput);
-
-extern std::atomic<bool> isRunning;
-
-extern std::thread::id idThreadBroadcast;
-extern std::thread::id idThreadClient;
-extern std::thread::id idThreadMail;
-extern std::thread::id idThreadUI;
-
-int startBroadcast();
-int startClient();
-int startMail();
-int startUI();

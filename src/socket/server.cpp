@@ -195,11 +195,11 @@ bool serverSocket::anyPendingConnection() {
     if (client == INVALID_SOCKET) { 
         if (WSAGetLastError() == WSAEWOULDBLOCK) { 
             // No pending connections; continue loop 
-            std::cout << "No pending connections. Checking again..." << std::endl; 
+            std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "No pending connections. Checking again..." << std::endl; 
             // Sleep for a short time before checking again continue; 
             } else { 
                 // An actual error occurred 
-            std::cerr << "accept() failed: " << WSAGetLastError() << std::endl; 
+            std::osyncstream(std::cerr) << std::this_thread::get_id() << ' ' << "accept() failed: " << WSAGetLastError() << std::endl; 
         }
         
         return false;

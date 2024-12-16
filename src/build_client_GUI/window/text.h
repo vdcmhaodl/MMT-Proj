@@ -3,6 +3,10 @@
 #include "base_window.h"
 #include <fstream>
 #include <iostream>
+#include <any>
+#include <syncstream>
+
+#define WM_TEXT_APPEND (WM_USER + 4)
 
 class TextWindow : public BaseWindow<TextWindow>
 {

@@ -18,7 +18,7 @@ struct Email {
     std::string subject;
     std::string messageID;
         
-    Email(): account(""), subject(""), messageID("") {}
+    Email() {}
 };
 
 struct Mail {

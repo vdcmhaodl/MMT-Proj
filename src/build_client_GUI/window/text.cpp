@@ -46,6 +46,15 @@ LRESULT TextWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         10, 10, 360, 240, m_hwnd, (HMENU)1, GetModuleHandle(NULL), NULL ); 
     } break;
 
+    case WM_TEXT_APPEND: {
+        std::any* any_ptr = reinterpret_cast<std::any*>(lParam);
+        std::string text = std::any_cast<std::string>(*any_ptr);
+        std::osyncstream(std::cout) << "Receive text: " << text << '\n';
+        getNewMessage(text);
+        delete any_ptr;
+        break;
+    }
+
     case WM_COPYDATA: {
         PCOPYDATASTRUCT pCDS = (PCOPYDATASTRUCT)lParam;
         std::string content((char*)pCDS->lpData);

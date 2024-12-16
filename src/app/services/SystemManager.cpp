@@ -97,8 +97,8 @@ bool Services::listServices(const std::string &saveFile) {
 
     fout << std::setw(35) << std::left << "Service name" << std::setw(65) << std::left << "Display name" << "PID" << "\n";
     for (DWORD i = 0; i < servicesCount; i++) {
-        fout << std::setw(35) << std::left << services[i].lpServiceName << std::setw(65) << std::left 
-             << services[i].lpDisplayName << services[i].ServiceStatusProcess.dwProcessId << std::endl;
+        // fout << std::setw(35) << std::left << services[i].lpServiceName << std::setw(65) << std::left 
+        //      << services[i].lpDisplayName << services[i].ServiceStatusProcess.dwProcessId << std::endl;
     }
 
     LocalFree(buffer);

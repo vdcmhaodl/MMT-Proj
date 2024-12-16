@@ -1,4 +1,4 @@
-#include "CatureOperator.h"
+#include "CaptureOperator.h"
 
 
 bool Services::webcamCapture(const std::string &fileName) {

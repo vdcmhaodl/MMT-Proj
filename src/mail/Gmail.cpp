@@ -72,12 +72,16 @@ std::queue<std::string> GmailAccount::searchNewEmail()
         pos1 = searchResult.find(" ", pos1) + 1;
         pos2 = searchResult.find(seperateLine, pos1);
         searchResult = searchResult.substr(pos1, pos2 - pos1);
+        // if (searchResult == "OK SEARCH completed (Success)\n") {
+        //     return std::queue<std::string>();
+        // }
         pos1 = searchResult.find_last_not_of(" \t\f\v\n\r");
         if (pos1 != std::string::npos)
             searchResult.erase(pos1 + 1);
 
         pos1 = pos2 = 0;
-        while (pos2 = searchResult.find(' ', pos2)) {
+        while (true) {
+            pos2 = searchResult.find(' ', pos2);
             if (pos2 == std::string::npos) {
                 pos2 = searchResult.length();
                 qEmailNums.push(searchResult.substr(pos1, pos2 - pos1));
@@ -102,8 +106,9 @@ std::queue<Mail> GmailAccount::getEmailQueue() {
 
         Email email;
         std::string content;
-        receiveEmail(email, content, emailNumber);
-        listMail.push(Mail{email, content});
+        if(receiveEmail(email, content, emailNumber)) {
+            listMail.push(Mail{email, content});
+        }
     }
     return listMail;
 }

@@ -34,12 +34,15 @@ void initializeServer() {
 
 int startServer() {
     broadcast.start();
-    while(broadcast.get_true_IP_addr() == "xxx.xxx.xxx.xxx") {}
-    std::cout << "IP address: " << broadcast.get_true_IP_addr() << '\n';
+    // std::osyncstream(std::cout) << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA " << std::this_thread::get_id() << ' ' << broadcast.get_true_IP_addr() << '\n';
+    while(broadcast.get_true_IP_addr() == "xxx.xxx.xxx.xxx") {
+        // std::osyncstream(std::cout) << broadcast.get_true_IP_addr() << '\n';
+    }
+    // std::osyncstream(std::cout) << std::this_thread::get_id() << "IP address: " << broadcast.get_true_IP_addr() << '\n';
     std::cout << server.initializeServer(broadcast.get_true_IP_addr()) << '\n';
     std::cout << server.listenClient() << '\n';
     fullyInitialize = true;
-    std::cout << "Finish setup\n";
+    // std::cout << "Finish setup\n";
 
     auto time_start = std::chrono::high_resolution_clock::now();
     while(isRunning) {
@@ -64,7 +67,7 @@ int startServer() {
         // server.connectClient();
         broadcast.createMessage(STATUS::IN_CONNECTION_SOCKET);
         // Work
-        // executeCommand();
+        executeCommand();
         // auto folder = std::filesystem::temp_directory_path();
         // std::string filepath = folder.string();
         // Finish connecting
@@ -79,11 +82,13 @@ int startServer() {
 void executeCommand() {
     std::string command, filepath;
     socketAPI::receiveMessage(server.client, command);
+    std::osyncstream(std::cout) << "RECEIVE: " << command << '\n';
     // Services::processCommand(command);
     // socketAPI::sendFile(server.client, filepath);
-    std::this_thread::sleep_for(std::chrono::microseconds(500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+    std::osyncstream(std::cout) << "SEND: " << command << '\n'; 
     socketAPI::sendMessage(server.client, command);
-    std::this_thread::sleep_for(std::chrono::microseconds(2500));
+    // std::this_thread::sleep_for(std::chrono::microseconds(2500));
 }
 
 void endServer() {
