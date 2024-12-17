@@ -29,6 +29,8 @@ namespace Services {
     bool webcamCapture(Command command);
     bool screenShot(Command command);
 }
+
+
 HRESULT GetWebcamMediaSource(IMFMediaSource **ppSource);
 HRESULT InitializeAndFormatSourceReader(IMFMediaSource *pSource, IMFSourceReader** pReader, GUID *pVideoFormat);
 HRESULT InitializeAndFormatSinkWriter(LPCWSTR filename, GUID pVideoFormat, IMFSinkWriter **ppWriter, DWORD* pStreamIndex);
