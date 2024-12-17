@@ -9,10 +9,6 @@
 #include "serviceCommand.h"
 
 namespace Services{
-    class SystemCommand : public Command {
-
-    };
-
     bool shutdown(const std::string &saveFile);
     bool restart(const std::string &saveFile);
 
@@ -22,4 +18,14 @@ namespace Services{
     bool listServices(const std::string &saveFile);
     bool startService(const std::string &serviceName);
     bool stopService(const std::string &serviceName);
+    
+    bool shutdown(Command command);
+    bool restart(Command command);
+
+    bool listFileAndFolder(Command command);
+    bool deleteFile(Command command);
+
+    bool listServices(Command command);
+    bool startService(Command command);
+    bool stopService(Command command);
 }

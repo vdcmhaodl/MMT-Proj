@@ -80,14 +80,24 @@ int startServer() {
 }
 
 void executeCommand() {
-    std::string command, filepath;
-    socketAPI::receiveMessage(server.client, command);
-    std::osyncstream(std::cout) << "RECEIVE: " << command << '\n';
+    std::string stringCommand, filepath;
+    socketAPI::receiveMessage(server.client, stringCommand);
+    std::osyncstream(std::cout) << "RECEIVE: " << stringCommand << '\n';
+    Command command;
+    command.construct(stringCommand);
+    // TODO: Execute this "command" variable.
+    std::string filename;
+
+
+
+
+
+    
+    // Expect sending the result file with name "filename"
+    socketAPI::sendFile(server.client, filename);
     // Services::processCommand(command);
     // socketAPI::sendFile(server.client, filepath);
-    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-    std::osyncstream(std::cout) << "SEND: " << command << '\n'; 
-    socketAPI::sendMessage(server.client, command);
+    // socketAPI::sendMessage(server.client, command);
     // std::this_thread::sleep_for(std::chrono::microseconds(2500));
 }
 

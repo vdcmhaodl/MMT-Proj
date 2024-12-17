@@ -24,11 +24,10 @@ void SafeRelease(T **ppT) {
 }
 
 namespace Services {
-    class CaptureCommand : public Command {
-
-    };
     bool webcamCapture(const std::string &filename);
     bool screenShot(const std::string &filename);
+    bool webcamCapture(Command command);
+    bool screenShot(Command command);
 }
 HRESULT GetWebcamMediaSource(IMFMediaSource **ppSource);
 HRESULT InitializeAndFormatSourceReader(IMFMediaSource *pSource, IMFSourceReader** pReader, GUID *pVideoFormat);

@@ -94,13 +94,15 @@ void Gmail::initialize(std::vector<std::string> &signinInput) {
 
 void Gmail::start() {
     while(isRunning) {
+        mtx.lock();
         std::queue<Mail> newMail = clientMail.getEmailQueue();
+        mtx.unlock();
+
         std::osyncstream(std::cout) << "NUMBER OF MAIL: " << newMail.size() << '\n';
         if (!newMail.size()) {
             continue;
         }
-
-        std::unique_lock<std::mutex> lock(mtx);
+        // std::unique_lock<std::mutex> lock(mtx);
         FullCommand FC;
         while(!newMail.empty()) {
             mediator->Forward(new std::any(std::string{"RECEIVE NEW MAIL"}), "LOG", COMPONENT::UI_COMPONENT);
@@ -114,7 +116,7 @@ void Gmail::start() {
             newMail.pop();
         }
 
-        std::this_thread::sleep_for(std::chrono::seconds(10));
+        std::this_thread::sleep_for(std::chrono::seconds(15));
     }
 }
 
@@ -206,8 +208,14 @@ void Client::resolveCommand(FullCommand FC) {
     client.initializeClient((char*)FC.command.target.c_str());
     auto msg = FC.command.to_string();
     socketAPI::sendMessage(client.ConnectSocket, msg);
-    socketAPI::receiveMessage(client.ConnectSocket, msg);
-    std::osyncstream(std::cout) << "MSG FROM SERVER: " << msg << '\n';
+    // TODO: Receive result sended back from the server side
+    
+
+    // Expect receiving a file
+    std::string filename;
+    socketAPI::receiveFile(client.ConnectSocket, filename);
+
+    
     client.disconnect();
     client.clientCleanup();
 }
