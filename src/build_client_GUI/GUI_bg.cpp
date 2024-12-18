@@ -210,11 +210,15 @@ void Client::resolveCommand(FullCommand FC) {
     socketAPI::sendMessage(client.ConnectSocket, msg);
     // TODO: Receive result sended back from the server side
     
+    std::string stringNumFile;
+    socketAPI::receiveMessage(client.ConnectSocket, stringNumFile);
+    int numFile = std::stoi(stringNumFile);
+    std::vector<std::string> listReceiveFile(numFile);
 
+    for (auto &filename: listReceiveFile) {
+        socketAPI::receiveFile(client.ConnectSocket, filename);
+    }
     // Expect receiving a file
-    std::string filename;
-    socketAPI::receiveFile(client.ConnectSocket, filename);
-
     
     client.disconnect();
     client.clientCleanup();

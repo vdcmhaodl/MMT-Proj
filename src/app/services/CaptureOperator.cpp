@@ -10,17 +10,8 @@ LONGLONG VIDEO_MAX_DURATION = 30;
 
 
 std::vector<std::string> Services::webcamRecord(Command command) {
-    std::string filename = Command::generateFilename(10);
-    filename += ".txt";
-
+    std::string filename = Command::generateFilepath(10, ".txt");
     std::ofstream fout (filename.c_str());
-
-    if ((command.type != "camera" && command.type != "webcam") || command.action != "record") {
-        std::cerr << "Invalid command";
-        fout.close();
-
-        return std::vector<std::string> ({filename});
-    }
 
     for (int i = 0; i < command.listName.size(); ++i) {
         std::string fileName = command.listName[i];
@@ -39,24 +30,15 @@ std::vector<std::string> Services::webcamRecord(Command command) {
 
     fout.close();
 
-    std::vector<std::string> result (command.listName);
+    std::vector<std::string> result(command.listName);
     result.push_back(filename);
 
     return result;
 }
 
 std::vector<std::string> Services::screenShot(Command command) {
-    std::string filename = Command::generateFilename(10);
-    filename += ".txt";
-
+    std::string filename = Command::generateFilepath(10, ".txt");
     std::ofstream fout (filename.c_str());
-    
-    if (command.type != "screen" || command.action != "capture") {
-        fout << "Invalid command";
-        fout.close();
-
-        return std::vector<std::string> ({filename});
-    }
 
     for (auto &it : command.listName) {
         if (!Services::screenShot(it))

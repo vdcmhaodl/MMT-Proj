@@ -58,6 +58,4 @@ full_clean:
 	-del /s /q *.o
 	-del /s /q *.exe
 
-
-
 .PHONY: all clean full_clean help

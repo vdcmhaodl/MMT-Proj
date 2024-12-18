@@ -2,16 +2,9 @@
 
 
 std::vector<std::string> Services::startApplication(Command command) {
-    std::string filename = Command::generateFilename(10);
-    filename += ".txt";
-
+    std::string filename = Command::generateFilepath(10, ".txt");
     std::ofstream fout (filename.c_str());
-    if (command.type != "application" || command.action != "start") {
-        fout << "Invalid command\n";
-        fout.close();
-        return std::vector<std::string> ({filename});
-    }
-
+    
     for (auto it : command.listName) {
         if (!Services::startApplication(it))
             fout << "Cannot start " << it << "\n";
@@ -24,14 +17,9 @@ std::vector<std::string> Services::startApplication(Command command) {
 }
 
 std::vector<std::string> Services::stopApplication(Command command) {
-    std::string filename = Command::generateFilename(10);
-    filename += ".txt";
-
+    std::string filename = Command::generateFilepath(10, ".txt");
     std::ofstream fout (filename.c_str());
-    if (command.type != "application" || command.action != "stop") {
-        fout << "Invalid command\n";
-        return std::vector<std::string> ({filename});
-    }
+
     for (auto it : command.listName) {
         if (!Services::stopApplication(it)) 
             fout << "Cannot stop " << it << "\n";
@@ -44,16 +32,6 @@ std::vector<std::string> Services::stopApplication(Command command) {
 }
 
 std::vector<std::string> Services::listApplications(Command command) {
-    if (command.type != "application" || command.action != "list") {
-        std::string filename = Command::generateFilename(10);
-        filename += ".txt";
-
-        std::ofstream fout (filename.c_str());
-        std::cerr << "Invalid command\n";
-        fout.close();
-        
-        return std::vector<std::string> ({filename});
-    }
     for (auto it : command.listName)
         if (!Services::listApplications(it)) {
             std::cerr << "Cannot list applications to file " << it << "\n";

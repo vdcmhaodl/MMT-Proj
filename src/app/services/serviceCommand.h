@@ -7,6 +7,7 @@
 #include <functional>
 #include <chrono>
 #include <random>
+#include <filesystem>
 
 extern std::mt19937_64 rng;
 
@@ -28,4 +29,5 @@ public:
     virtual bool executeCommand();
 
     static std::string generateFilename(int length);
+    static std::string generateFilepath(int length, std::string extension);
 };

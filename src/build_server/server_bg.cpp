@@ -86,12 +86,33 @@ void executeCommand() {
     Command command;
     command.construct(stringCommand);
     // TODO: Execute this "command" variable.
-    std::string filename;
+
+    std::vector<std::string> listFilename;
+
+    auto ServiceFunc = Services::servicesMap.find({command.type, command.action});
+    if (ServiceFunc == Services::servicesMap.end()) {
+        std::string failure = Command::generateFilepath(10, ".txt");
+        // filename += ".txt";
+
+        std::ofstream fout (failure.c_str());
+        std::cerr << "Invalid command\n";
+        fout.close();
+        
+        listFilename.push_back(failure);
+    }
+    else {
+        listFilename = (ServiceFunc->second)(command);
+    }
+
+    std::string numFile = std::to_string(listFilename.size());
+    socketAPI::sendMessage(server.client, numFile);
+    for (auto filename: listFilename) {
+        socketAPI::sendFile(server.client, filename);
+        Services::deleteFile(filename);
+    }
     
-
-
     // Expect sending the result file with name "filename"
-    socketAPI::sendFile(server.client, filename);
+    
     // delete filename
     // Services::processCommand(command);
     // socketAPI::sendFile(server.client, filepath);
