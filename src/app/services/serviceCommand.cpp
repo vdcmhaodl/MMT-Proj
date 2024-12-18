@@ -1,5 +1,7 @@
 #include "serviceCommand.h"
 
+std::mt19937_64 rng(std::chrono::steady_clock().now().time_since_epoch().count());
+
 Command::Command(std::string target, std::string type, std::string action, std::vector<std::string> listName, std::vector<std::string> listOption) {
     this->target = target;
     this->type = type;
@@ -69,4 +71,10 @@ bool Command::executeCommand() {
     return false;
 }
 
-
+std::string Command::generateFilename(int length) {
+    std::string result(length, ' ');
+    for (char &ch: result) {
+        ch = (char)(std::uniform_int_distribution<int>(65, 90)(rng));
+    }
+    return result;
+}

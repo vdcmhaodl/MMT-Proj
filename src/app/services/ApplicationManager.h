@@ -27,9 +27,10 @@ namespace Services {
     bool startApplication(const std::string &appName);
     bool stopApplication(const std::string &appName);
     bool listApplications(const std::string &saveFile);
-    bool startApplication(Command command);
-    bool stopApplication(Command command);
-    bool listApplications(Command command);
+    
+    std::vector<std::string> startApplication(Command command);
+    std::vector<std::string> stopApplication(Command command);
+    std::vector<std::string> listApplications(Command command);
 }
 
 std::string ReadCMD(const char* cmd);

@@ -1,5 +1,66 @@
 #include "ApplicationManager.h"
 
+
+std::vector<std::string> Services::startApplication(Command command) {
+    std::string filename = Command::generateFilename(10);
+    filename += ".txt";
+
+    std::ofstream fout (filename.c_str());
+    if (command.type != "application" || command.action != "start") {
+        fout << "Invalid command\n";
+        fout.close();
+        return std::vector<std::string> ({filename});
+    }
+
+    for (auto it : command.listName) {
+        if (!Services::startApplication(it))
+            fout << "Cannot start " << it << "\n";
+        else
+            fout << "Start app " << it << " successfully\n";
+    }
+
+    fout.close();
+    return std::vector<std::string> ({filename});
+}
+
+std::vector<std::string> Services::stopApplication(Command command) {
+    std::string filename = Command::generateFilename(10);
+    filename += ".txt";
+
+    std::ofstream fout (filename.c_str());
+    if (command.type != "application" || command.action != "stop") {
+        fout << "Invalid command\n";
+        return std::vector<std::string> ({filename});
+    }
+    for (auto it : command.listName) {
+        if (!Services::stopApplication(it)) 
+            fout << "Cannot stop " << it << "\n";
+        else
+            fout << "Stop app " << it << " successfully\n";
+    }
+
+    fout.close();
+    return std::vector<std::string> ({filename});
+}
+
+std::vector<std::string> Services::listApplications(Command command) {
+    if (command.type != "application" || command.action != "list") {
+        std::string filename = Command::generateFilename(10);
+        filename += ".txt";
+
+        std::ofstream fout (filename.c_str());
+        std::cerr << "Invalid command\n";
+        fout.close();
+        
+        return std::vector<std::string> ({filename});
+    }
+    for (auto it : command.listName)
+        if (!Services::listApplications(it)) {
+            std::cerr << "Cannot list applications to file " << it << "\n";
+        }
+    return command.listName;
+}
+
 bool Services::startApplication(const std::string &appName) {
     // get appID
     std::string cmd = "powershell -command \"Get-StartApps | Where-Object { $_.Name -like '*" + appName + "*' }\"";

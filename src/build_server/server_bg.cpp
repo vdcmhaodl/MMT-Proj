@@ -87,14 +87,12 @@ void executeCommand() {
     command.construct(stringCommand);
     // TODO: Execute this "command" variable.
     std::string filename;
-
-
-
-
-
     
+
+
     // Expect sending the result file with name "filename"
     socketAPI::sendFile(server.client, filename);
+    // delete filename
     // Services::processCommand(command);
     // socketAPI::sendFile(server.client, filepath);
     // socketAPI::sendMessage(server.client, command);

@@ -8,6 +8,6 @@
 #include "services/KeyLogger.h"
 
 namespace Services {
-    extern std::map<std::pair<std::string, std::string>, bool(*)(const std::string&)> servicesMap;
+    extern std::map<std::pair<std::string, std::string>, std::vector<std::string>(*)(Command)> servicesMap;
     // bool processCommand(std::string &command);
 }

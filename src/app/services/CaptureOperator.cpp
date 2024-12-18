@@ -1,9 +1,80 @@
 #include "CaptureOperator.h"
 
+// Format constants
+UINT32 VIDEO_WIDTH = 1920;
+UINT32 VIDEO_HEIGHT = 1080;
+UINT32 VIDEO_FPS = 30;
+UINT64 VIDEO_FRAME_DURATION = 10 * 1000 * 1000 / VIDEO_FPS;
+UINT32 VIDEO_BIT_RATE = 2000000;
+LONGLONG VIDEO_MAX_DURATION = 30;
 
-bool Services::webcamCapture(const std::string &fileName) {
+
+std::vector<std::string> Services::webcamRecord(Command command) {
+    std::string filename = Command::generateFilename(10);
+    filename += ".txt";
+
+    std::ofstream fout (filename.c_str());
+
+    if ((command.type != "camera" && command.type != "webcam") || command.action != "record") {
+        std::cerr << "Invalid command";
+        fout.close();
+
+        return std::vector<std::string> ({filename});
+    }
+
+    for (int i = 0; i < command.listName.size(); ++i) {
+        std::string fileName = command.listName[i];
+
+        // set video duration
+        LONGLONG videoDuration = stol(command.listOption[i]);
+        if (videoDuration < 0 || videoDuration > VIDEO_MAX_DURATION)
+            videoDuration = VIDEO_MAX_DURATION;
+
+        // record video to fileName
+        if (!Services::webcamRecord(fileName, videoDuration))
+            fout << "Fail to record video " << fileName << "\n";
+        else
+            fout << "Record video " << fileName << " successfully\n";
+    }
+
+    fout.close();
+
+    std::vector<std::string> result (command.listName);
+    result.push_back(filename);
+
+    return result;
+}
+
+std::vector<std::string> Services::screenShot(Command command) {
+    std::string filename = Command::generateFilename(10);
+    filename += ".txt";
+
+    std::ofstream fout (filename.c_str());
+    
+    if (command.type != "screen" || command.action != "capture") {
+        fout << "Invalid command";
+        fout.close();
+
+        return std::vector<std::string> ({filename});
+    }
+
+    for (auto &it : command.listName) {
+        if (!Services::screenShot(it))
+            fout << "Fail to screenshot picture " << it << "\n";
+        else
+            fout << "Screenshot to file " << it << " successfully\n";
+    }
+    fout.close();
+
+    std::vector<std::string> result (command.listName);
+    result.push_back(filename);
+
+    return result;
+}
+
+bool Services::webcamRecord(const std::string &fileName, LONGLONG videoDuration) {
     std::wstring filename (fileName.begin(), fileName.end());
-    return SUCCEEDED(WebcamCapture(filename.c_str()));
+    return SUCCEEDED(WebcamRecord(filename.c_str(), videoDuration));
 }
 
 bool Services::screenShot(const std::string &filename) {
@@ -156,6 +227,7 @@ HRESULT InitializeAndFormatSourceReader(IMFMediaSource *pSource, IMFSourceReader
 
     IMFMediaType* pVideoType = nullptr;
     IMFSourceReader* pSReader = nullptr;
+    UINT32 width = 0, height = 0;
 
     hr = MFCreateSourceReaderFromMediaSource(pSource, nullptr, &pSReader);
     if (FAILED(hr)) {
@@ -173,6 +245,14 @@ HRESULT InitializeAndFormatSourceReader(IMFMediaSource *pSource, IMFSourceReader
     if (FAILED(hr)) {
         std::cerr << "Cannot get subtype of media type!\n";
         goto done;
+    }
+
+    // get frame size
+    hr = MFGetAttributeSize(pVideoType, MF_MT_FRAME_SIZE, &width, &height);
+    if (SUCCEEDED(hr)) {
+        // std::cerr << "Resolution: " << height << " x " << width << "\n";
+        VIDEO_HEIGHT = height;
+        VIDEO_WIDTH = width;
     }
     SafeRelease(&pVideoType);
 
@@ -212,12 +292,8 @@ done:
 
 HRESULT InitializeAndFormatSinkWriter(LPCWSTR filename, GUID pInputVideoFormat, IMFSinkWriter **ppWriter, DWORD *pStreamIndex) {
     // Format constants
-    const UINT32 VIDEO_WIDTH = 1920;
-    const UINT32 VIDEO_HEIGHT = 1080;
-    const UINT32 VIDEO_FPS = 30;
-    const UINT32 VIDEO_BIT_RATE = 2500000;
-    const GUID   VIDEO_ENCODING_FORMAT = MFVideoFormat_H264;
-    const GUID   VIDEO_INPUT_FORMAT = pInputVideoFormat;
+    const GUID VIDEO_ENCODING_FORMAT = MFVideoFormat_H264;
+    const GUID VIDEO_INPUT_FORMAT = pInputVideoFormat;
 
     HRESULT hr = S_OK;
     IMFSinkWriter* pSWriter = nullptr;
@@ -313,16 +389,14 @@ done:
     return hr;
 }
 
-HRESULT StartRecord(IMFSourceReader *pReader, IMFSinkWriter *pWriter, DWORD streamIndex) {
+HRESULT StartRecord(IMFSourceReader *pReader, IMFSinkWriter *pWriter, DWORD streamIndex, LONGLONG videoDuration) {
     HRESULT hr = S_OK;
     DWORD flags = 0;
     IMFSample* pSample = nullptr;
     LONGLONG time = 0;
-    LONGLONG sampleTimeStamp = 1e7 / 30;
-    LONGLONG videoDuration = 5;
+    CONST UINT32 VIDEO_FRAME_COUNT = videoDuration * VIDEO_FPS;
 
-    videoDuration *= 1e7;
-    while (time < videoDuration) {        
+    for(DWORD i = 0; i < VIDEO_FRAME_COUNT; ++i) {        
         hr = pReader->ReadSample((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, nullptr, &flags, nullptr, &pSample);
         if (FAILED(hr)) {
             std::cerr << "Read sample error!\n";
@@ -334,7 +408,7 @@ HRESULT StartRecord(IMFSourceReader *pReader, IMFSinkWriter *pWriter, DWORD stre
         }
         if (pSample) {
             pSample->SetSampleTime(time);
-            pSample->SetSampleDuration(sampleTimeStamp);
+            pSample->SetSampleDuration(VIDEO_FRAME_DURATION);
             hr = pWriter->WriteSample(streamIndex, pSample);
             if (FAILED(hr)) {
                 std::cerr << "Fail to write sample!\n";
@@ -342,13 +416,13 @@ HRESULT StartRecord(IMFSourceReader *pReader, IMFSinkWriter *pWriter, DWORD stre
         }
         SafeRelease(&pSample);
         if (FAILED(hr)) break;
-        time += sampleTimeStamp;
+        time += VIDEO_FRAME_DURATION;
     }
 
     return hr;
 }
 
-HRESULT WebcamCapture(LPCWSTR filename) { 
+HRESULT WebcamRecord(LPCWSTR filename, LONGLONG videoDuration) { 
     IMFMediaSource* pSource = nullptr;
     IMFSourceReader* pReader = nullptr;
     IMFSinkWriter* pWriter = nullptr;
@@ -389,7 +463,7 @@ HRESULT WebcamCapture(LPCWSTR filename) {
         goto done;
     }
 
-    hr = StartRecord(pReader, pWriter, streamIndex);
+    hr = StartRecord(pReader, pWriter, streamIndex, videoDuration);
     if (FAILED(hr)) {
         std::cerr << "Fail to record!\n";
         goto done;
