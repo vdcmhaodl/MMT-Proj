@@ -3,7 +3,7 @@
 namespace Services {
     std::map<std::pair<std::string, std::string>, std::vector<std::string>(*)(Command)> servicesMap {
         {{"help", "get"},            &getHelp},
-        {{"IP", "get"},              &getIP},
+        // {{"IP", "get"},              &getIP},
         {{"system", "shutdown"},     &shutdown}, 
         {{"system", "restart"},      &restart},
         {{"file", "list"},           &listFileAndFolder},

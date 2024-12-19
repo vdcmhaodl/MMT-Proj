@@ -43,7 +43,9 @@ LRESULT TextWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         logFile.close(); 
         hEdit = CreateWindowExA(0, "EDIT", logContent.c_str(), 
         WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY, 
-        10, 10, 360, 240, m_hwnd, (HMENU)1, GetModuleHandle(NULL), NULL ); 
+        10, 10, 900, 450, m_hwnd, (HMENU)1, GetModuleHandle(NULL), NULL ); 
+        HFONT hFont = (HFONT)GetStockObject(ANSI_FIXED_FONT); 
+        SendMessageA(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
     } break;
 
     case WM_TEXT_APPEND: {

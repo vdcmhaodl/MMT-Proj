@@ -2,15 +2,16 @@
 
 void UI::setMode(int mode) {
     this->mode = mode;
-    EXTRA.setMode(mode);
+    // EXTRA.setMode(mode);
 }
 
 UI::UI(int WIDTH, int HEIGHT, int mode, Mediator* mediator, std::string name) : BaseWindow<UI>(WIDTH, HEIGHT),
-                                                          INFO(640, 360),
-                                                          HELP(640, 360),
+                                                          MAIL(640, 360),
+                                                          HELP(960, 480),
                                                           IP(640, 360),
-                                                          LOG(640, 360),
-                                                          EXTRA(640, 360, mode),
+                                                          ABOUT(640, 360),
+                                                        //   LOG(640, 360),
+                                                        //   EXTRA(640, 360, mode),
                                                           mode(mode),
                                                           Participant(mediator, name) {}
 
@@ -19,16 +20,43 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     switch (uMsg)
     {
     case WM_CREATE: {
-        hwndButtonInfo = CreateWindowW(L"BUTTON", L"INFO", WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                50, 50, 100, 30, m_hwnd, (HMENU)INFO_BUTTON, NULL, NULL);
+        hwndButtonMail = CreateWindowW(L"BUTTON", L"MAIL", WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                50, 25, 75, 75, m_hwnd, (HMENU)MAIL_BUTTON, NULL, NULL);
         hwndButtonHelp = CreateWindowW(L"BUTTON", L"HELP", WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                200, 50, 100, 30, m_hwnd, (HMENU)HELP_BUTTON, NULL, NULL);
+                                50, 125, 75, 75, m_hwnd, (HMENU)HELP_BUTTON, NULL, NULL);
         hwndButtonIP = CreateWindowW(L"BUTTON", L"IP LIST", WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                350, 50, 100, 30, m_hwnd, (HMENU)IP_BUTTON, NULL, NULL);
-        hwndButtonLog = CreateWindowW(L"BUTTON", L"LOG", WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                500, 50, 100, 30, m_hwnd, (HMENU)LOG_BUTTON, NULL, NULL);
-        hwndButtonExtra = CreateWindowW(L"BUTTON", L"EXTRA", WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                650, 50, 100, 30, m_hwnd, (HMENU)EXTRA_BUTTON, NULL, NULL);
+                                50, 225, 75, 75, m_hwnd, (HMENU)IP_BUTTON, NULL, NULL);
+        hwndButtonAbout = CreateWindowW(L"BUTTON", L"ABOUT", WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                50, 325, 75, 75, m_hwnd, (HMENU)ABOUT_BUTTON, NULL, NULL);
+
+        std::ifstream logFile("Info.txt"); 
+        // std::cerr << "filepath: " << filepath << '\n';
+        std::string line;
+        std::string logContent; 
+
+        std::getline(logFile, line);
+        logContent += line;
+        while (std::getline(logFile, line)) { 
+            logContent += "\r\n" + line; 
+        }
+
+        // MessageBoxA(NULL, logContent.c_str(), "LOG", MB_OK);
+        logFile.close(); 
+
+        hInfo = CreateWindowExA(0, "EDIT", logContent.c_str(), 
+            WS_CHILD | WS_BORDER | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY, 
+            175, 25, 625, 75, m_hwnd, (HMENU)1, GetModuleHandle(NULL), NULL ); 
+        
+        HFONT hFont = (HFONT)GetStockObject(ANSI_FIXED_FONT); 
+        SendMessageA(hInfo, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+        hEdit = CreateWindowExA(0, "EDIT", NULL, 
+            WS_CHILD | WS_BORDER | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY, 
+            175, 125, 625, 275, m_hwnd, (HMENU)0, GetModuleHandle(NULL), NULL ); 
+        // hwndButtonLog = CreateWindowW(L"BUTTON", L"LOG", WS_VISIBLE | WS_CHILD | WS_BORDER,
+        //                         50, 350, 100, 30, m_hwnd, (HMENU)LOG_BUTTON, NULL, NULL);
+        // hwndButtonExtra = CreateWindowW(L"BUTTON", L"EXTRA", WS_VISIBLE | WS_CHILD | WS_BORDER,
+        //                         50, 450, 100, 30, m_hwnd, (HMENU)EXTRA_BUTTON, NULL, NULL);
         break;
     }
     
@@ -36,12 +64,12 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         int identifier = LOWORD(wParam);
         std::osyncstream(std::cout) << identifier << '\n';
         switch (identifier) {
-        case INFO_BUTTON:
+        case MAIL_BUTTON:
             // MessageBoxW(m_hwnd, L"Info button!", L"Child Window", MB_OK);
-            if (INFO.Window() == NULL) {
-                INFO.Create("Client infomation", WS_OVERLAPPEDWINDOW, WS_EX_CLIENTEDGE);
-                ShowWindow(INFO.Window(), SW_SHOWDEFAULT);
-                UpdateWindow(INFO.Window());
+            if (MAIL.Window() == NULL) {
+                MAIL.Create("Mail", WS_OVERLAPPEDWINDOW, WS_EX_CLIENTEDGE);
+                ShowWindow(MAIL.Window(), SW_SHOWDEFAULT);
+                UpdateWindow(MAIL.Window());
             }
             break;
         
@@ -63,22 +91,12 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             }
             break;
 
-        case LOG_BUTTON:
+        case ABOUT_BUTTON:
             // MessageBoxW(m_hwnd, L"Log button!", L"Child Window", MB_OK);
-            if (LOG.Window() == NULL) {
-                LOG.Create("Log", WS_OVERLAPPEDWINDOW, WS_EX_CLIENTEDGE);
-                ShowWindow(LOG.Window(), SW_SHOWDEFAULT);
-                UpdateWindow(LOG.Window());
-            }
-            break;
-        
-        case EXTRA_BUTTON:
-            // MessageBoxW(m_hwnd, L"Log button!", L"Child Window", MB_OK);
-            if (EXTRA.Window() == NULL) {
-                // MessageBoxW(m_hwnd, L"Extra button clicked!", L"Test", MB_OK);
-                EXTRA.Create("Extra", WS_OVERLAPPEDWINDOW, WS_EX_CLIENTEDGE);
-                ShowWindow(EXTRA.Window(), SW_SHOWDEFAULT);
-                UpdateWindow(EXTRA.Window());
+            if (ABOUT.Window() == NULL) {
+                ABOUT.Create("About", WS_OVERLAPPEDWINDOW, WS_EX_CLIENTEDGE);
+                ShowWindow(ABOUT.Window(), SW_SHOWDEFAULT);
+                UpdateWindow(ABOUT.Window());
             }
             break;
         
@@ -125,7 +143,7 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_FRONTEND_NOTIFY: {
         switch(wParam) {
             case INFO_UPDATE_MESSAGE: {
-                if (INFO.Window() != NULL) {
+                if (MAIL.Window() != NULL) {
                     SendMessageA(IP.Window(), WM_TEXT_APPEND, 0, lParam);
                 }
                 break;
@@ -142,7 +160,7 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
                 std::any* any_ptr = reinterpret_cast<std::any*>(lParam);
                 std::string text = std::any_cast<std::string>(*any_ptr);
                 // std::osyncstream(std::cout) << "LOG text: " << text << '\n';
-                LOG.getNewMessage(text);
+                // LOG.getNewMessage(text);
                 // if (LOG.Window() != NULL) {
                 //     SendMessageA(LOG.Window(), WM_TEXT_APPEND, 0, lParam);
                 // }
@@ -152,16 +170,16 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     } break;
 
     case WM_DESTROY:{
-        std::string resultINFO = (INFO.Window() == NULL ? "SUCCESS" : "FAIL");
+        std::string resultINFO = (MAIL.Window() == NULL ? "SUCCESS" : "FAIL");
         std::string resultHELP = (HELP.Window() == NULL ? "SUCCESS" : "FAIL");
         std::string resultIP = (IP.Window() == NULL ? "SUCCESS" : "FAIL");
-        std::string resultLOG = (LOG.Window() == NULL ? "SUCCESS" : "FAIL");
-        std::string resultEXTRA = (EXTRA.Window() == NULL ? "SUCCESS" : "FAIL");
-        MessageBoxA(INFO.Window(), (char*)resultINFO.c_str(), "WM_DESTROY", MB_OK);
-        MessageBoxA(INFO.Window(), (char*)resultHELP.c_str(), "WM_DESTROY", MB_OK);
-        MessageBoxA(INFO.Window(), (char*)resultIP.c_str(), "WM_DESTROY", MB_OK);
-        MessageBoxA(INFO.Window(), (char*)resultLOG.c_str(), "WM_DESTROY", MB_OK);
-        MessageBoxA(INFO.Window(), (char*)resultEXTRA.c_str(), "WM_DESTROY", MB_OK);
+        // std::string resultLOG = (LOG.Window() == NULL ? "SUCCESS" : "FAIL");
+        // std::string resultEXTRA = (EXTRA.Window() == NULL ? "SUCCESS" : "FAIL");
+        // MessageBoxA(INFO.Window(), (char*)resultINFO.c_str(), "WM_DESTROY", MB_OK);
+        // MessageBoxA(INFO.Window(), (char*)resultHELP.c_str(), "WM_DESTROY", MB_OK);
+        // MessageBoxA(INFO.Window(), (char*)resultIP.c_str(), "WM_DESTROY", MB_OK);
+        // MessageBoxA(INFO.Window(), (char*)resultLOG.c_str(), "WM_DESTROY", MB_OK);
+        // MessageBoxA(INFO.Window(), (char*)resultEXTRA.c_str(), "WM_DESTROY", MB_OK);
         PostQuitMessage(0);
         return 0;
     }
@@ -190,11 +208,11 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_CLOSE: {
             if (MessageBoxW(m_hwnd, L"Really quit?", L"My application", MB_OKCANCEL) == IDOK) {
-                SendMessageA(INFO.Window(), WM_CLOSE, 0, 0);
+                SendMessageA(MAIL.Window(), WM_CLOSE, 0, 0);
                 SendMessageA(HELP.Window(), WM_CLOSE, 0, 0);
                 SendMessageA(IP.Window(), WM_CLOSE, 0, 0);
-                SendMessageA(LOG.Window(), WM_CLOSE, 0, 0);
-                SendMessageA(EXTRA.Window(), WM_CLOSE, 0, 0);
+                // SendMessageA(LOG.Window(), WM_CLOSE, 0, 0);
+                // SendMessageA(EXTRA.Window(), WM_CLOSE, 0, 0);
                 DestroyWindow(m_hwnd);
 
                 mediator->Broadcast(this, "exit");
@@ -211,9 +229,9 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 void UI::initialize(std::vector<std::string> &signinInput) {
     setMode(signinInput[4] == "AUTOMATIC" ? AUTOMATIC : MANUAL);
-    INFO.setFilePath("INFO.txt");
+    MAIL.setFilePath("AdminAccount");
     HELP.setFilePath("HELP.txt");
-    LOG.setFilePath("LOG.txt");
+    // LOG.setFilePath("LOG.txt");
 }
 
 void UI::start() {
@@ -222,11 +240,11 @@ void UI::start() {
         return;
     }
 
-    INFO.update_hwnd_parent(Window());
+    MAIL.update_hwnd_parent(Window());
     HELP.update_hwnd_parent(Window());
     IP.update_hwnd_parent(Window());
-    LOG.update_hwnd_parent(Window());
-    EXTRA.update_hwnd_parent(Window());
+    // LOG.update_hwnd_parent(Window());
+    // EXTRA.update_hwnd_parent(Window());
 
     ShowWindow(Window(), SW_SHOWDEFAULT);
 

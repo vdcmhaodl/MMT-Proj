@@ -21,6 +21,20 @@ std::vector<std::string> getInputInfo() {
     // std::cerr << inp_win.password << '\n';
     // std::cerr << inp_win.selectedOption << '\n';
 
+    std::ifstream fout("Default_account.txt");
+    if (fout.is_open()) {
+        std::string default_username;
+        std::string default_password;
+        std::getline(fout, default_username);
+        std::getline(fout, default_password);
+
+        inp_win.mail = default_username;
+        inp_win.password = default_password;
+        inp_win.selectedOption = "Automatic";
+
+        fout.close();
+    }
+
     std::vector<std::string> result{inp_win.IPaddr, inp_win.subnetMask, inp_win.mail, inp_win.password, inp_win.selectedOption};
     return (inp_win.validinput() ? result : std::vector<std::string>());
 }
@@ -98,6 +112,8 @@ void Gmail::start() {
         std::queue<Mail> newMail = clientMail.getEmailQueue();
         mtx.unlock();
 
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+
         std::osyncstream(std::cout) << "NUMBER OF MAIL: " << newMail.size() << '\n';
         if (!newMail.size()) {
             continue;
@@ -116,7 +132,7 @@ void Gmail::start() {
             newMail.pop();
         }
 
-        std::this_thread::sleep_for(std::chrono::seconds(15));
+        
     }
 }
 
@@ -167,9 +183,9 @@ void Client::initialize(std::vector<std::string> &signinInput) {
         return;
     }
 
-    // fout << "IP address: " << clientIPv4 << '\n';
-    // fout << "Subnet mask: " << subnetMask << '\n';
-    // fout << "Mail account: " << username << '\n';
+    fout << "IP address     : " << signinInput[0] << '\n';
+    fout << "Subnet mask    : " << signinInput[1] << '\n';
+    fout << "Mail account   : " << signinInput[2] << '\n';
 
     fout.close();
 }
