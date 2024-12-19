@@ -1,3 +1,29 @@
-HELP
-HELP
-HELP
+HELP:
+
+EMAIL FORMAT:
+    To:      <ClientEmail@gmail.com>
+    Subject: <Type> - <Action>
+    Content: <IPv4 address>
+             <Name>
+             <Optional>
+
+ALL COMMAND:
+REQUEST DESCRIPTION                                 Type            Action          Name            Optional
+------------------------------------------------------------------------------------------------------------
+GET HELP                                            help            get                                        
+GET ALL IPv4 address                                IP              get                                     
+SHUTDOWN computer after 5 seconds                   system          shutdown                                
+RESTART computer after 5 seconds                    system          restart                                 
+WEBCAM RECORD in TIME seconds, save to FILENAME     webcam          record          FILENAME        TIME    
+SCREENSHOT and save to FILENAME                     screen          capture         FILENAME                
+LIST APPLICATIONS are running                       application     list                                    
+START APPLICATION with specific NAME_APP            application     start           NAME_APP                
+STOP APPLICATION with specific NAME_APP             application     stop            NAME_APP                
+LIST SERVICES are running                           service         list                                    
+START SERVICE with specific NAME_SERVICE            service         start           NAME_SERVICE            
+STOP SERVICE with specific NAME_SERVICE             service         stop            NAME_SERVICE            
+LIST FILES in specific DIRECTORY                    file            list            DIRECTORY               
+GET FILE from specific FILEPATH                     file            get             FILEPATH                
+DELETE FILE with specific FILEPATH                  file            delete          FILEPATH                
+KEYLOGGER HOOK                                      keylogger       hook                                    
+KEYLOGGER UNHOOK                                    keylogger       unhook                                      
