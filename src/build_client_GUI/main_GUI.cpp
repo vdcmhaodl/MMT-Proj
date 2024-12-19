@@ -14,7 +14,7 @@ int main() {
 
     AppMediator mediator;
 
-    UI ui(1280, 720, 0, &mediator, COMPONENT::UI_COMPONENT);
+    UI ui(854, 480, 0, &mediator, COMPONENT::UI_COMPONENT);
     Gmail gmail(&mediator, COMPONENT::MAIL_COMPONENT);
     Client client(&mediator, COMPONENT::CLIENT_COMPONENT);
     Broadcast broadcast(&mediator, COMPONENT::BROADCAST_COMPONENT);

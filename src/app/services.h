@@ -9,5 +9,10 @@
 
 namespace Services {
     extern std::map<std::pair<std::string, std::string>, std::vector<std::string>(*)(Command)> servicesMap;
-    // bool processCommand(std::string &command);
+
+    bool getHelp(std::string &help);
+    // bool getIP();
+
+    std::vector<std::string> getHelp(Command command);
+    // std::vector<std::string> getIP(Command command);
 }

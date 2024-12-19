@@ -2,6 +2,8 @@
 
 namespace Services {
     std::map<std::pair<std::string, std::string>, std::vector<std::string>(*)(Command)> servicesMap {
+        {{"help", "get"},            &getHelp},
+        {{"IP", "get"},              &getIP},
         {{"system", "shutdown"},     &shutdown}, 
         {{"system", "restart"},      &restart},
         {{"file", "list"},           &listFileAndFolder},
@@ -18,27 +20,33 @@ namespace Services {
     };
 };
 
-// bool Services::processCommand(std::string &command) {
-//     int pos = command.find(' ');
-//     if (pos == command.npos) {
-//         return false;
-//     }
+bool Services::getHelp(std::string &help) {
+    help = "FAIL to get HELP!";
+    
+    std::ifstream fin("src\\Help.txt");
+    if (!fin.is_open())
+        return false;
+    
+    std::string line;
+    help = "";
 
-//     std::string type = command.substr(0, pos);
-//     std::cout << "Type: " << type << '\n';
+    while (getline(fin, line))
+        help = help + line + "\n";
 
-//     // if (type == "file-copy") {
-//     //     int pos2 = command.find(' ', pos + 1);
-//     //     std::string pathSrc = command.substr(pos + 1, pos2 - pos - 1);
-//     //     std::string pathDes = command.substr(pos2 + 1, command.size() - pos2 - 1);
-//     //     return copyFile(pathSrc, pathDes);
-//     // }
+    fin.close();
+    return true;
+}
 
-//     if (servicesMap.find(type) == servicesMap.end()) {
-//         return false;
-//     }
+// bool Services::getIP() {
 
-//     std::string str = command.substr(pos + 1, command.size() - pos - 1);
-//     std::cout << "File: " << str << '\n';
-//     return servicesMap[type](str);
+// }
+
+std::vector<std::string> Services::getHelp(Command command) {
+    std::string help = "FAIL to get HELP!";
+    Services::getHelp(help);
+    return std::vector<std::string> ({help});
+}
+
+// std::vector<std::string> getIP(Command command) {
+
 // }

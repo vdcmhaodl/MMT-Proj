@@ -11,7 +11,7 @@ size_t GmailAccount::headerCallback(char* buffer, size_t size, size_t nitems, st
 }
 
 void GmailAccount::readAdminEmail() {
-    std::ifstream fin ("AdminAccount");
+    std::ifstream fin ("src\\AdminAccount");
     if (!fin.is_open()) {
         std::cerr << "Fail to read Admin's Email!\n";
         return;
@@ -72,12 +72,14 @@ std::queue<std::string> GmailAccount::searchNewEmail()
         pos1 = searchResult.find(" ", pos1) + 1;
         pos2 = searchResult.find(seperateLine, pos1);
         searchResult = searchResult.substr(pos1, pos2 - pos1);
-        // if (searchResult == "OK SEARCH completed (Success)\n") {
-        //     return std::queue<std::string>();
-        // }
         pos1 = searchResult.find_last_not_of(" \t\f\v\n\r");
         if (pos1 != std::string::npos)
             searchResult.erase(pos1 + 1);
+        // if no new email
+        if (searchResult == "OK SEARCH completed (Success)") {
+            std::cerr << "No new Email!\n";
+            return qEmailNums;
+        }
 
         pos1 = pos2 = 0;
         while (true) {
