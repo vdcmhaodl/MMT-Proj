@@ -42,6 +42,7 @@ std::vector<std::string> getInputInfo() {
 Broadcast::Broadcast() : Participant() {}
 
 Broadcast::Broadcast(Mediator *mediator, std::string name) : Participant(mediator, name) {}
+
 void Broadcast::initialize(std::vector<std::string> &signinInput) {
     isRunning = true;
     // std::string clientIPv4 = signinInput[0];
@@ -89,6 +90,7 @@ void Broadcast::Receive(std::string msg, std::string sender) {
         isRunning = false;
     }
     else if (msg == "request") {
+        std::cout << "\nABC\n";
         mediator->Forward(new std::any(listIP), "IP", sender);
     }
     else {

@@ -33,9 +33,9 @@ private:
 class Broadcast : public Participant {
 protected:
     std::atomic<bool> isRunning;
-    
+   
     ListIPData listIP;
-public:
+public: 
     P2P_clientSocket broadcast;
     Broadcast();
     Broadcast(Mediator* mediator, std::string name);

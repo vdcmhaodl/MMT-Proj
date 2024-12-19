@@ -45,7 +45,7 @@ public:
 class Mediator {
 protected:
     std::vector<Participant*> listParticipants;
-    std::mutex mtx;
+    std::recursive_mutex mtx;
 public:
     void Register(Participant* participant);
     void Forward(std::string receiver, std::string msg);

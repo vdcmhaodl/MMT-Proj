@@ -1,3 +1,3 @@
-IP address     : 192.168.1.33
+IP address     : 192.168.2.19
 Subnet mask    : 255.255.255.0
 Mail account   : mmt23clc007017236@gmail.com
