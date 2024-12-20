@@ -71,6 +71,14 @@ bool Services::webcamRecord(const std::string &fileName, LONGLONG videoDuration)
 
 bool Services::screenShot(const std::string &filename) {
     std::wstring fileName (filename.begin(), filename.end());
+
+    UINT dpi = 96;
+    HMONITOR hMonitor = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);
+    if (hMonitor)
+        GetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &dpi, &dpi);
+
+    int screenWidth = GetSystemMetricsForDpi(SM_CXSCREEN, dpi);
+    int screenHeight = GetSystemMetricsForDpi(SM_CYSCREEN, dpi);
     
     HDC hdcScreen = GetDC(NULL);
     if (!hdcScreen) {
@@ -89,10 +97,6 @@ bool Services::screenShot(const std::string &filename) {
 	Gdiplus::GdiplusStartupInput gdip;
 	ULONG_PTR gdipToken;
 	Gdiplus::GdiplusStartup(&gdipToken, &gdip, NULL);
-
-	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-	// std::cout << screenWidth << " " << screenHeight << "\n";
 	
 	// create bitmap object
 	hbmScreen = CreateCompatibleBitmap(hdcScreen, screenWidth, screenHeight);

@@ -8,6 +8,7 @@
 #include <mfreadwrite.h> 
 #include <mferror.h> 
 #include <gdiplus.h>
+#include <shellscalingapi.h>
 #include "serviceCommand.h"
 
 extern UINT32 VIDEO_WIDTH;
