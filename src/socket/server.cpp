@@ -193,7 +193,7 @@ bool serverSocket::anyPendingConnection() {
     // std::cout << (client == INVALID_SOCKET) << '\n';
 
     if (client == INVALID_SOCKET) { 
-        if (WSAGetLastError() == WSAEWOULDBLOCK) { 
+        if (WSAGetLastError() == WSAEWOULDBLOCK) {
             // No pending connections; continue loop 
             std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "No pending connections. Checking again..." << std::endl; 
             // Sleep for a short time before checking again continue; 

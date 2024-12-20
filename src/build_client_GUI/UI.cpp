@@ -280,6 +280,7 @@ void UI::Send(std::string msg, std::string receiver) {
 }
 
 void UI::Receive(std::string msg) {
+    std::cout << "String: " << msg;
 }
 
 void UI::Send(std::any *ptr) {

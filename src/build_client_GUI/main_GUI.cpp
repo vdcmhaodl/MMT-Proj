@@ -10,6 +10,9 @@ int main() {
         return 0;
     }
 
+    // std::vector<std::string> signinInput;
+    // signinInput = std::vector<std::string> {"192.168.2.19", "255.255.255.0", "mmt23clc007017236@gmail.com", "okkc ufvk ucuj cxgm", "AUTOMATIC"};
+
     std::cout << "We good\n";
 
     Mediator mediator;
@@ -31,7 +34,7 @@ int main() {
     client.initialize(signinInput);
     broadcast.initialize(signinInput);
 
-    // std::cout << "check again " << broadcast.broadcast.IP_addr << ' ' << broadcast.broadcast.subnetMask << '\n';
+    std::cout << "check again " << broadcast.broadcast.IP_addr << ' ' << broadcast.broadcast.subnetMask << '\n';
 
     std::thread UIThread(&UI::start, &ui);
     std::thread mailThread(&Gmail::start, &gmail);

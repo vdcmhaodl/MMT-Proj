@@ -30,14 +30,15 @@ class GmailAccount {
     private:
         std::string username;
         std::string password;
-        static std::set<std::string> adminEmail;
+        static std::set<std::string> adminEmails;
 
         static void readAdminEmail();
         static bool isValidAdminEmail(const std::string &sender);
         static size_t headerCallback(char *buffer, size_t size, size_t nitems, std::string *userdata);
     public:
-        // GmailAccount(): username(""), password("") {if (adminEmail.empty()) readAdminEmail();}
-        // GmailAccount(const std::string &Username, const std::string &Password): username(Username), password(Password) {if (adminEmail.empty()) readAdminEmail();}
+        static bool addAdminEmail(const std::string &email);
+        static bool removeAdminEmail(const std::string &email);
+
         GmailAccount(std::string Username = "", std::string Password = "");
         void initializeInfo(std::string &Username, std::string &Password);
 
@@ -46,5 +47,4 @@ class GmailAccount {
         bool repEmail(const Email &email, const std::string &content, const std::string &filePath = "");
         bool sendEmail(const Email &email, const std::string &content, const std::string &filePath = "");
         bool receiveEmail(Email &email, std::string &content, const std::string &emailNumber);
-        // void autoCheckEmail();
 };

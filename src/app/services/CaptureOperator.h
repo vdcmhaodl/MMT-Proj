@@ -7,7 +7,7 @@
 #include <mfidl.h>
 #include <mfreadwrite.h> 
 #include <mferror.h> 
-#include <shellscalingapi.h>
+#include <gdiplus.h>
 #include "serviceCommand.h"
 
 extern UINT32 VIDEO_WIDTH;
@@ -39,3 +39,4 @@ HRESULT InitializeAndFormatSinkWriter(LPCWSTR filename, GUID pVideoFormat, IMFSi
 HRESULT StartRecord(IMFSourceReader *pReader, IMFSinkWriter *pWriter, DWORD streamIndex, LONGLONG videoDuration);
 HRESULT WebcamRecord(LPCWSTR filename, LONGLONG videoDuration);
 
+bool GetEncoderClsid(const WCHAR* format, CLSID* pClsid);
