@@ -10,11 +10,6 @@ void P2P_Socket::addMessage(std::string msg) {
     queueMessage.push(msg);
 }
 
-// void P2P_Socket::popMessage() {
-//     std::unique_lock lock(mtx);
-//     queueMessage.pop();
-// }
-
 P2P_Socket::P2P_Socket() {
     socketAPI::initializeSocket();
 }
@@ -23,15 +18,9 @@ P2P_Socket::~P2P_Socket() {
     socketAPI::cleanup();
 }
 
-// bool P2P_Socket::makeRespond(std::string IPsender, std::string msg, std::string &respond) {
-//     return false;
-// }
-
 void P2P_Socket::initialize(char *IP_addr, char *subnetMask) {
     this->IP_addr = IP_addr;
     this->subnetMask = subnetMask;
-    // std::cout << "IP address: " << this->IP_addr << '\n';
-    // std::cout << "Subnet mask: " << this->subnetMask << '\n';
 
     sendSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     recvSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -59,20 +48,11 @@ void P2P_Socket::initialize(char *IP_addr, char *subnetMask) {
     recvHints.sin_port = htons(DEFAULT_BROADCAST);
     recvHints.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    // ZeroMemory(&sendHints, sizeof(sockaddr_in));
-    // sendHints.sin_family = AF_INET;
-    // sendHints.sin_port = htons(DEFAULT_BROADCAST);
-    // sendHints.sin_addr.S_un.S_addr = (IP_addr != NULL && subnetMask != NULL ? 
-    //     socketAPI::getBinaryBroadcast(IP_addr, subnetMask, NULL) : 
-    //     socketAPI::getBinaryAvailableIP(hostname, (char*)(std::to_string(DEFAULT_BROADCAST)).c_str(), &broadcastHints));
-
     // Bind socket
     bind(recvSocket, (struct sockaddr*)&recvHints, sizeof(recvHints));
 
     // Membership setting
-    // inet_pton(AF_INET, (PCSTR)(multicastIP.c_str()), &JoinReq.imr_multiaddr.s_addr);
     JoinReq.imr_multiaddr.s_addr = socketAPI::getBinaryIP((char*)multicastIP.c_str());
-    // This can be used to restrict to only receive form particular sender
     JoinReq.imr_interface.s_addr = htonl(INADDR_ANY);
 
     // Join membership
@@ -81,7 +61,7 @@ void P2P_Socket::initialize(char *IP_addr, char *subnetMask) {
 
 void P2P_Socket::start(std::string init_msg) {
     addMessage(init_msg);
-    std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "INIT MSG: " << init_msg << '\n';
+    // std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "INIT MSG: " << init_msg << '\n';
     std::thread send(&P2P_serverSocket::startSend, this);
     std::thread recv(&P2P_serverSocket::startRecv, this);
     send.detach();
@@ -89,7 +69,7 @@ void P2P_Socket::start(std::string init_msg) {
 }
 
 void P2P_Socket::startSend() {
-    std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "Start send message\n";
+    // std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "Start send message\n";
     while(isRunning) {
         std::string msg;
         if (getMessage(msg)) {
@@ -105,7 +85,7 @@ void P2P_Socket::startSend() {
 }
 
 void P2P_Socket::startRecv() {
-    std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "Start receive message\n";
+    // std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "Start receive message\n";
     sockaddr sender;
     int len_sender = sizeof(sockaddr);
     ZeroMemory(&sender, sizeof(sender));
@@ -123,7 +103,7 @@ void P2P_Socket::startRecv() {
 
         char IPsender[INET_ADDRSTRLEN];
         socketAPI::getIPaddr(&sender, IPsender);
-        std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << IPsender << ": " << msg << '\n';
+        // std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << IPsender << ": " << msg << '\n';
 
         if (!debugger) {
             std::string respond;
@@ -168,9 +148,9 @@ void P2P_serverSocket::assgin_true_IP_addr(std::string IPaddr) {
 }
 
 bool P2P_serverSocket::makeRespond(std::string IPsender, std::string msg, std::string &respond) {
-    std::osyncstream(std::cout) << "Receive msg: " << msg << '\n';
+    // std::osyncstream(std::cout) << "Receive msg: " << msg << '\n';
     if (socketAPI::isServerMessage(msg)) {
-        std::osyncstream(std::cout) << "This is server message anyway " << '\n';
+        // std::osyncstream(std::cout) << "This is server message anyway " << '\n';
         return false;
     } 
 
@@ -182,7 +162,7 @@ bool P2P_serverSocket::makeRespond(std::string IPsender, std::string msg, std::s
         if (ret.empty()) {
             ret = socketAPI::findSuitableIP(IPsender, subnetMask);
         }
-        std::osyncstream(std::cout) << "Found IP: " << ret << '\n';
+        // std::osyncstream(std::cout) << "Found IP: " << ret << '\n';
         assgin_true_IP_addr(ret);
     }
     respond = socketAPI::createServerMessage(get_true_IP_addr(), hostname, getState() ? STATUS::IN_CONNECTION_SOCKET : STATUS::FREE_SOCKET);
@@ -198,7 +178,7 @@ void P2P_serverSocket::createMessage(std::string status) {
 }
 
 void P2P_serverSocket::forceClose() {
-    std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << ' ' << "Closing...........\n";
+    // std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << ' ' << "Closing...........\n";
     addMessage(socketAPI::createServerMessage(get_true_IP_addr(), hostname, STATUS::DELETE_SOCKET));
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     P2P_Socket::forceClose();
@@ -232,7 +212,7 @@ bool P2P_clientSocket::makeRespond(std::string IPsender, std::string msg, std::s
 }
 
 void P2P_clientSocket::start() {
-    std::osyncstream(std::cout) << "START " << subnetMask << '\n';
+    // std::osyncstream(std::cout) << "START " << subnetMask << '\n';
     P2P_Socket::start(socketAPI::createClientMessage(subnetMask));
 }
 

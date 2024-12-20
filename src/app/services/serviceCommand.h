@@ -8,6 +8,7 @@
 #include <chrono>
 #include <random>
 #include <filesystem>
+#include <syncstream>
 
 extern std::mt19937_64 rng;
 
@@ -25,8 +26,6 @@ public:
     void construct(std::string command);
     void print();
     std::string to_string();
-    virtual bool isValidCommand(std::string command);
-    virtual bool executeCommand();
 
     static std::string generateFilename(int length);
     static std::string generateFilepath(int length, std::string extension);

@@ -27,51 +27,33 @@ void initializeServer() {
     socketAPI::initializeSocket();
     broadcast.initialize();
     if (SetConsoleCtrlHandler(CtrlHandler, TRUE)) {
-        printf("\nThe Control Handler is installed.\n");
+        // printf("\nThe Control Handler is installed.\n");
         // while (1) {}
     }
 }
 
 int startServer() {
     broadcast.start();
-    // std::osyncstream(std::cout) << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA " << std::this_thread::get_id() << ' ' << broadcast.get_true_IP_addr() << '\n';
-    while(broadcast.get_true_IP_addr() == "xxx.xxx.xxx.xxx") {
-        // std::osyncstream(std::cout) << broadcast.get_true_IP_addr() << '\n';
-    }
-    // std::osyncstream(std::cout) << std::this_thread::get_id() << "IP address: " << broadcast.get_true_IP_addr() << '\n';
-    std::cout << server.initializeServer(broadcast.get_true_IP_addr()) << '\n';
-    std::cout << server.listenClient() << '\n';
-    fullyInitialize = true;
-    // std::cout << "Finish setup\n";
+    while(broadcast.get_true_IP_addr() == "xxx.xxx.xxx.xxx") {}
 
-    auto time_start = std::chrono::high_resolution_clock::now();
+    server.initializeServer(broadcast.get_true_IP_addr());
+    server.listenClient();
+    fullyInitialize = true;
+    std::osyncstream(std::cout) << "INITIALIZE COMPLETED!\nIP address: " << broadcast.get_true_IP_addr() << "\n";
+
     while(isRunning) {
-        // auto now = std::chrono::high_resolution_clock::now();
-        // std::chrono::duration<long double> timeElapsed = now - time_start;
-        // if (timeElapsed.count() < 0.5) { 
-        //     continue;
-        // }
-        // else if (timeElapsed.count() > 0.5) {
-        //     time_start = now;
-        //     if (!server.anyPendingConnection()) {
-        //         continue;
-        //     }
-        // }
         if (!server.anyPendingConnection()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(750));
             continue;
         }
 
-        std::cout << "NEW CONNECTION\n";
-        // Start connecting
-        // server.connectClient();
+        std::osyncstream(std::cout) << "NEW CONNECTION!\n";
+        std::osyncstream(std::cout) << "Time: " << Services::getCurrentTimeString() << '\n';
         broadcast.createMessage(STATUS::IN_CONNECTION_SOCKET);
-        // Work
+
         executeCommand();
-        // auto folder = std::filesystem::temp_directory_path();
-        // std::string filepath = folder.string();
-        // Finish connecting
-        std::cout << "FINISH\n";
+
+        std::cout << "FINISH CONNECTION!\n";
         server.disconnect();
         broadcast.createMessage(STATUS::FREE_SOCKET);
     }
@@ -82,9 +64,10 @@ int startServer() {
 void executeCommand() {
     std::string stringCommand, filepath;
     socketAPI::receiveMessage(server.client, stringCommand);
-    std::osyncstream(std::cout) << "RECEIVE: " << stringCommand << '\n';
+    // std::osyncstream(std::cout) << "RECEIVE: " << stringCommand << '\n';
     Command command;
     command.construct(stringCommand);
+    command.print();
     // TODO: Execute this "command" variable.
 
     std::vector<std::string> listFilename;
@@ -108,7 +91,7 @@ void executeCommand() {
 
     std::string message[2] = {"file", "content"};
     for (auto filename: listFilename) {
-        std::cout << "filename: " << filename << " " << std::filesystem::exists(filename) << "\n";
+        // std::cout << "filename: " << filename << " " << std::filesystem::exists(filename) << "\n";
         if (std::filesystem::exists(filename)) {
             socketAPI::sendMessage(server.client, message[0]);
             socketAPI::sendFile(server.client, filename);
@@ -118,22 +101,10 @@ void executeCommand() {
             socketAPI::sendMessage(server.client, message[1]);
             socketAPI::sendMessage(server.client, filename);
         }
-
-        // socketAPI::sendFile(server.client, filename);
-        // Services::deleteFile(filename);
     }
-    
-    // Expect sending the result file with name "filename"
-    
-    // delete filename
-    // Services::processCommand(command);
-    // socketAPI::sendFile(server.client, filepath);
-    // socketAPI::sendMessage(server.client, command);
-    // std::this_thread::sleep_for(std::chrono::microseconds(2500));
 }
 
 void endServer() {
-    // MessageBoxA(GetConsoleWindow(), "Start free resource!", "FINISH", MB_OK);
     broadcast.forceClose();
     server.cleanup();
     socketAPI::cleanup();

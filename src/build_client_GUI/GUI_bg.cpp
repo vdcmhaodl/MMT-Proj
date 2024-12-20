@@ -15,27 +15,21 @@ std::vector<std::string> getInputInfo() {
         DispatchMessage(&msg);
     }
 
-    // std::cerr << inp_win.IPaddr << '\n';
-    // std::cerr << inp_win.subnetMask << '\n';
-    // std::cerr << inp_win.mail << '\n';
-    // std::cerr << inp_win.password << '\n';
-    // std::cerr << inp_win.selectedOption << '\n';
+    // std::ifstream fin("Default_account.txt");
+    // if (fin.is_open()) {
+    //     std::string default_username;
+    //     std::string default_password;
+    //     std::getline(fin, default_username);
+    //     std::getline(fin, default_password);
 
-    std::ifstream fin("Default_account.txt");
-    if (fin.is_open()) {
-        std::string default_username;
-        std::string default_password;
-        std::getline(fin, default_username);
-        std::getline(fin, default_password);
+    //     inp_win.mail = default_username;
+    //     inp_win.password = default_password;
+    //     inp_win.selectedOption = "Automatic";
 
-        inp_win.mail = default_username;
-        inp_win.password = default_password;
-        inp_win.selectedOption = "Automatic";
+    //     fin.close();
+    // }
 
-        fin.close();
-    }
-
-    std::vector<std::string> result{inp_win.IPaddr, inp_win.subnetMask, inp_win.mail, inp_win.password, inp_win.selectedOption};
+    std::vector<std::string> result{inp_win.IPaddr, inp_win.subnetMask, inp_win.mail, inp_win.password};
     return (inp_win.validinput() ? result : std::vector<std::string>());
 }
 
@@ -58,10 +52,12 @@ void Broadcast::start() {
         if (broadcast.updateStatusIP.try_pop(msg)) {
             std::unique_lock<std::mutex> lock(mtx);
             auto &[IP, hostname, status] = msg;
-            std::osyncstream(std::cout) << "Receive new IP update!\n";
+            // std::osyncstream(std::cout) << "Receive new IP update!\n";
             socketAPI::update_list(listIP, IP, hostname, status);
             mediator->Forward(new std::any(listIP), "IP", COMPONENT::UI_COMPONENT);
-            mediator->Forward(new std::any(std::string{"Receive new IP update"}), "LOG", COMPONENT::UI_COMPONENT);
+
+            std::string newMsg = Services::getCurrentTimeString() + "|" + "IP update: " + IP + " - " + hostname + " - " + status;
+            mediator->Forward(new std::any(newMsg), "LOG", COMPONENT::UI_COMPONENT);
             // COPYDATASTRUCT cds = wrapperData(socketAPI::createServerMessage(IP, hostname, status), MainWindow::IP_MESSAGE);
             // SendMessageA(win.Window(), WM_COMMAND, MAKEWORD(MainWindow::IP_UPDATE_MESSAGE, 0), 0);
         }
@@ -74,7 +70,7 @@ void Broadcast::start() {
 }
 
 void Broadcast::Receive(std::string msg) {
-    std::osyncstream(std::cout) << "Broadcast receive " << msg << '\n';
+    // std::osyncstream(std::cout) << "Broadcast receive " << msg << '\n';
     if (msg == "exit") {
         isRunning = false;
     }
@@ -88,12 +84,12 @@ void Broadcast::Receive(std::string msg) {
 }
 
 void Broadcast::Receive(std::string msg, std::string sender) {
-    std::osyncstream(std::cout) << "Broadcast receive " << msg << " from " << sender;
+    // std::osyncstream(std::cout) << "Broadcast receive " << msg << " from " << sender;
     if (msg == "exit") {
         isRunning = false;
     }
     else if (msg == "request") {
-        std::cout << "\nABC\n";
+        // std::cout << "\nABC\n";
         mediator->Forward(new std::any(listIP), "IP", sender);
     }
     else {
@@ -114,27 +110,30 @@ void Gmail::initialize(std::vector<std::string> &signinInput) {
 void Gmail::start() {
     while(isRunning) {
         mtx.lock();
-        std::osyncstream(std::cout) << "Start checking mail" << '\n';
+        // std::osyncstream(std::cout) << "Start checking mail" << '\n';
         std::queue<Mail> newMail = clientMail.getEmailQueue();
         mtx.unlock();
 
-        std::this_thread::sleep_for(std::chrono::seconds(30));
+        std::this_thread::sleep_for(std::chrono::seconds(15));
 
-        std::osyncstream(std::cout) << "NUMBER OF MAIL: " << newMail.size() << '\n';
+        // std::osyncstream(std::cout) << "NUMBER OF MAIL: " << newMail.size() << '\n';
         if (!newMail.size()) {
             continue;
         }
         // std::unique_lock<std::mutex> lock(mtx);
         FullCommand FC;
         while(!newMail.empty()) {
-            mediator->Forward(new std::any(std::string{"Receive new mail request"}), "LOG", COMPONENT::UI_COMPONENT);
             Mail tmp = newMail.front();
-            std::osyncstream(std::cout) << "[" << tmp.sender.subject << "]" << ' ' << "[" << tmp.content << "]";
+            // std::osyncstream(std::cout) << "[" << tmp.sender.subject << "]" << ' ' << "[" << tmp.content << "]";
             FC.command = constructCommand(newMail.front());
             FC.email = newMail.front().sender;
-            std::osyncstream(std::cout) << "[" << "start forwarding" << "]";
+
+            std::string newMsg = Services::getCurrentTimeString() + "|" + "New mail: " + FC.command.to_string();
+            mediator->Forward(new std::any(newMsg), "LOG", COMPONENT::UI_COMPONENT);
+
+            // std::osyncstream(std::cout) << "[" << "start forwarding" << "]";
             mediator->Forward(new std::any(FC), COMPONENT::CLIENT_COMPONENT);
-            std::osyncstream(std::cout) << "[" << "forward complete?" << "]";
+            // std::osyncstream(std::cout) << "[" << "forward complete?" << "]";
             newMail.pop();
         }
     }
@@ -178,7 +177,7 @@ void Gmail::Receive(std::string msg) {
 }
 
 void Gmail::Receive(std::any *ptr) {
-    std::cout << "Receive " << ptr << '\n';
+    // std::cout << "Receive " << ptr << '\n';
     std::pair<Email, std::vector<std::string>> FC = std::any_cast<std::pair<Email, std::vector<std::string>>>(*ptr);
 
     
@@ -192,12 +191,12 @@ void Gmail::Receive(std::any *ptr) {
 }
 
 void Gmail::Receive(std::any *ptr, std::string type) {
-    std::osyncstream(std::cout) << "Receive " << ptr << "; type " << type << '\n';
+    // std::osyncstream(std::cout) << "Receive " << ptr << "; type " << type << '\n';
     std::pair<Email, std::vector<std::string>> FC = std::any_cast<std::pair<Email, std::vector<std::string>>>(*ptr);
     
     if (type == "content") {
         for (std::string content: FC.second) {
-            std::osyncstream(std::cout) << "Type " << type << "  content: " << content << '\n';
+            // std::osyncstream(std::cout) << "Type " << type << "  content: " << content << '\n';
             mtx.lock();
             clientMail.repEmail(FC.first, content, "");
             mtx.unlock();
@@ -205,13 +204,14 @@ void Gmail::Receive(std::any *ptr, std::string type) {
     }
     else if (type == "file") {
         for (std::string filename: FC.second) {
-            std::osyncstream(std::cout) << "Type " << type << "  filename: " << filename << '\n';
+            // std::osyncstream(std::cout) << "Type " << type << "  filename: " << filename << '\n';
             mtx.lock();
             clientMail.repEmail(FC.first, "", filename);
             mtx.unlock();
         }
     }
-    mediator->Forward(new std::any(std::string{"Request completed!"}), "LOG", COMPONENT::UI_COMPONENT);
+    std::string newMsg = Services::getCurrentTimeString() + "|" + "Request from " + FC.first.account + " success!";
+        mediator->Forward(new std::any(newMsg), "LOG", COMPONENT::UI_COMPONENT);
     
     delete ptr;
 }
@@ -243,11 +243,14 @@ void Client::start() {
 
         std::lock_guard<std::mutex> lock(mtx);
 
-        std::osyncstream(std::cout) << "RECEIVE NEW COMMAND:\n";
-        std::osyncstream(std::cout) << "EMAIL:\n";
-        std::osyncstream(std::cout) << "ACCOUNT: " << FC.email.account << '\n';
-        std::osyncstream(std::cout) << "MESSAGE ID: " << FC.email.messageID << '\n';
-        std::osyncstream(std::cout) << "COMMAND: " << FC.command.to_string() << '\n';
+        std::string newMsg = Services::getCurrentTimeString() + "|" + "Start resolve command: " + FC.command.to_string();
+        mediator->Forward(new std::any(newMsg), "LOG", COMPONENT::UI_COMPONENT);
+
+        // std::osyncstream(std::cout) << "RECEIVE NEW COMMAND:\n";
+        // std::osyncstream(std::cout) << "EMAIL:\n";
+        // std::osyncstream(std::cout) << "ACCOUNT: " << FC.email.account << '\n';
+        // std::osyncstream(std::cout) << "MESSAGE ID: " << FC.email.messageID << '\n';
+        // std::osyncstream(std::cout) << "COMMAND: " << FC.command.to_string() << '\n';
 
         resolveCommand(FC);
     }
@@ -255,12 +258,13 @@ void Client::start() {
 
 void Client::resolveCommand(FullCommand FC) {
     // check IP 
-    std::osyncstream(std::cout) << "START RESOLVE COMMAND\n";
+    // std::osyncstream(std::cout) << "START RESOLVE COMMAND\n";
     IPdata = false;
     mediator->Forward(COMPONENT::CLIENT_COMPONENT, COMPONENT::BROADCAST_COMPONENT, "request");
     while(!IPdata) {}
     if (listIP.find(FC.command.target) == listIP.end()) {
-        mediator->Forward(new std::any(std::string{"ERROR: IP NOT FOUND"}), "LOG", COMPONENT::UI_COMPONENT);
+        std::string newMsg = Services::getCurrentTimeString() + "|" + "Cannot find the target IP " + FC.command.to_string();
+        mediator->Forward(new std::any(newMsg), "LOG", COMPONENT::UI_COMPONENT);
         return;
     }
 
@@ -311,7 +315,7 @@ void Client::Receive(std::string msg) {
 }
 
 void Client::Receive(std::any *ptr) {
-    std::cout << "Receive " << ptr << '\n';
+    // std::cout << "Receive " << ptr << '\n';
     FullCommand FC = std::any_cast<FullCommand>(*ptr);
     queueCommand.push(FC);
     delete ptr;

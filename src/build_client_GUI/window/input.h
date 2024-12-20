@@ -21,5 +21,7 @@ public:
     PCSTR  ClassName() const;
     LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
     bool validinput();
+
+    HFONT s_hFont = NULL;
 };
 

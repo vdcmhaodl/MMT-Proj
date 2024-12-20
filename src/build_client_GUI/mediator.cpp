@@ -23,7 +23,7 @@ void Mediator::Forward(std::string sender, std::string receiver, std::string msg
 
 void Mediator::Forward(std::any *ptr, std::string dest) {
     std::unique_lock<std::recursive_mutex> lock(mtx);
-    std::cerr << "Forwarding...\n";
+    // std::cerr << "Forwarding...\n";
     for (Participant *participant : listParticipants) {
         if (participant->getName() == dest) {
             participant->Receive(ptr);
@@ -42,7 +42,7 @@ void Mediator::Forward(std::any *ptr, std::string type, std::string dest) {
 
 void Mediator::Broadcast(Participant *sender, std::string msg) {
     std::unique_lock<std::recursive_mutex> lock(mtx);
-    std::osyncstream(std::cout) << "Broadcast message: " << msg << '\n';
+    // std::osyncstream(std::cout) << "Broadcast message: " << msg << '\n';
     for (auto participant: listParticipants) if (participant != sender) {
         participant->Receive(msg);
     }
@@ -84,7 +84,7 @@ void Participant::Send(std::string msg, std::string receiver) {
 
 void Participant::Receive(std::string msg) {
     queueMessage.push(msg);
-    std::osyncstream(std::cout) << "Participant " << name << " receive message: " << msg << '\n';
+    // std::osyncstream(std::cout) << "Participant " << name << " receive message: " << msg << '\n';
 }
 
 void Participant::Receive(std::string msg, std::string sender) {

@@ -40,13 +40,16 @@ void Command::construct(std::string command) {
 }
 
 void Command::print() {
-    std::cout << "+------\n";
-    std::cout << "Target: " << target << '\n';
-    std::cout << "Type: " << type << '\n';
-    std::cout << "Action: " << action << '\n';
-    std::cout << "Name: "; for (auto it: listName) std::cout << it << ' '; std::cout << '\n';
-    std::cout << "Option: "; for (auto it: listOption) std::cout << it << ' '; std::cout << '\n';
-    std::cout << "+------\n";
+    std::stringstream ss;
+    ss << "+------\n";
+    ss << "Target: " << target << '\n';
+    ss << "Type: " << type << '\n';
+    ss << "Action: " << action << '\n';
+    ss << "Name: "; for (auto it: listName) ss << '<' << it << '>' << ' '; ss << '\n';
+    ss << "Option: "; for (auto it: listOption) ss << it << ' '; ss << '\n';
+    ss << "+------\n";
+    std::string compressed_print = ss.str();
+    std::osyncstream(std::cout) << compressed_print << '\n';
 }
 
 std::string Command::to_string() {
@@ -61,14 +64,6 @@ std::string Command::to_string() {
         command += option + ' ';
     } command += '|';
     return command;
-}
-
-bool Command::isValidCommand(std::string command) {
-    return false;
-}
-
-bool Command::executeCommand() {
-    return false;
 }
 
 std::string Command::generateFilename(int length) {

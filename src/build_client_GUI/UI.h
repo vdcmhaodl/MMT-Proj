@@ -37,6 +37,8 @@ public:
     HWND hEdit;
     HWND hInfo;
 
+    HFONT s_hFont;
+
     int mode;
     void setMode(int mode);
     UI(int WIDTH, int HEIGHT, int mode, Mediator* mediator, std::string name);

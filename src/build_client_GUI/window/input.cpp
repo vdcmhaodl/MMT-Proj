@@ -8,85 +8,113 @@ LRESULT InputWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg)
     {
     case WM_CREATE: {
+            const char* fontName = "Consolas";
+            const long nFontSize = 13;
+
+            HDC hdc = GetDC(m_hwnd);
+            LOGFONT logFont = {0};
+            logFont.lfHeight = -MulDiv(nFontSize, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+            logFont.lfWeight = FW_BOLD;
+            strcpy((char*)logFont.lfFaceName, fontName);
+
+            // printf("%s", (char*)logFont.lfFaceName);
+
+            s_hFont = CreateFontIndirect(&logFont);
+
             // Create a static control for the header
             hwndHeader = CreateWindowW(L"STATIC", L"SIGN IN",
                 WS_CHILD | WS_VISIBLE | SS_CENTER,
-                50, 20, 400, 30,
+                50, 20, 500, 25,
                 m_hwnd, NULL, NULL, NULL);
+            SendMessage(hwndHeader, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
 
             // Create static controls for descriptions
-            hwndDesc1 = CreateWindowW(L"STATIC", L"IP address:",
+            hwndDesc1 = CreateWindowW(L"STATIC", L"IP address",
                 WS_CHILD | WS_VISIBLE,
-                50, 70, 100, 25,
+                50, 80, 150, 25,
                 m_hwnd, NULL, NULL, NULL);
+            SendMessage(hwndDesc1, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
 
-            hwndDesc2 = CreateWindowW(L"STATIC", L"Subnet mask:",
+            hwndDesc2 = CreateWindowW(L"STATIC", L"Subnet mask",
                 WS_CHILD | WS_VISIBLE,
-                50, 110, 100, 25,
+                50, 120, 150, 25,
                 m_hwnd, NULL, NULL, NULL);
+            SendMessage(hwndDesc2, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
 
-            hwndDesc3 = CreateWindowW(L"STATIC", L"Mail account:",
+            hwndDesc3 = CreateWindowW(L"STATIC", L"Username",
                 WS_CHILD | WS_VISIBLE,
-                50, 150, 100, 25,
+                50, 160, 150, 25,
                 m_hwnd, NULL, NULL, NULL);
+            SendMessage(hwndDesc3, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
             
-            hwndDesc4 = CreateWindowW(L"STATIC", L"Password:",
+            hwndDesc4 = CreateWindowW(L"STATIC", L"Password",
                 WS_CHILD | WS_VISIBLE,
-                50, 190, 100, 25,
+                50, 200, 150, 25,
                 m_hwnd, NULL, NULL, NULL);
+            SendMessage(hwndDesc4, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
 
+            logFont.lfWeight = FW_NORMAL;
+            s_hFont = CreateFontIndirect(&logFont);
+            
             // Create child windows with a distinct background
             hwndInput1 = CreateWindowExW(0,
                                         L"EDIT",
                                         L"",
                                         WS_CHILD | WS_VISIBLE | WS_BORDER,
-                                        175, 70, 300, 25,
+                                        215, 80, 335, 25,
                                         m_hwnd, NULL, NULL, NULL);
+            SendMessage(hwndInput1, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
 
             hwndInput2 = CreateWindowExW(0,
                                         L"EDIT",
                                         L"",
                                         WS_CHILD | WS_VISIBLE | WS_BORDER,
-                                        175, 110, 300, 25,
+                                        215, 120, 335, 25,
                                         m_hwnd, NULL, NULL, NULL);
-            
+            SendMessage(hwndInput2, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
+
             hwndInput3 = CreateWindowExW(0,
                                         L"EDIT",
                                         L"",
                                         WS_CHILD | WS_VISIBLE | WS_BORDER,
-                                        175, 150, 300, 25,
+                                        215, 160, 335, 25,
                                         m_hwnd, NULL, NULL, NULL);
-            
+            SendMessage(hwndInput3, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
+
             hwndInput4 = CreateWindowExW(0,
                                         L"EDIT",
                                         L"",
                                         WS_CHILD | WS_VISIBLE | WS_BORDER,
-                                        175, 190, 300, 25,
+                                        215, 200, 335, 25,
                                         m_hwnd, NULL, NULL, NULL);
-            
+            SendMessage(hwndInput4, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
+
+            ReleaseDC(m_hwnd, hdc);
+
             // Create a combo box for selection
-            hwndComboBox = CreateWindowW(L"COMBOBOX", NULL,
-                WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_BORDER,
-                175, 230, 100, 100,
-                m_hwnd, (HMENU) 2, NULL, NULL);
+            // hwndComboBox = CreateWindowW(L"COMBOBOX", NULL,
+            //     WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_BORDER,
+            //     175, 230, 100, 100,
+            //     m_hwnd, (HMENU) 2, NULL, NULL);
 
             // Add items to the combo box
-            SendMessageW(hwndComboBox, CB_ADDSTRING, 0, (LPARAM) L"Automatic");
-            SendMessageW(hwndComboBox, CB_ADDSTRING, 0, (LPARAM) L"Manual");
+            // SendMessageW(hwndComboBox, CB_ADDSTRING, 0, (LPARAM) L"Automatic");
+            // SendMessageW(hwndComboBox, CB_ADDSTRING, 0, (LPARAM) L"Manual");
 
             // Create a static control for the combo box description
-            hwndComboDesc = CreateWindowW(L"STATIC", L"Mode:",
-                WS_CHILD | WS_VISIBLE,
-                50, 230, 100, 25,
-                m_hwnd, NULL, NULL, NULL);
+            // hwndComboDesc = CreateWindowW(L"STATIC", L"Mode:",
+            //     WS_CHILD | WS_VISIBLE,
+            //     50, 230, 100, 25,
+            //     m_hwnd, NULL, NULL, NULL);
             
             hwndButton = CreateWindowExW(0,
                                         L"BUTTON",
                                         L"Submit",
                                         WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-                                        150, 270, 100, 30,
+                                        250, 250, 100, 30,
                                         m_hwnd, (HMENU)INPUT_BUTTON, NULL, NULL);
-            
+            SendMessage(hwndButton, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
+
             // // Set background color to make areas stand out
             HBRUSH hBrush = CreateSolidBrush(RGB(173, 216, 230)); // Light blue
             // SetClassLongPtrW(hwndInput1, GCLP_HBRBACKGROUND, (LONG_PTR)hBrush);
@@ -116,24 +144,24 @@ LRESULT InputWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             password = std::string(buffer);
 
             // Get the selected option from the combo box
-            int itemIndex = SendMessageA(hwndComboBox, CB_GETCURSEL, 0, 0);
-            char itemText[256];
-            SendMessage(hwndComboBox, CB_GETLBTEXT, itemIndex, (LPARAM)itemText);
-            selectedOption = itemText;
+            // int itemIndex = SendMessageA(hwndComboBox, CB_GETCURSEL, 0, 0);
+            // char itemText[256];
+            // SendMessage(hwndComboBox, CB_GETLBTEXT, itemIndex, (LPARAM)itemText);
+            // selectedOption = itemText;
 
             // Clear the child windows
             DestroyWindow(hwndInput1);
             DestroyWindow(hwndInput2);
             DestroyWindow(hwndInput3);
             DestroyWindow(hwndInput4);
-            DestroyWindow(hwndComboBox);
+            // DestroyWindow(hwndComboBox);
             DestroyWindow(hwndButton);
             DestroyWindow(hwndHeader);
             DestroyWindow(hwndDesc1);
             DestroyWindow(hwndDesc2);
             DestroyWindow(hwndDesc3);
             DestroyWindow(hwndDesc4);
-            DestroyWindow(hwndComboDesc);
+            // DestroyWindow(hwndComboDesc);
             inputCollected = true;
 
             // Trigger a repaint to display the collected inputs
@@ -148,6 +176,7 @@ LRESULT InputWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     } break;
 
     case WM_DESTROY:
+        DeleteObject(s_hFont);
         PostQuitMessage(0);
         return 0;
 
@@ -181,6 +210,5 @@ LRESULT InputWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
 }
 
 bool InputWindow::validinput() {
-    return (!IPaddr.empty() && !subnetMask.empty() && !selectedOption.empty())
-        && ((selectedOption == "Automatic" && !mail.empty()) || (selectedOption == "Manual" && mail.empty())); 
+    return true;
 }

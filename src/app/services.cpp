@@ -47,6 +47,16 @@ std::vector<std::string> Services::getHelp(Command command) {
     return std::vector<std::string> ({help});
 }
 
+std::string Services::getCurrentTimeString() {
+    auto now = std::chrono::system_clock::now();                      // Get current time
+    std::time_t currentTime = std::chrono::system_clock::to_time_t(now); // Convert to time_t
+    std::tm localTime = *std::localtime(&currentTime);                // Convert to local time
+    
+    std::ostringstream oss;
+    oss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S");            // Format time as string
+    return oss.str();
+}
+
 // std::vector<std::string> getIP(Command command) {
 
 // }

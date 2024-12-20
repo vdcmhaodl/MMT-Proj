@@ -58,10 +58,15 @@ LRESULT ListViewWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             icex.dwICC = ICC_LISTVIEW_CLASSES;
             InitCommonControlsEx(&icex);
 
+            RECT clientRect;
+            GetClientRect(m_hwnd, &clientRect);
+            int width = clientRect.right - clientRect.left;
+            int height = clientRect.bottom - clientRect.top;
+
             // Create the List-View control
             hWndListView = CreateWindowExA(0, WC_LISTVIEW, "",
                                         WS_CHILD | WS_VISIBLE | LVS_REPORT,
-                                        10, 10, 400, 200,
+                                        clientRect.left, clientRect.top, width, height,
                                         m_hwnd, (HMENU)1, GetModuleHandle(NULL), NULL);
 
             // Initialize the List-View columns

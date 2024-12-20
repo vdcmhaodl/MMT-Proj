@@ -3,16 +3,6 @@
 
 std::vector<std::string> Services::startApplication(Command command) {
     std::string filename;
-    // filename = Command::generateFilepath(10, ".txt");
-    // std::ofstream fout (filename.c_str());
-    
-    // for (auto it : command.listName) {
-    //     if (!Services::startApplication(it))
-    //         fout << "Cannot start " << it << "\n";
-    //     else
-    //         fout << "Start app " << it << " successfully\n";
-    // }
-    // fout.close();
 
     for (auto it : command.listName) {
         if (!Services::startApplication(it))
@@ -26,17 +16,6 @@ std::vector<std::string> Services::startApplication(Command command) {
 
 std::vector<std::string> Services::stopApplication(Command command) {
     std::string filename;
-    // filename = Command::generateFilepath(10, ".txt");
-    // std::ofstream fout (filename.c_str());
-
-    // for (auto it : command.listName) {
-    //     if (!Services::stopApplication(it)) 
-    //         fout << "Cannot stop " << it << "\n";
-    //     else
-    //         fout << "Stop app " << it << " successfully\n";
-    // }
-
-    // fout.close();
 
     for (auto it : command.listName) {
         if (!Services::stopApplication(it)) 

@@ -3,20 +3,21 @@
 int main() {
     socketAPI::initializeSocket();
 
-    // std::vector<std::string> signinInput = getInputInfo();
+    std::vector<std::string> signinInput = getInputInfo();
+    // return 0;
 
     // if (signinInput.empty()) {
     //     MessageBoxW(NULL, L"Invalid input!", L"SIGN IN", MB_OK);
     //     return 0;
     // }
 
-    std::vector<std::string> signinInput;
-    signinInput = std::vector<std::string> {"192.168.2.19", "255.255.255.0", "mmt23clc007017236@gmail.com", "fvlo wnaj azrh tzuq", "Automatic"};
+    // std::vector<std::string> signinInput;
+    // signinInput = std::vector<std::string> {"192.168.2.19", "255.255.255.0", "mmt23clc007017236@gmail.com", "fvlo wnaj azrh tzuq", "Automatic"};
     
-    for (auto s : signinInput)
-        std::cout << s << '\n';
+    // for (auto s : signinInput)
+    //     std::cout << s << '\n';
 
-    std::cout << "We good\n";
+    // std::cout << "We good\n";
 
     Mediator mediator;
 
@@ -30,14 +31,14 @@ int main() {
     mediator.Register(&client);
     mediator.Register(&broadcast);
 
-    std::cout << signinInput[0] << ' ' << signinInput[1] << '\n';
+    // std::cout << signinInput[0] << ' ' << signinInput[1] << '\n';
 
     ui.initialize(signinInput);
     gmail.initialize(signinInput);
     client.initialize(signinInput);
     broadcast.initialize(signinInput);
 
-    std::cout << "check again " << broadcast.broadcast.IP_addr << ' ' << broadcast.broadcast.subnetMask << '\n';
+    // std::cout << "check again " << broadcast.broadcast.IP_addr << ' ' << broadcast.broadcast.subnetMask << '\n';
 
     std::thread UIThread(&UI::start, &ui);
     std::thread mailThread(&Gmail::start, &gmail);

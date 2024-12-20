@@ -29,7 +29,7 @@ LRESULT TextWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     {
     case WM_CREATE: {
         std::ifstream logFile(filepath.c_str()); 
-        std::cerr << "filepath: " << filepath << '\n';
+        // std::cerr << "filepath: " << filepath << '\n';
         std::string line;
         std::string logContent; 
 
@@ -39,11 +39,15 @@ LRESULT TextWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             logContent += "\r\n" + line; 
         }
 
+        RECT clientRect;
+        GetClientRect(m_hwnd, &clientRect);
+        int width = clientRect.right - clientRect.left;
+        int height = clientRect.bottom - clientRect.top;
+
         // MessageBoxA(NULL, logContent.c_str(), "LOG", MB_OK);
         logFile.close(); 
         hEdit = CreateWindowExA(0, "EDIT", logContent.c_str(), 
-        WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY, 
-        10, 10, 900, 450, m_hwnd, (HMENU)1, GetModuleHandle(NULL), NULL ); 
+        WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY, clientRect.left, clientRect.top, width, height, m_hwnd, (HMENU)1, GetModuleHandle(NULL), NULL ); 
         HFONT hFont = (HFONT)GetStockObject(ANSI_FIXED_FONT); 
         SendMessageA(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
     } break;
@@ -51,7 +55,7 @@ LRESULT TextWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     case WM_TEXT_APPEND: {
         std::any* any_ptr = reinterpret_cast<std::any*>(lParam);
         std::string text = std::any_cast<std::string>(*any_ptr);
-        std::osyncstream(std::cout) << "Receive text: " << text << '\n';
+        // std::osyncstream(std::cout) << "Receive text: " << text << '\n';
         getNewMessage(text);
         delete any_ptr;
         break;

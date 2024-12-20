@@ -15,4 +15,6 @@ namespace Services {
 
     std::vector<std::string> getHelp(Command command);
     // std::vector<std::string> getIP(Command command);
+
+    std::string getCurrentTimeString();
 }

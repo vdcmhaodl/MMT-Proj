@@ -20,14 +20,31 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     switch (uMsg)
     {
     case WM_CREATE: {
-        hwndButtonMail = CreateWindowW(L"BUTTON", L"MAIL", WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                50, 25, 75, 75, m_hwnd, (HMENU)MAIL_BUTTON, NULL, NULL);
+        const char* fontName = "Consolas";
+        const long nFontSize = 13;
+
+        HDC hdc = GetDC(m_hwnd);
+        LOGFONT logFont = {0};
+        logFont.lfHeight = -MulDiv(nFontSize, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+        logFont.lfWeight = FW_BOLD;
+        strcpy((char*)logFont.lfFaceName, fontName);
+
+        // printf("%s", (char*)logFont.lfFaceName);
+
+        s_hFont = CreateFontIndirect(&logFont);
+
+        hwndButtonMail = CreateWindowW(L"BUTTON", L"ACCOUNT", WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                25, 25, 75, 75, m_hwnd, (HMENU)MAIL_BUTTON, NULL, NULL);
+        SendMessage(hwndButtonMail, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
         hwndButtonHelp = CreateWindowW(L"BUTTON", L"HELP", WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                50, 125, 75, 75, m_hwnd, (HMENU)HELP_BUTTON, NULL, NULL);
-        hwndButtonIP = CreateWindowW(L"BUTTON", L"IP LIST", WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                50, 225, 75, 75, m_hwnd, (HMENU)IP_BUTTON, NULL, NULL);
+                                25, 125, 75, 75, m_hwnd, (HMENU)HELP_BUTTON, NULL, NULL);
+        SendMessage(hwndButtonHelp, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
+        hwndButtonIP = CreateWindowW(L"BUTTON", L"IP", WS_VISIBLE | WS_CHILD | WS_BORDER,
+                                25, 225, 75, 75, m_hwnd, (HMENU)IP_BUTTON, NULL, NULL);
+        SendMessage(hwndButtonIP, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
         hwndButtonAbout = CreateWindowW(L"BUTTON", L"ABOUT", WS_VISIBLE | WS_CHILD | WS_BORDER,
-                                50, 325, 75, 75, m_hwnd, (HMENU)ABOUT_BUTTON, NULL, NULL);
+                                25, 325, 75, 75, m_hwnd, (HMENU)ABOUT_BUTTON, NULL, NULL);
+        SendMessage(hwndButtonAbout, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
 
         std::ifstream logFile("Info.txt"); 
         // std::cerr << "filepath: " << filepath << '\n';
@@ -43,16 +60,25 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         // MessageBoxA(NULL, logContent.c_str(), "LOG", MB_OK);
         logFile.close(); 
 
+        logFont.lfWeight = FW_NORMAL;
+        // printf("%s", (char*)logFont.lfFaceName);
+
+        s_hFont = CreateFontIndirect(&logFont);
+
         hInfo = CreateWindowExA(0, "EDIT", logContent.c_str(), 
             WS_CHILD | WS_BORDER | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY, 
-            175, 25, 625, 75, m_hwnd, (HMENU)1, GetModuleHandle(NULL), NULL ); 
+            125, 25, 675, 75, m_hwnd, (HMENU)1, GetModuleHandle(NULL), NULL ); 
+        SendMessage(hInfo, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
         
-        HFONT hFont = (HFONT)GetStockObject(ANSI_FIXED_FONT); 
-        SendMessageA(hInfo, WM_SETFONT, (WPARAM)hFont, TRUE);
+        // HFONT hFont = (HFONT)GetStockObject(ANSI_FIXED_FONT); 
+        // SendMessageA(hInfo, WM_SETFONT, (WPARAM)hFont, TRUE);
 
         hEdit = CreateWindowExA(0, "EDIT", NULL, 
             WS_CHILD | WS_BORDER | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY, 
-            175, 125, 625, 275, m_hwnd, (HMENU)0, GetModuleHandle(NULL), NULL ); 
+            125, 125, 675, 275, m_hwnd, (HMENU)0, GetModuleHandle(NULL), NULL ); 
+        SendMessage(hEdit, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
+
+        ReleaseDC(m_hwnd, hdc);
         // hwndButtonLog = CreateWindowW(L"BUTTON", L"LOG", WS_VISIBLE | WS_CHILD | WS_BORDER,
         //                         50, 350, 100, 30, m_hwnd, (HMENU)LOG_BUTTON, NULL, NULL);
         // hwndButtonExtra = CreateWindowW(L"BUTTON", L"EXTRA", WS_VISIBLE | WS_CHILD | WS_BORDER,
@@ -62,12 +88,12 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     
     case WM_COMMAND: {
         int identifier = LOWORD(wParam);
-        std::osyncstream(std::cout) << identifier << '\n';
+        // std::osyncstream(std::cout) << identifier << '\n';
         switch (identifier) {
         case MAIL_BUTTON:
             // MessageBoxW(m_hwnd, L"Info button!", L"Child Window", MB_OK);
             if (MAIL.Window() == NULL) {
-                MAIL.Create("Mail", WS_OVERLAPPEDWINDOW, WS_EX_CLIENTEDGE);
+                MAIL.Create("VALID MAIL ACCOUNT", WS_OVERLAPPEDWINDOW, WS_EX_CLIENTEDGE);
                 ShowWindow(MAIL.Window(), SW_SHOWDEFAULT);
                 UpdateWindow(MAIL.Window());
             }
@@ -76,7 +102,7 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         case HELP_BUTTON:
             // MessageBoxW(m_hwnd, L"Help button!", L"Child Window", MB_OK);
             if (HELP.Window() == NULL) {
-                HELP.Create("Help", WS_OVERLAPPEDWINDOW, WS_EX_CLIENTEDGE);
+                HELP.Create("HELP", WS_OVERLAPPEDWINDOW, WS_EX_CLIENTEDGE);
                 ShowWindow(HELP.Window(), SW_SHOWDEFAULT);
                 UpdateWindow(HELP.Window());
             }
@@ -85,7 +111,7 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         case IP_BUTTON:
             // MessageBoxW(m_hwnd, L"IP button!", L"Child Window", MB_OK);
             if (IP.Window() == NULL) {
-                IP.Create("Ip adresses", WS_OVERLAPPEDWINDOW, WS_EX_CLIENTEDGE);
+                IP.Create("LIST OF SERVER IP", WS_OVERLAPPEDWINDOW, WS_EX_CLIENTEDGE);
                 ShowWindow(IP.Window(), SW_SHOWDEFAULT);
                 UpdateWindow(IP.Window());
             }
@@ -94,7 +120,7 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         case ABOUT_BUTTON:
             // MessageBoxW(m_hwnd, L"Log button!", L"Child Window", MB_OK);
             if (ABOUT.Window() == NULL) {
-                ABOUT.Create("About", WS_OVERLAPPEDWINDOW, WS_EX_CLIENTEDGE);
+                ABOUT.Create("ABOUT", WS_OVERLAPPEDWINDOW, WS_EX_CLIENTEDGE);
                 ShowWindow(ABOUT.Window(), SW_SHOWDEFAULT);
                 UpdateWindow(ABOUT.Window());
             }
@@ -124,14 +150,14 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         case IP_MESSAGE: {
             std::string IP_addr, name, status;
             socketAPI::decipherServerMessage(content, IP_addr, name, status);
-            MessageBoxA(m_hwnd, (char*)content.c_str(), "IP message", MB_OK);
+            // MessageBoxA(m_hwnd, (char*)content.c_str(), "IP message", MB_OK);
             
             break;
         }
         case EXTRA_MESSAGE:{
             
             std::string message = content + std::string("; RECEIVED TEXT!");
-            MessageBoxA(m_hwnd, (char*)message.c_str(), "Extra message", MB_OK);
+            // MessageBoxA(m_hwnd, (char*)message.c_str(), "Extra message", MB_OK);
             break;
         }
         default:
@@ -149,17 +175,17 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
                 break;
             }
             case IP_UPDATE_MESSAGE: {
-                std::osyncstream(std::cout) << "Recieve frontend message IP\n";
+                // std::osyncstream(std::cout) << "Recieve frontend message IP\n";
                 if (IP.Window() != NULL) {
                     SendMessageA(IP.Window(), WM_IP_NOTIFY, 0, lParam);
                 }
                 break;
             }
             case LOG_UPDATE_MESSAGE: {
-                std::osyncstream(std::cout) << "Recieve frontend message LOG\n";
+                // std::osyncstream(std::cout) << "Recieve frontend message LOG\n";
                 std::any* any_ptr = reinterpret_cast<std::any*>(lParam);
                 std::string text = std::any_cast<std::string>(*any_ptr);
-                std::osyncstream(std::cout) << "TEXT: " << text << '\n';
+                // std::osyncstream(std::cout) << "TEXT: " << text << '\n';
                 
                 auto appendTextToEdit = [&](LPCSTR newText)
                 {
@@ -170,8 +196,9 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
                 std::ofstream logFile("LOG.txt", std::ios::app);
                 logFile << text + "\n";
-                appendTextToEdit("\r\n");
+                
                 appendTextToEdit(text.c_str());
+                appendTextToEdit("\r\n");
 
                 // std::osyncstream(std::cout) << "LOG text: " << text << '\n';
                 // LOG.getNewMessage(text);
@@ -184,9 +211,9 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     } break;
 
     case WM_DESTROY:{
-        std::string resultINFO = (MAIL.Window() == NULL ? "SUCCESS" : "FAIL");
-        std::string resultHELP = (HELP.Window() == NULL ? "SUCCESS" : "FAIL");
-        std::string resultIP = (IP.Window() == NULL ? "SUCCESS" : "FAIL");
+        // std::string resultINFO = (MAIL.Window() == NULL ? "SUCCESS" : "FAIL");
+        // std::string resultHELP = (HELP.Window() == NULL ? "SUCCESS" : "FAIL");
+        // std::string resultIP = (IP.Window() == NULL ? "SUCCESS" : "FAIL");
         // std::string resultLOG = (LOG.Window() == NULL ? "SUCCESS" : "FAIL");
         // std::string resultEXTRA = (EXTRA.Window() == NULL ? "SUCCESS" : "FAIL");
         // MessageBoxA(INFO.Window(), (char*)resultINFO.c_str(), "WM_DESTROY", MB_OK);
@@ -221,13 +248,14 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         } 
 
     case WM_CLOSE: {
-            if (MessageBoxW(m_hwnd, L"Really quit?", L"My application", MB_OKCANCEL) == IDOK) {
+            if (MessageBoxW(m_hwnd, L"Really quit?", L"EXIT", MB_OKCANCEL) == IDOK) {
                 SendMessageA(MAIL.Window(), WM_CLOSE, 0, 0);
                 SendMessageA(HELP.Window(), WM_CLOSE, 0, 0);
                 SendMessageA(IP.Window(), WM_CLOSE, 0, 0);
                 // SendMessageA(LOG.Window(), WM_CLOSE, 0, 0);
                 // SendMessageA(EXTRA.Window(), WM_CLOSE, 0, 0);
                 DestroyWindow(m_hwnd);
+                DeleteObject(s_hFont);
 
                 mediator->Broadcast(this, "exit");
             }
@@ -242,14 +270,15 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 void UI::initialize(std::vector<std::string> &signinInput) {
-    setMode(signinInput[4] == "AUTOMATIC" ? AUTOMATIC : MANUAL);
-    MAIL.setFilePath("mail\\AdminAccount.txt");
+    setMode(AUTOMATIC);
+    MAIL.setFilePath("mail/AdminAccount.txt");
     HELP.setFilePath("HELP.txt");
+    ABOUT.setFilePath("ABOUT.txt");
     // LOG.setFilePath("LOG.txt");
 }
 
 void UI::start() {
-    if (!Create("Learn to Program Windows", 
+    if (!Create("CLIENT", 
         WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX, WS_EX_CLIENTEDGE)) {
         return;
     }
@@ -280,7 +309,7 @@ void UI::Send(std::string msg, std::string receiver) {
 }
 
 void UI::Receive(std::string msg) {
-    std::cout << "String: " << msg;
+    // std::cout << "String: " << msg;
 }
 
 void UI::Send(std::any *ptr) {
@@ -296,7 +325,7 @@ void UI::Receive(std::any *ptr) {
 }
 
 void UI::Receive(std::any *ptr, std::string type) {
-    std::osyncstream(std::cout) << "Receive ptr " << ptr << ' ' << type << '\n';
+    // std::osyncstream(std::cout) << "Receive ptr " << ptr << ' ' << type << '\n';
     if (type == "IP") {
         SendMessageA(m_hwnd, WM_FRONTEND_NOTIFY, IP_UPDATE_MESSAGE, (LPARAM)ptr);
     }
@@ -305,7 +334,7 @@ void UI::Receive(std::any *ptr, std::string type) {
     }
     else if (type == "LOG") {
         std::string text = std::any_cast<std::string>(*ptr);
-        std::osyncstream(std::cout) << "Append " << text << '\n';
+        // std::osyncstream(std::cout) << "Append " << text << '\n';
         SendMessageA(m_hwnd, WM_FRONTEND_NOTIFY, LOG_UPDATE_MESSAGE, (LPARAM)ptr);
     }
 }
