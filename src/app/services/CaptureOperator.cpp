@@ -5,14 +5,12 @@ UINT32 VIDEO_WIDTH = 1920;
 UINT32 VIDEO_HEIGHT = 1080;
 UINT32 VIDEO_FPS = 30;
 UINT64 VIDEO_FRAME_DURATION = 10 * 1000 * 1000 / VIDEO_FPS;
-UINT32 VIDEO_BIT_RATE = 2000000;
+UINT32 VIDEO_BIT_RATE = 2500000;
 LONGLONG VIDEO_MAX_DURATION = 30;
 
 
 std::vector<std::string> Services::webcamRecord(Command command) {
-    std::string filename;
-    // filename = Command::generateFilepath(10, ".txt");
-    // std::ofstream fout (filename.c_str());
+    std::string response = "";
 
     for (int i = 0; i < command.listName.size(); ++i) {
         std::string fileName = command.listName[i];
@@ -29,15 +27,13 @@ std::vector<std::string> Services::webcamRecord(Command command) {
         //     fout << "Record video " << fileName << " successfully\n";
 
         if (!Services::webcamRecord(fileName, videoDuration))
-            filename += "Fail to record video " + fileName + "\r\n";
+            response += "Fail to record video " + fileName + "\r\n";
         else
-            filename += "Record video " + fileName + " successfully\r\n";
+            response += "Record video " + fileName + " successfully\r\n";
     }
 
-    // fout.close();
-
     std::vector<std::string> result(command.listName);
-    result.push_back(filename);
+    result.push_back(response);
 
     return result;
 }
@@ -130,7 +126,7 @@ bool Services::screenShot(const std::string &filename) {
     }
 	
 	Gdiplus::Bitmap* bmp = new Gdiplus::Bitmap(hbmScreen, (HPALETTE)0);
-	bmp->Save(L"tcm.jpg", &encoderID, NULL);
+	bmp->Save(fileName.c_str(), &encoderID, NULL);
 	
 	Gdiplus::GdiplusShutdown(gdipToken);
 	DeleteObject(hbmScreen);

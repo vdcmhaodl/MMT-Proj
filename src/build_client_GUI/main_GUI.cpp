@@ -3,15 +3,18 @@
 int main() {
     socketAPI::initializeSocket();
 
-    std::vector<std::string> signinInput = getInputInfo();
+    // std::vector<std::string> signinInput = getInputInfo();
 
-    if (signinInput.empty()) {
-        MessageBoxW(NULL, L"Invalid input!", L"SIGN IN", MB_OK);
-        return 0;
-    }
+    // if (signinInput.empty()) {
+    //     MessageBoxW(NULL, L"Invalid input!", L"SIGN IN", MB_OK);
+    //     return 0;
+    // }
 
-    // std::vector<std::string> signinInput;
-    // signinInput = std::vector<std::string> {"192.168.2.19", "255.255.255.0", "mmt23clc007017236@gmail.com", "okkc ufvk ucuj cxgm", "AUTOMATIC"};
+    std::vector<std::string> signinInput;
+    signinInput = std::vector<std::string> {"192.168.2.19", "255.255.255.0", "mmt23clc007017236@gmail.com", "fvlo wnaj azrh tzuq", "Automatic"};
+    
+    for (auto s : signinInput)
+        std::cout << s << '\n';
 
     std::cout << "We good\n";
 

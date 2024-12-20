@@ -21,18 +21,18 @@ std::vector<std::string> getInputInfo() {
     // std::cerr << inp_win.password << '\n';
     // std::cerr << inp_win.selectedOption << '\n';
 
-    std::ifstream fout("Default_account.txt");
-    if (fout.is_open()) {
+    std::ifstream fin("Default_account.txt");
+    if (fin.is_open()) {
         std::string default_username;
         std::string default_password;
-        std::getline(fout, default_username);
-        std::getline(fout, default_password);
+        std::getline(fin, default_username);
+        std::getline(fin, default_password);
 
         inp_win.mail = default_username;
         inp_win.password = default_password;
         inp_win.selectedOption = "Automatic";
 
-        fout.close();
+        fin.close();
     }
 
     std::vector<std::string> result{inp_win.IPaddr, inp_win.subnetMask, inp_win.mail, inp_win.password, inp_win.selectedOption};
@@ -64,6 +64,9 @@ void Broadcast::start() {
             mediator->Forward(new std::any(std::string{"Receive new IP update"}), "LOG", COMPONENT::UI_COMPONENT);
             // COPYDATASTRUCT cds = wrapperData(socketAPI::createServerMessage(IP, hostname, status), MainWindow::IP_MESSAGE);
             // SendMessageA(win.Window(), WM_COMMAND, MAKEWORD(MainWindow::IP_UPDATE_MESSAGE, 0), 0);
+        }
+        else {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 
@@ -115,7 +118,7 @@ void Gmail::start() {
         std::queue<Mail> newMail = clientMail.getEmailQueue();
         mtx.unlock();
 
-        std::this_thread::sleep_for(std::chrono::seconds(10));
+        std::this_thread::sleep_for(std::chrono::seconds(30));
 
         std::osyncstream(std::cout) << "NUMBER OF MAIL: " << newMail.size() << '\n';
         if (!newMail.size()) {
@@ -194,6 +197,7 @@ void Gmail::Receive(std::any *ptr, std::string type) {
     
     if (type == "content") {
         for (std::string content: FC.second) {
+            std::osyncstream(std::cout) << "Type " << type << "  content: " << content << '\n';
             mtx.lock();
             clientMail.repEmail(FC.first, content, "");
             mtx.unlock();
@@ -201,6 +205,7 @@ void Gmail::Receive(std::any *ptr, std::string type) {
     }
     else if (type == "file") {
         for (std::string filename: FC.second) {
+            std::osyncstream(std::cout) << "Type " << type << "  filename: " << filename << '\n';
             mtx.lock();
             clientMail.repEmail(FC.first, "", filename);
             mtx.unlock();
@@ -232,6 +237,7 @@ void Client::start() {
     while(isRunning) {
         FullCommand FC;
         if (!queueCommand.try_pop(FC)) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;
         }
 

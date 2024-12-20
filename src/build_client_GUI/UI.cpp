@@ -243,7 +243,7 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 void UI::initialize(std::vector<std::string> &signinInput) {
     setMode(signinInput[4] == "AUTOMATIC" ? AUTOMATIC : MANUAL);
-    MAIL.setFilePath("AdminAccount");
+    MAIL.setFilePath("mail\\AdminAccount.txt");
     HELP.setFilePath("HELP.txt");
     // LOG.setFilePath("LOG.txt");
 }

@@ -92,7 +92,6 @@ void executeCommand() {
     auto ServiceFunc = Services::servicesMap.find({command.type, command.action});
     if (ServiceFunc == Services::servicesMap.end()) {
         std::string failure = Command::generateFilepath(10, ".txt");
-        // filename += ".txt";
 
         std::ofstream fout (failure.c_str());
         std::cerr << "Invalid command\n";
@@ -109,10 +108,11 @@ void executeCommand() {
 
     std::string message[2] = {"file", "content"};
     for (auto filename: listFilename) {
+        std::cout << "filename: " << filename << " " << std::filesystem::exists(filename) << "\n";
         if (std::filesystem::exists(filename)) {
             socketAPI::sendMessage(server.client, message[0]);
             socketAPI::sendFile(server.client, filename);
-            // Services::deleteFile(filename);
+            Services::deleteFile(filename);
         }
         else {
             socketAPI::sendMessage(server.client, message[1]);

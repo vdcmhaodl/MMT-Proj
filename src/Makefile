@@ -1,7 +1,7 @@
 CXX = g++
 
 CXXFLAGS = -std=c++20 -Wall -Wextra -pedantic
-LDFLAGS = -lgdi32 -lshcore -lws2_32 -liphlpapi -lMswsock -lmfplat -lmf -lmfuuid -lmfreadwrite -lstrmiids -lquartz -lole32 -luuid -lshell32 -lwinmm -lcomctl32 # -mwindows
+LDFLAGS = -lgdi32 -lshcore -lws2_32 -liphlpapi -lMswsock -lmfplat -lmf -lmfuuid -lmfreadwrite -lstrmiids -lquartz -lole32 -luuid -lshell32 -lwinmm -lcomctl32 -lgdiplus # -mwindows
 STATIC_LDFLAGS = -static -static-libgcc -static-libstdc++
 CURL_FLAGS = -I ../third_party/libcurl/include -L ../third_party/libcurl/lib -lcurl
 
