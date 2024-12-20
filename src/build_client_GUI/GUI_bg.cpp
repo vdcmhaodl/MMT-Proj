@@ -60,7 +60,7 @@ void Broadcast::start() {
             std::osyncstream(std::cout) << "Receive new IP update!\n";
             socketAPI::update_list(listIP, IP, hostname, status);
             mediator->Forward(new std::any(listIP), "IP", COMPONENT::UI_COMPONENT);
-            mediator->Forward(new std::any(std::string{"RECEIVE NEW IP UDATE"}), "LOG", COMPONENT::UI_COMPONENT);
+            mediator->Forward(new std::any(std::string{"Receive new IP update"}), "LOG", COMPONENT::UI_COMPONENT);
             // COPYDATASTRUCT cds = wrapperData(socketAPI::createServerMessage(IP, hostname, status), MainWindow::IP_MESSAGE);
             // SendMessageA(win.Window(), WM_COMMAND, MAKEWORD(MainWindow::IP_UPDATE_MESSAGE, 0), 0);
         }
@@ -109,6 +109,7 @@ void Gmail::initialize(std::vector<std::string> &signinInput) {
 void Gmail::start() {
     while(isRunning) {
         mtx.lock();
+        std::osyncstream(std::cout) << "Start checking mail" << '\n';
         std::queue<Mail> newMail = clientMail.getEmailQueue();
         mtx.unlock();
 
@@ -121,7 +122,7 @@ void Gmail::start() {
         // std::unique_lock<std::mutex> lock(mtx);
         FullCommand FC;
         while(!newMail.empty()) {
-            mediator->Forward(new std::any(std::string{"RECEIVE NEW MAIL"}), "LOG", COMPONENT::UI_COMPONENT);
+            mediator->Forward(new std::any(std::string{"Receive new mail request"}), "LOG", COMPONENT::UI_COMPONENT);
             Mail tmp = newMail.front();
             std::osyncstream(std::cout) << "[" << tmp.sender.subject << "]" << ' ' << "[" << tmp.content << "]";
             FC.command = constructCommand(newMail.front());
@@ -131,8 +132,6 @@ void Gmail::start() {
             std::osyncstream(std::cout) << "[" << "forward complete?" << "]";
             newMail.pop();
         }
-
-        
     }
 }
 
@@ -171,6 +170,43 @@ void Gmail::Receive(std::string msg) {
     else {
         Participant::Receive(msg);
     }
+}
+
+void Gmail::Receive(std::any *ptr) {
+    std::cout << "Receive " << ptr << '\n';
+    std::pair<Email, std::vector<std::string>> FC = std::any_cast<std::pair<Email, std::vector<std::string>>>(*ptr);
+
+    
+    for (std::string filename: FC.second) {
+        mtx.lock();
+        clientMail.repEmail(FC.first, "", filename);
+        mtx.unlock();
+    }
+    
+    delete ptr;
+}
+
+void Gmail::Receive(std::any *ptr, std::string type) {
+    std::osyncstream(std::cout) << "Receive " << ptr << "; type " << type << '\n';
+    std::pair<Email, std::vector<std::string>> FC = std::any_cast<std::pair<Email, std::vector<std::string>>>(*ptr);
+    
+    if (type == "content") {
+        for (std::string content: FC.second) {
+            mtx.lock();
+            clientMail.repEmail(FC.first, content, "");
+            mtx.unlock();
+        }
+    }
+    else if (type == "file") {
+        for (std::string filename: FC.second) {
+            mtx.lock();
+            clientMail.repEmail(FC.first, "", filename);
+            mtx.unlock();
+        }
+    }
+    mediator->Forward(new std::any(std::string{"Request completed!"}), "LOG", COMPONENT::UI_COMPONENT);
+    
+    delete ptr;
 }
 
 Client::Client() {}
@@ -225,15 +261,32 @@ void Client::resolveCommand(FullCommand FC) {
     auto msg = FC.command.to_string();
     socketAPI::sendMessage(client.ConnectSocket, msg);
     // TODO: Receive result sended back from the server side
-    
-    std::string stringNumFile;
-    socketAPI::receiveMessage(client.ConnectSocket, stringNumFile);
-    int numFile = std::stoi(stringNumFile);
-    std::vector<std::string> listReceiveFile(numFile);
 
-    for (auto &filename: listReceiveFile) {
-        socketAPI::receiveFile(client.ConnectSocket, filename);
+    std::string message[2] = {"file", "content"};
+    
+    std::string stringNum;
+    socketAPI::receiveMessage(client.ConnectSocket, stringNum);
+    int numFile = std::stoi(stringNum);
+    std::vector<std::string> listReceiveFile;
+    std::vector<std::string> listReceiveMsg;
+
+    for (int i = 0; i < numFile; i++) {
+        std::string type;
+        socketAPI::receiveMessage(client.ConnectSocket, type);
+        if (type == "content") {
+            std::string content;
+            socketAPI::receiveMessage(client.ConnectSocket, content);
+            listReceiveMsg.push_back(content);
+        }
+        else {
+            std::string filename;
+            socketAPI::receiveFile(client.ConnectSocket, filename);
+            listReceiveFile.push_back(filename);
+        }
     }
+
+    mediator->Forward(new std::any(std::pair<Email, std::vector<std::string>>(FC.email, listReceiveMsg)), "content", COMPONENT::MAIL_COMPONENT);
+    mediator->Forward(new std::any(std::pair<Email, std::vector<std::string>>(FC.email, listReceiveFile)), "file", COMPONENT::MAIL_COMPONENT);
     // Expect receiving a file
     
     client.disconnect();

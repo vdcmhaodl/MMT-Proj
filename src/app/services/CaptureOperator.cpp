@@ -10,8 +10,9 @@ LONGLONG VIDEO_MAX_DURATION = 30;
 
 
 std::vector<std::string> Services::webcamRecord(Command command) {
-    std::string filename = Command::generateFilepath(10, ".txt");
-    std::ofstream fout (filename.c_str());
+    std::string filename;
+    // filename = Command::generateFilepath(10, ".txt");
+    // std::ofstream fout (filename.c_str());
 
     for (int i = 0; i < command.listName.size(); ++i) {
         std::string fileName = command.listName[i];
@@ -22,13 +23,18 @@ std::vector<std::string> Services::webcamRecord(Command command) {
             videoDuration = VIDEO_MAX_DURATION;
 
         // record video to fileName
+        // if (!Services::webcamRecord(fileName, videoDuration))
+        //     fout << "Fail to record video " << fileName << "\n";
+        // else
+        //     fout << "Record video " << fileName << " successfully\n";
+
         if (!Services::webcamRecord(fileName, videoDuration))
-            fout << "Fail to record video " << fileName << "\n";
+            filename += "Fail to record video " + fileName + "\r\n";
         else
-            fout << "Record video " << fileName << " successfully\n";
+            filename += "Record video " + fileName + " successfully\r\n";
     }
 
-    fout.close();
+    // fout.close();
 
     std::vector<std::string> result(command.listName);
     result.push_back(filename);
@@ -37,16 +43,24 @@ std::vector<std::string> Services::webcamRecord(Command command) {
 }
 
 std::vector<std::string> Services::screenShot(Command command) {
-    std::string filename = Command::generateFilepath(10, ".txt");
-    std::ofstream fout (filename.c_str());
+    std::string filename;
+    // filename = Command::generateFilepath(10, ".txt");
+    // std::ofstream fout (filename.c_str());
+
+    // for (auto &it : command.listName) {
+    //     if (!Services::screenShot(it))
+    //         fout << "Fail to screenshot picture " << it << "\n";
+    //     else
+    //         fout << "Screenshot to file " << it << " successfully\n";
+    // }
+    // fout.close();
 
     for (auto &it : command.listName) {
         if (!Services::screenShot(it))
-            fout << "Fail to screenshot picture " << it << "\n";
+            filename += "Fail to screenshot picture " + it + "\r\n";
         else
-            fout << "Screenshot to file " << it << " successfully\n";
+            filename += "Screenshot to file " + it + " successfully\r\n";
     }
-    fout.close();
 
     std::vector<std::string> result (command.listName);
     result.push_back(filename);

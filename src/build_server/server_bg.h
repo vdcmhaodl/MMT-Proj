@@ -4,6 +4,7 @@
 #include "../app/services.h"
 #include <iostream>
 #include <assert.h>
+#include <filesystem>
 
 extern P2P_serverSocket broadcast;
 extern serverSocket server;

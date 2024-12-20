@@ -1,27 +1,39 @@
 #include "SystemManager.h"
 
 std::vector<std::string> Services::shutdown(Command command) {
-    std::string filename = Command::generateFilepath(10, ".txt");
-    std::ofstream fout(filename.c_str());
+    std::string filename;
+    // filename = Command::generateFilepath(10, ".txt");
+    // std::ofstream fout(filename.c_str());
     
+    // if (!Services::shutdown())
+    //     fout << "Cannot execute command";
+    // else
+    //     fout << "Command execute successfully";
+    // fout.close();
+
     if (!Services::shutdown())
-        fout << "Cannot execute command";
+        filename = "Cannot execute command";
     else
-        fout << "Command execute successfully";
-    fout.close();
+        filename = "Command execute successfully";
 
     return std::vector<std::string>({filename});
 }
 
 std::vector<std::string> Services::restart(Command command) {
-    std::string filename = Command::generateFilepath(10, ".txt");
-    std::ofstream fout (filename.c_str());
+    std::string filename;
+    // filename = Command::generateFilepath(10, ".txt");
+    // std::ofstream fout (filename.c_str());
+
+    // if (!Services::restart()) 
+    //     fout << "Cannot execute command";
+    // else
+    //     fout << "Command execute successfully";
+    // fout.close();
 
     if (!Services::restart()) 
-        fout << "Cannot execute command";
+        filename = "Cannot execute command";
     else
-        fout << "Command execute successfully";
-    fout.close();
+        filename = "Command execute successfully";
 
     return std::vector<std::string>({filename});
 }
@@ -38,16 +50,24 @@ std::vector<std::string> Services::listFileAndFolder(Command command) {
 }
 
 std::vector<std::string> Services::deleteFile(Command command) {
-    std::string filename = Command::generateFilepath(10, ".txt");
-    std::ofstream fout (filename.c_str());
+    std::string filename;
+    // filename = Command::generateFilepath(10, ".txt");
+    // std::ofstream fout (filename.c_str());
+    // for (auto &it : command.listName) {
+    //     if (!Services::deleteFile(it))
+    //         fout << "Cannot delete file " << it << "\n";
+    //     else
+    //         fout << "Delete file " << it << " successfully\n";
+    // }
+
+    // fout.close();
+
     for (auto &it : command.listName) {
         if (!Services::deleteFile(it))
-            fout << "Cannot delete file " << it << "\n";
+            filename += "Cannot delete file " + it + "\r\n";
         else
-            fout << "Delete file " << it << " successfully\n";
+            filename += "Delete file " + it + " successfully\r\n";
     }
-
-    fout.close();
     return std::vector<std::string>({filename});
 }
 
@@ -58,31 +78,47 @@ std::vector<std::string> Services::listServices(Command command) {
 }
 
 std::vector<std::string> Services::startService(Command command) {
-    std::string filename = Command::generateFilepath(10, ".txt");
-    std::ofstream fout (filename.c_str());
+    std::string filename;
+    // filename = Command::generateFilepath(10, ".txt");
+    // std::ofstream fout (filename.c_str());
+
+    // for (auto &it : command.listName) {
+    //     if (!Services::startService(it))
+    //         fout << "Cannot start service " << it << "\n";
+    //     else
+    //         fout << "Delete service " << it << " successfully\n";
+    // }
+
+    // fout.close();
 
     for (auto &it : command.listName) {
         if (!Services::startService(it))
-            fout << "Cannot start service " << it << "\n";
+            filename += "Cannot start service " + it + "\r\n";
         else
-            fout << "Delete service " << it << " successfully\n";
+            filename += "Delete service " + it + " successfully\r\n";
     }
-
-    fout.close();
     return std::vector<std::string> ({filename});
 }
 
 std::vector<std::string> Services::stopService(Command command) {
-    std::string filename = Command::generateFilepath(10, ".txt");
-    std::ofstream fout (filename.c_str());
+    std::string filename;
+    // filename = Command::generateFilepath(10, ".txt");
+    // std::ofstream fout (filename.c_str());
+
+    // for (auto& it : command.listName) {
+    //     if (!Services::stopService(it))
+    //         fout << "Cannot stop service " << it << "\n";
+    //     else
+    //         fout << "Stop service " << it << " successfully\n";
+    // }
+    // fout.close();
 
     for (auto& it : command.listName) {
         if (!Services::stopService(it))
-            fout << "Cannot stop service " << it << "\n";
+            filename += "Cannot stop service " + it + "\r\n";
         else
-            fout << "Stop service " << it << " successfully\n";
+            filename += "Stop service " + it + " successfully\r\n";
     }
-    fout.close();
     return std::vector<std::string> ({filename});
 }
 

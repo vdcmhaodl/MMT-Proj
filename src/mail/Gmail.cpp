@@ -11,7 +11,7 @@ size_t GmailAccount::headerCallback(char* buffer, size_t size, size_t nitems, st
 }
 
 void GmailAccount::readAdminEmail() {
-    std::ifstream fin ("src\\AdminAccount");
+    std::ifstream fin ("AdminAccount.txt");
     if (!fin.is_open()) {
         std::cerr << "Fail to read Admin's Email!\n";
         return;

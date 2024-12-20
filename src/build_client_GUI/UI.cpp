@@ -159,6 +159,20 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
                 std::osyncstream(std::cout) << "Recieve frontend message LOG\n";
                 std::any* any_ptr = reinterpret_cast<std::any*>(lParam);
                 std::string text = std::any_cast<std::string>(*any_ptr);
+                std::osyncstream(std::cout) << "TEXT: " << text << '\n';
+                
+                auto appendTextToEdit = [&](LPCSTR newText)
+                {
+                    int TextLen = SendMessageA(hEdit, WM_GETTEXTLENGTH, 0, 0);
+                    SendMessageA(hEdit, EM_SETSEL, (WPARAM)TextLen, (LPARAM)TextLen);
+                    SendMessageA(hEdit, EM_REPLACESEL, FALSE, (LPARAM)(newText));
+                };
+
+                std::ofstream logFile("LOG.txt", std::ios::app);
+                logFile << text + "\n";
+                appendTextToEdit("\r\n");
+                appendTextToEdit(text.c_str());
+
                 // std::osyncstream(std::cout) << "LOG text: " << text << '\n';
                 // LOG.getNewMessage(text);
                 // if (LOG.Window() != NULL) {

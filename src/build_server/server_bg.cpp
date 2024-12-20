@@ -106,9 +106,21 @@ void executeCommand() {
 
     std::string numFile = std::to_string(listFilename.size());
     socketAPI::sendMessage(server.client, numFile);
+
+    std::string message[2] = {"file", "content"};
     for (auto filename: listFilename) {
-        socketAPI::sendFile(server.client, filename);
-        Services::deleteFile(filename);
+        if (std::filesystem::exists(filename)) {
+            socketAPI::sendMessage(server.client, message[0]);
+            socketAPI::sendFile(server.client, filename);
+            // Services::deleteFile(filename);
+        }
+        else {
+            socketAPI::sendMessage(server.client, message[1]);
+            socketAPI::sendMessage(server.client, filename);
+        }
+
+        // socketAPI::sendFile(server.client, filename);
+        // Services::deleteFile(filename);
     }
     
     // Expect sending the result file with name "filename"

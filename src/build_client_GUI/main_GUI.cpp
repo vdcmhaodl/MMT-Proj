@@ -12,7 +12,7 @@ int main() {
 
     std::cout << "We good\n";
 
-    AppMediator mediator;
+    Mediator mediator;
 
     UI ui(854, 480, 0, &mediator, COMPONENT::UI_COMPONENT);
     Gmail gmail(&mediator, COMPONENT::MAIL_COMPONENT);
