@@ -85,6 +85,7 @@ void executeCommand() {
     std::osyncstream(std::cout) << "RECEIVE: " << stringCommand << '\n';
     Command command;
     command.construct(stringCommand);
+    command.print();
     // TODO: Execute this "command" variable.
 
     std::vector<std::string> listFilename;
@@ -100,6 +101,7 @@ void executeCommand() {
         listFilename.push_back(failure);
     }
     else {
+        std::cerr << "\n\n\n" << command.type << "\n\n\n";
         listFilename = (ServiceFunc->second)(command);
     }
 
@@ -112,7 +114,7 @@ void executeCommand() {
         if (std::filesystem::exists(filename)) {
             socketAPI::sendMessage(server.client, message[0]);
             socketAPI::sendFile(server.client, filename);
-            Services::deleteFile(filename);
+            // Services::deleteFile(filename);
         }
         else {
             socketAPI::sendMessage(server.client, message[1]);

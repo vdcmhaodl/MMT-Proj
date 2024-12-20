@@ -14,6 +14,7 @@ namespace Services{
 
     bool listFileAndFolder(const std::string &directory, std::string &fileSave);
     bool deleteFile(const std::string &filePath);
+    bool getFile(const std::string &filePath);
 
     bool listServices(const std::string &saveFile);
     bool startService(const std::string &serviceName);
@@ -24,6 +25,7 @@ namespace Services{
 
     std::vector<std::string> listFileAndFolder(Command command);
     std::vector<std::string> deleteFile(Command command);
+    std::vector<std::string> getFile(Command command);
 
     std::vector<std::string> listServices(Command command);
     std::vector<std::string> startService(Command command);

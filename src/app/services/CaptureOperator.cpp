@@ -69,9 +69,80 @@ bool Services::webcamRecord(const std::string &fileName, LONGLONG videoDuration)
     return SUCCEEDED(WebcamRecord(filename.c_str(), videoDuration));
 }
 
-bool Services::screenShot(const std::string &filename) {
-    std::wstring fileName (filename.begin(), filename.end());
+// bool Services::screenShot(const std::string &filename) {
+//     std::wstring fileName (filename.begin(), filename.end());
 
+//     UINT dpi = 96;
+//     HMONITOR hMonitor = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);
+//     if (hMonitor)
+//         GetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &dpi, &dpi);
+
+//     int screenWidth = GetSystemMetricsForDpi(SM_CXSCREEN, dpi);
+//     int screenHeight = GetSystemMetricsForDpi(SM_CYSCREEN, dpi);
+    
+//     HDC hdcScreen = GetDC(NULL);
+//     if (!hdcScreen) {
+//         std::cerr << "Failed to get screen HDC\n";
+//         return false;
+//     } 
+
+// 	HDC hdcMemory = CreateCompatibleDC(hdcScreen);
+// 	if (!hdcMemory) {
+//         std::cerr << "Failed to create memory HDC\n";
+//         ReleaseDC(NULL, hdcScreen);
+//         return false;
+//     }
+// 	HBITMAP hbmScreen = NULL;
+
+// 	Gdiplus::GdiplusStartupInput gdip;
+// 	ULONG_PTR gdipToken;
+// 	Gdiplus::GdiplusStartup(&gdipToken, &gdip, NULL);
+	
+// 	// create bitmap object
+// 	hbmScreen = CreateCompatibleBitmap(hdcScreen, screenWidth, screenHeight);
+//     if (!hbmScreen) {
+//         std::cerr << "Failed to create bitmap\n";
+//         DeleteDC(hdcMemory);
+//         ReleaseDC(NULL, hdcScreen);
+//         Gdiplus::GdiplusShutdown(gdipToken);
+//         return false;
+//     }
+// 	SelectObject(hdcMemory, hbmScreen);
+	
+// 	// copy data from Screen to Memory
+// 	if (!BitBlt(hdcMemory, 0, 0, screenWidth, screenHeight, hdcScreen, 0, 0, SRCCOPY)) {
+//         std::cerr << "Failed to copy data from screen to memory\n";
+//         DeleteObject(hbmScreen);
+//         DeleteDC(hdcMemory);
+//         ReleaseDC(NULL, hdcScreen); 
+//         Gdiplus::GdiplusShutdown(gdipToken);
+//         return false;
+//     }
+	
+// 	CLSID encoderID;
+// 	if (!GetEncoderClsid(L"image/png", &encoderID)) {
+//         std::cerr << "Failed to get encoder\n";
+//         DeleteObject(hbmScreen);
+//         DeleteDC(hdcMemory);
+//         ReleaseDC(NULL, hdcScreen); 
+//         Gdiplus::GdiplusShutdown(gdipToken);
+//         return false;
+//     }
+	
+// 	Gdiplus::Bitmap* bmp = new Gdiplus::Bitmap(hbmScreen, (HPALETTE)0);
+// 	bmp->Save(fileName.c_str(), &encoderID, NULL);
+	
+// 	Gdiplus::GdiplusShutdown(gdipToken);
+// 	DeleteObject(hbmScreen);
+// 	DeleteObject(hdcMemory);
+// 	ReleaseDC(NULL, hdcScreen);
+
+//     return true;
+// }
+
+bool Services::screenShot(const std::string &filename) {
+    SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+    // Lấy kích thước màn hình
     UINT dpi = 96;
     HMONITOR hMonitor = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);
     if (hMonitor)
@@ -79,64 +150,87 @@ bool Services::screenShot(const std::string &filename) {
 
     int screenWidth = GetSystemMetricsForDpi(SM_CXSCREEN, dpi);
     int screenHeight = GetSystemMetricsForDpi(SM_CYSCREEN, dpi);
-    
-    HDC hdcScreen = GetDC(NULL);
-    if (!hdcScreen) {
-        std::cerr << "Failed to get screen HDC\n";
-        return false;
-    } 
 
-	HDC hdcMemory = CreateCompatibleDC(hdcScreen);
-	if (!hdcMemory) {
-        std::cerr << "Failed to create memory HDC\n";
-        ReleaseDC(NULL, hdcScreen);
-        return false;
-    }
-	HBITMAP hbmScreen = NULL;
+    // Tạo một DC để tương tác với màn hình
+    HDC hScreenDC = GetDC(NULL);
+    HDC hMemoryDC = CreateCompatibleDC(hScreenDC);
 
-	Gdiplus::GdiplusStartupInput gdip;
-	ULONG_PTR gdipToken;
-	Gdiplus::GdiplusStartup(&gdipToken, &gdip, NULL);
-	
-	// create bitmap object
-	hbmScreen = CreateCompatibleBitmap(hdcScreen, screenWidth, screenHeight);
-    if (!hbmScreen) {
-        std::cerr << "Failed to create bitmap\n";
-        DeleteDC(hdcMemory);
-        ReleaseDC(NULL, hdcScreen);
-        Gdiplus::GdiplusShutdown(gdipToken);
+    if (!hMemoryDC)
+    {
+        std::cerr << "Không thể tạo DC tương thích!" << std::endl;
+        ReleaseDC(NULL, hScreenDC);
         return false;
     }
-	SelectObject(hdcMemory, hbmScreen);
-	
-	// copy data from Screen to Memory
-	if (!BitBlt(hdcMemory, 0, 0, screenWidth, screenHeight, hdcScreen, 0, 0, SRCCOPY)) {
-        std::cerr << "Failed to copy data from screen to memory\n";
-        DeleteObject(hbmScreen);
-        DeleteDC(hdcMemory);
-        ReleaseDC(NULL, hdcScreen); 
-        Gdiplus::GdiplusShutdown(gdipToken);
-        return false;
-    }
-	
-	CLSID encoderID;
-	if (!GetEncoderClsid(L"image/png", &encoderID)) {
-        std::cerr << "Failed to get encoder\n";
-        DeleteObject(hbmScreen);
-        DeleteDC(hdcMemory);
-        ReleaseDC(NULL, hdcScreen); 
-        Gdiplus::GdiplusShutdown(gdipToken);
-        return false;
-    }
-	
-	Gdiplus::Bitmap* bmp = new Gdiplus::Bitmap(hbmScreen, (HPALETTE)0);
-	bmp->Save(fileName.c_str(), &encoderID, NULL);
-	
-	Gdiplus::GdiplusShutdown(gdipToken);
-	DeleteObject(hbmScreen);
-	DeleteObject(hdcMemory);
-	ReleaseDC(NULL, hdcScreen);
 
+    // Cấu hình cho bitmap với BITMAPINFO
+    BITMAPINFO bmi;
+    ZeroMemory(&bmi, sizeof(bmi));
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = screenWidth;
+    bmi.bmiHeader.biHeight = -screenHeight; // Đặt chiều cao âm để lưu ảnh đúng chiều
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 24;
+    bmi.bmiHeader.biCompression = BI_RGB;
+
+    // Tạo một DIB section
+    void *pBits = NULL;
+    HBITMAP hBitmap = CreateDIBSection(hScreenDC, &bmi, DIB_RGB_COLORS, &pBits, NULL, 0);
+
+    if (!hBitmap)
+    {
+        std::cerr << "Không thể tạo DIB section!" << std::endl;
+        DeleteDC(hMemoryDC);
+        ReleaseDC(NULL, hScreenDC);
+        return false;
+    }
+
+    // Chọn bitmap vào DC bộ nhớ
+    SelectObject(hMemoryDC, hBitmap);
+
+    // Sao chép dữ liệu từ màn hình vào bitmap
+    if (!BitBlt(hMemoryDC, 0, 0, screenWidth, screenHeight, hScreenDC, 0, 0, SRCCOPY))
+    {
+        std::cerr << "Không thể sao chép dữ liệu từ màn hình vào bitmap!" << std::endl;
+        DeleteObject(hBitmap);
+        DeleteDC(hMemoryDC);
+        ReleaseDC(NULL, hScreenDC);
+        return false;
+    }
+
+    // Tạo file để lưu bitmap
+    BITMAPFILEHEADER fileHeader;
+    BITMAPINFOHEADER &bi = bmi.bmiHeader;
+    DWORD dwBmpSize = ((screenWidth * bi.biBitCount + 31) / 32) * 4 * screenHeight;
+    DWORD dwFileSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + dwBmpSize;
+
+    fileHeader.bfType = 0x4D42; // "BM"
+    fileHeader.bfSize = dwFileSize;
+    fileHeader.bfReserved1 = 0;
+    fileHeader.bfReserved2 = 0;
+    fileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
+    std::ofstream file(filename, std::ios::out | std::ios::binary);
+    if (!file)
+    {
+        std::cerr << "Không thể tạo file ảnh!" << std::endl;
+        DeleteObject(hBitmap);
+        DeleteDC(hMemoryDC);
+        ReleaseDC(NULL, hScreenDC);
+        return false;
+    }
+
+    // Ghi dữ liệu vào file
+    file.write(reinterpret_cast<const char *>(&fileHeader), sizeof(fileHeader));
+    file.write(reinterpret_cast<const char *>(&bi), sizeof(bi));
+    file.write(reinterpret_cast<const char *>(pBits), dwBmpSize);
+    file.close();
+
+    // Giải phóng tài nguyên
+    DeleteObject(hBitmap);
+    DeleteDC(hMemoryDC);
+    ReleaseDC(NULL, hScreenDC);
+
+    std::cout << "Chụp màn hình thành công! File lưu tại: " << filename << std::endl;
     return true;
 }
 

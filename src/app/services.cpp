@@ -8,6 +8,7 @@ namespace Services {
         {{"system", "restart"},      &restart},
         {{"file", "list"},           &listFileAndFolder},
         {{"file", "delete"},         &deleteFile},
+        {{"file", "get"},            &getFile},
         {{"application", "list"},    &listApplications},
         {{"application", "start"},   &startApplication},
         {{"application", "stop"},    &stopApplication},
@@ -23,17 +24,11 @@ namespace Services {
 bool Services::getHelp(std::string &help) {
     help = "FAIL to get HELP!";
     
-    std::ifstream fin("src\\Help.txt");
+    std::ifstream fin("Help.txt");
     if (!fin.is_open())
         return false;
-    
-    std::string line;
-    help = "";
-
-    while (getline(fin, line))
-        help = help + line + "\n";
-
     fin.close();
+    help = "Help.txt";
     return true;
 }
 

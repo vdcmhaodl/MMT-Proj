@@ -1,5 +1,6 @@
 #include "serviceCommand.h"
 
+std::string seperator = "><";
 std::mt19937_64 rng(std::chrono::steady_clock().now().time_since_epoch().count());
 
 Command::Command(std::string target, std::string type, std::string action, std::vector<std::string> listName, std::vector<std::string> listOption) {
@@ -11,16 +12,14 @@ Command::Command(std::string target, std::string type, std::string action, std::
 }
 
 void Command::parseString(std::string stringStr, std::vector<std::string> &listStr) {
-    std::stringstream ss;
-    ss.clear();
-    ss << stringStr;
-    while(true) {
-        std::string str;
-        ss >> str;
-        if (str.empty()) {
-            break;
-        }
-        listStr.push_back(str);
+    size_t pos1 = 0, pos2 = 0;
+    while (true) {
+        pos2 = stringStr.find(">", pos2);
+        if (pos2 == std::string::npos)
+            return;
+        pos1 = stringStr.find("<", pos1);
+        listStr.push_back(stringStr.substr(pos1 + 1, pos2 - pos1 - 1));
+        ++pos1; ++pos2;
     }
 }
 
@@ -55,10 +54,10 @@ std::string Command::to_string() {
     command += type + '|';
     command += action + '|';
     for (auto name : listName) {
-        command += name + ' ';
+        command += '<' + name + '>';
     } command += '|';
     for (auto option : listOption) {
-        command += option + ' ';
+        command += '<' + option + '>';
     } command += '|';
     return command;
 }

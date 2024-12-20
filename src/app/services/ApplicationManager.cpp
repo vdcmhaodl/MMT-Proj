@@ -3,16 +3,6 @@
 
 std::vector<std::string> Services::startApplication(Command command) {
     std::string filename;
-    // filename = Command::generateFilepath(10, ".txt");
-    // std::ofstream fout (filename.c_str());
-    
-    // for (auto it : command.listName) {
-    //     if (!Services::startApplication(it))
-    //         fout << "Cannot start " << it << "\n";
-    //     else
-    //         fout << "Start app " << it << " successfully\n";
-    // }
-    // fout.close();
 
     for (auto it : command.listName) {
         if (!Services::startApplication(it))
@@ -26,17 +16,6 @@ std::vector<std::string> Services::startApplication(Command command) {
 
 std::vector<std::string> Services::stopApplication(Command command) {
     std::string filename;
-    // filename = Command::generateFilepath(10, ".txt");
-    // std::ofstream fout (filename.c_str());
-
-    // for (auto it : command.listName) {
-    //     if (!Services::stopApplication(it)) 
-    //         fout << "Cannot stop " << it << "\n";
-    //     else
-    //         fout << "Stop app " << it << " successfully\n";
-    // }
-
-    // fout.close();
 
     for (auto it : command.listName) {
         if (!Services::stopApplication(it)) 
@@ -48,11 +27,15 @@ std::vector<std::string> Services::stopApplication(Command command) {
 }
 
 std::vector<std::string> Services::listApplications(Command command) {
-    for (auto it : command.listName)
-        if (!Services::listApplications(it)) {
-            std::cerr << "Cannot list applications to file " << it << "\n";
-        }
-    return command.listName;
+    std::string filename = Command::generateFilepath(10, ".txt");
+
+    std::wstring wFileName (filename.begin(), filename.end());
+    if (!Services::listApplications(wFileName)) {
+        return std::vector<std::string> ({"Failed to list applications"});
+    }
+    std::cerr << "listApp successfully\n";
+    
+    return std::vector<std::string> ({filename});
 }
 
 bool Services::startApplication(const std::string &appName) {
@@ -96,24 +79,21 @@ bool Services::stopApplication(const std::string &appName) {
     return system(cmd.c_str()) == 0;
 }
 
-bool Services::listApplications(const std::string &saveFile) {
+bool Services::listApplications(const std::wstring &filename) {
     std::set<RunningApp> runningApps;
+    
     EnumWindows(EnumWindowsProc, reinterpret_cast<LPARAM>(&runningApps));
+    std::wofstream fout(filename.c_str());
+    fout.imbue(std::locale(fout.getloc(), new std::codecvt_utf8<wchar_t>));
 
-    std::ofstream fout(saveFile.c_str());
-    if (!fout.is_open()) {
-        return false;
-    }
-
-    fout << "Cac ung dung dang chay:\n\n";
     for (const auto &app : runningApps) {
-        fout << "Process ID: " << app.processID
-             << "\nTieu de cua so: " << app.windowTitle
-             << "\nTen executable: " << extractAppName(app.executableName)
-             << "\nPath: " << app.executableName << "\n\n";
+        fout << L"Process ID: " << app.processID << L"\n";
+        fout << L"Window title: " << app.windowTitle << L"\n";
+        fout << L"Executable name: " << extractAppName(app.executableName) << L"\n";
+        fout << L"Path: " << app.executableName << L"\n\n";
     }
-
     fout.close();
+
     return true;
 }
 
@@ -130,46 +110,46 @@ std::string ReadCMD(const char* cmd) {
     return result;
 }
 
-bool isSystemApp(const std::string &windowTitle, const std::string &executableName) {
-    std::vector<std::string> excludedTitles = {"Settings", "Program Manager", "Windows Input Experience"};
-    std::vector<std::string> excludedExecutables = {"SystemSettings.exe", "explorer.exe", "TextInputHost.exe", "ApplicationFrameHost.exe"};
-    for (const std::string &title : excludedTitles) {
-        if (windowTitle.find(title) != std::string::npos)
+bool isSystemApp(const std::wstring &windowTitle, const std::wstring &executableName) {
+    std::vector<std::wstring> excludedTitles = {L"Settings", L"Program Manager", L"Windows Input Experience"};
+    std::vector<std::wstring> excludedExecutables = {L"SystemSettings.exe", L"explorer.exe", L"TextInputHost.exe", L"ApplicationFrameHost.exe"};
+    for (const std::wstring &title : excludedTitles) {
+        if (windowTitle.find(title) != std::wstring::npos)
             return true;
     }
-    for (const std::string &exe : excludedExecutables) {
-        if (executableName.find(exe) != std::string::npos)
+    for (const std::wstring &exe : excludedExecutables) {
+        if (executableName.find(exe) != std::wstring::npos)
             return true;
     }
-
     return false;
 }
 
-std::string extractAppName(const std::string &path) {
-    return std::filesystem::path(path).filename().string();
+std::wstring extractAppName(const std::wstring &path) {
+    return std::filesystem::path(path).filename().wstring();
 }
 
 BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
     DWORD processID;
     GetWindowThreadProcessId(hwnd, &processID);
 
-    if (IsWindowVisible(hwnd) && GetWindowTextLength(hwnd) > 0)
+    if (IsWindowVisible(hwnd) && GetWindowTextLengthW(hwnd) > 0)
     {
         RunningApp app;
         app.processID = processID;
 
-        int length = GetWindowTextLength(hwnd) + 1;
-        std::vector<char> title(length);
-        GetWindowTextA(hwnd, &title[0], length);
-        app.windowTitle = &title[0];
+        int length = GetWindowTextLengthW(hwnd) + 1;
+        std::vector<wchar_t> title(length);
+        GetWindowTextW(hwnd, &title[0], length);
+
+        app.windowTitle.assign(title.begin(), title.end());
 
         HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processID);
         if (hProcess)
         {
-            std::vector<char> exeName(MAX_PATH);
-            if (GetModuleFileNameExA(hProcess, NULL, &exeName[0], MAX_PATH))
+            std::vector<wchar_t> exeName(MAX_PATH);
+            if (GetModuleFileNameExW(hProcess, NULL, &exeName[0], MAX_PATH))
             {
-                app.executableName = &exeName[0];
+                app.executableName.assign(exeName.begin(), exeName.end());
             }
             CloseHandle(hProcess);
         }

