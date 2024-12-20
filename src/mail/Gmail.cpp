@@ -2,7 +2,7 @@
 
 const std::string seperateLine = "#*^";
 
-std::set<std::string> GmailAccount::adminEmail;
+std::set<std::string> GmailAccount::adminEmails;
 
 size_t GmailAccount::headerCallback(char* buffer, size_t size, size_t nitems, std::string* userdata) {
     userdata -> append(std::string(buffer, size * nitems));
@@ -19,14 +19,39 @@ void GmailAccount::readAdminEmail() {
 
     std::string s;
     while (getline(fin, s)) {
-        adminEmail.insert(s);
+        adminEmails.insert(s);
     }
 
     fin.close();
 }
 
 bool GmailAccount::isValidAdminEmail(const std::string &sender) {
-    return (adminEmail.find(sender) != adminEmail.end());
+    return (adminEmails.find(sender) != adminEmails.end());
+}
+
+bool GmailAccount::addAdminEmail(const std::string &email) {
+    if (adminEmails.find(email) != adminEmails.end()) {
+        std::cerr << email << " has already been admin email!\n";
+        return false;
+    }
+    adminEmails.insert(email);
+    std::ofstream fout("AdminAccount.txt", std::ios::app);
+    fout << email << "\n";
+    fout.close();
+    return true;
+}
+
+bool GmailAccount::removeAdminEmail(const std::string &email) {
+    if (adminEmails.find(email) == adminEmails.end()) {
+        std::cerr << email << " isn't an admin email!\n";
+        return false;
+    }
+    adminEmails.erase(email);
+    std::ofstream fout("AdminAccount.txt");
+    for (auto &e : adminEmails)
+        fout << e << "\n";
+    fout.close();
+    return true;
 }
 
 GmailAccount::GmailAccount(std::string Username, std::string Password) {
@@ -36,12 +61,11 @@ GmailAccount::GmailAccount(std::string Username, std::string Password) {
 void GmailAccount::initializeInfo(std::string &Username, std::string &Password) {
     this->username = Username;
     this->password = Password;
-    if (adminEmail.empty()) 
+    if (adminEmails.empty()) 
         readAdminEmail();
 }
 
-std::queue<std::string> GmailAccount::searchNewEmail()
-{
+std::queue<std::string> GmailAccount::searchNewEmail() {
     CURL* handle;
     CURLcode res = CURLE_OK;
     std::queue<std::string> qEmailNums;
@@ -377,30 +401,3 @@ bool GmailAccount::receiveEmail(Email &email, std::string &content, const std::s
     }
     return (res == CURLE_OK);
 }
-
-// void GmailAccount::autoCheckEmail() {
-//     Email email;
-//     std::queue<std::string> emailNumbers;
-//     while (true) {
-//         if (_kbhit()) {
-//             std::cout << "Key pressed. Stop check email!\n";
-//             break;
-//         }
-//         emailNumbers = this->searchNewEmail();
-//         while (!emailNumbers.empty()) {
-//             std::string eNum = emailNumbers.front();
-//             emailNumbers.pop();
-//             this->receiveEmail(email, eNum);
-//             if (!isValidAdminEmail(email.account)) {
-//                 std::cerr << "Not Admin!\n";
-//                 continue;
-//             }
-//             std::cout << "New email: \n";
-//             std::cout << "\tSender: \t" << email.account << "\n"
-//                       << "\tSubject: \t" << email.subject << "\n"
-//                       << "\tContent: \t" << email.content << "\n";
-//             std::cout << "----------------------------\n";
-//         }
-//         std::this_thread::sleep_for(std::chrono::seconds(5));
-//     }
-// }
