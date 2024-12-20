@@ -160,6 +160,9 @@ Command Gmail::constructCommand(Mail &mail) {
     std::getline(ss, stringName);
     std::getline(ss, stringOption);
 
+    std::cout << cleansedContent << "\n" << command.target
+                << "\n" << stringName << "\n" << stringOption << "\n";
+
     // std::osyncstream(std::cout) << "[" << command.type << "]" << "[" << command.action << "]" << "[" << command.target << "]" << '\n';
     command.parseString(stringName, command.listName);
     command.parseString(stringOption, command.listOption);
@@ -262,6 +265,29 @@ void Client::resolveCommand(FullCommand FC) {
     IPdata = false;
     mediator->Forward(COMPONENT::CLIENT_COMPONENT, COMPONENT::BROADCAST_COMPONENT, "request");
     while(!IPdata) {}
+    if (FC.command.type == "IP") {
+        std::string content = "SERVER IP:\n";
+        for (auto &[IP, info] : listIP) {
+            auto &[hostname, status] = info;
+            content += '{' + IP + '|' + hostname + '|' + status + '}' + '\n';
+        }
+        mediator->Forward(new std::any(std::pair<Email, std::vector<std::string>>(FC.email, std::vector<std::string>{content})), "content", COMPONENT::MAIL_COMPONENT);
+        return;
+    }
+    else if (FC.command.type == "help") {
+        std::string result = "FAIL to get HELP!";
+        std::ifstream fin("Help.txt");
+        if (fin.is_open()) {
+            result = "Help.txt";
+            fin.close();
+            mediator->Forward(new std::any(std::pair<Email, std::vector<std::string>>(FC.email, std::vector<std::string>{result})), "file", COMPONENT::MAIL_COMPONENT);
+        } 
+        else {
+            mediator->Forward(new std::any(std::pair<Email, std::vector<std::string>>(FC.email, std::vector<std::string>{result})), "content", COMPONENT::MAIL_COMPONENT);
+        }
+        return;
+    }
+
     if (listIP.find(FC.command.target) == listIP.end()) {
         std::string newMsg = Services::getCurrentTimeString() + "|" + "Cannot find the target IP " + FC.command.to_string();
         mediator->Forward(new std::any(newMsg), "LOG", COMPONENT::UI_COMPONENT);

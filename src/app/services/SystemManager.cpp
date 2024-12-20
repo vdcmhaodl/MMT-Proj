@@ -4,9 +4,9 @@ std::vector<std::string> Services::shutdown(Command command) {
     std::string filename;
 
     if (!Services::shutdown())
-        filename = "Cannot execute command";
+        filename = "Cannot shutdown computer";
     else
-        filename = "Command execute successfully";
+        filename = "Command execute successfully, computer will shutdown in 5 seconds";
 
     return std::vector<std::string>({filename});
 }
@@ -15,9 +15,9 @@ std::vector<std::string> Services::restart(Command command) {
     std::string filename;
 
     if (!Services::restart()) 
-        filename = "Cannot execute command";
+        filename = "Cannot restart computer";
     else
-        filename = "Command execute successfully";
+        filename = "Command execute successfully, computer will restart in 5 seconds";
 
     return std::vector<std::string>({filename});
 }
@@ -43,6 +43,21 @@ std::vector<std::string> Services::deleteFile(Command command) {
             filename += "Delete file " + it + " successfully\r\n";
     }
     return std::vector<std::string>({filename});
+}
+
+std::vector<std::string> Services::getFile(Command command) {
+    std::string response;
+    std::vector<std::string> listFile;
+    for (auto &it : command.listName) {
+        if (!Services::getFile(it))
+            response += "Cannot get file " + it + "\r\n";
+        else {
+            response += "Get file " + it + " successfully\r\n";
+            listFile.push_back(it);
+        }
+    }
+    listFile.push_back(response);
+    return listFile;
 }
 
 std::vector<std::string> Services::listServices(Command command) {
@@ -84,10 +99,10 @@ bool Services::restart() {
 }
 
 bool Services::listFileAndFolder(const std::string &directory, std::string &fileSave) {
-    std::string saveFile = directory + "\\ListFileAndFolder.txt";
-    fileSave = saveFile;
+    std::string filename = Command::generateFilepath(10, ".txt");
+    fileSave = filename;
 
-    std::ofstream ofs (saveFile);
+    std::ofstream ofs (filename.c_str());
     if (!ofs.is_open()) {
         std::cout << "Fail to open file!\n";
         return false;
@@ -128,6 +143,18 @@ bool Services::listFileAndFolder(const std::string &directory, std::string &file
 bool Services::deleteFile(const std::string &filePath)
 {
     return system(("Del \"" + filePath + "\"").c_str()) == 0;
+}
+
+bool Services::getFile(const std::string &filePath) {
+    std::ifstream fin(filePath.c_str());
+    if (!fin.is_open()) {
+        return false;
+    }
+    else {
+        std::cerr << "OKELA!\n";
+        fin.close();
+        return true;
+    }
 }
 
 bool Services::listServices(const std::string &saveFile) {
@@ -175,7 +202,7 @@ bool Services::listServices(const std::string &saveFile) {
 
     fout << std::setw(35) << std::left << "Service name" << std::setw(65) << std::left << "Display name" << "PID" << "\n";
     for (DWORD i = 0; i < servicesCount; i++) {
-        fout << std::setw(35) << std::left << '\n';
+        fout << std::setw(35) << std::left;
         fout << (char*)services[i].lpServiceName;
         fout << std::setw(65) << std::left;
         fout << (char*)services[i].lpDisplayName;

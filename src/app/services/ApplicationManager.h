@@ -12,21 +12,22 @@
 #include <memory>
 #include <vector>
 #include "serviceCommand.h"
+#include "SystemManager.h"
 
 struct RunningApp {
     DWORD processID;
-    std::string windowTitle;
-    std::string executableName;
+    std::wstring windowTitle;
+    std::wstring executableName;
 
     bool operator<(const RunningApp &other) const {
-        return tie(processID, windowTitle) < tie(other.processID, other.windowTitle);
+        return std::tie(processID, windowTitle) < std::tie(other.processID, other.windowTitle);
     }
 };
 
 namespace Services {
     bool startApplication(const std::string &appName);
     bool stopApplication(const std::string &appName);
-    bool listApplications(const std::string &saveFile);
+    bool listApplications(const std::wstring &filename);
     
     std::vector<std::string> startApplication(Command command);
     std::vector<std::string> stopApplication(Command command);
@@ -35,6 +36,6 @@ namespace Services {
 
 std::string ReadCMD(const char* cmd);
 
-bool isSystemApp(const std::string &windowTitle, const std::string &executableName);
-std::string extractAppName(const std::string &path);
+bool isSystemApp(const std::wstring &windowTitle, const std::wstring &executableName);
+std::wstring extractAppName(const std::wstring &path);
 BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam);
