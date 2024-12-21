@@ -57,13 +57,13 @@ bool Services::screenShot(const std::string &filename) {
     std::wstring fileName (filename.begin(), filename.end());
 
     SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
-	UINT32 dpi = 96;
-	HMONITOR hMonitor = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);
-	if (hMonitor)
-		GetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &dpi, &dpi);
+    UINT dpi = 96;
+    HMONITOR hMonitor = MonitorFromWindow(nullptr, MONITOR_DEFAULTTOPRIMARY);
+    if (hMonitor)
+        GetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &dpi, &dpi);
 
-	int screenWidth = GetSystemMetricsForDpi(SM_CXSCREEN, dpi);
-	int screenHeight = GetSystemMetricsForDpi(SM_CYSCREEN, dpi);
+    int screenWidth = GetSystemMetricsForDpi(SM_CXSCREEN, dpi);
+    int screenHeight = GetSystemMetricsForDpi(SM_CYSCREEN, dpi);
     
     HDC hdcScreen = GetDC(NULL);
     if (!hdcScreen) {
