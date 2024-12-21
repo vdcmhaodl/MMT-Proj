@@ -33,8 +33,8 @@ class GmailAccount {
         static bool isValidAdminEmail(const std::string &sender);
         static size_t headerCallback(char *buffer, size_t size, size_t nitems, std::string *userdata);
     public:
-        static bool addAdminEmail(const std::string &email);
-        static bool removeAdminEmail(const std::string &email);
+        // static bool addAdminEmail(const std::string &email);
+        // static bool removeAdminEmail(const std::string &email);
 
         GmailAccount(std::string Username = "", std::string Password = "");
         void initializeInfo(std::string &Username, std::string &Password);

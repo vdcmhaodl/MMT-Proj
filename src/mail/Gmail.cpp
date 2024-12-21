@@ -11,7 +11,7 @@ size_t GmailAccount::headerCallback(char* buffer, size_t size, size_t nitems, st
 }
 
 void GmailAccount::readAdminEmail() {
-    std::ifstream fin ("..\\mail\\AdminAccount.txt");
+    std::ifstream fin ("AdminAccount.txt");
     if (!fin.is_open()) {
         std::cerr << "Fail to read Admin's Email!\n";
         return;
@@ -29,30 +29,30 @@ bool GmailAccount::isValidAdminEmail(const std::string &sender) {
     return (adminEmails.find(sender) != adminEmails.end());
 }
 
-bool GmailAccount::addAdminEmail(const std::string &email) {
-    if (adminEmails.find(email) != adminEmails.end()) {
-        std::cerr << email << " has already been admin email!\n";
-        return false;
-    }
-    adminEmails.insert(email);
-    std::ofstream fout("AdminAccount.txt", std::ios::app);
-    fout << email << "\n";
-    fout.close();
-    return true;
-}
+// bool GmailAccount::addAdminEmail(const std::string &email) {
+//     if (adminEmails.find(email) != adminEmails.end()) {
+//         std::cerr << email << " has already been admin email!\n";
+//         return false;
+//     }
+//     adminEmails.insert(email);
+//     std::ofstream fout("AdminAccount.txt", std::ios::app);
+//     fout << email << "\n";
+//     fout.close();
+//     return true;
+// }
 
-bool GmailAccount::removeAdminEmail(const std::string &email) {
-    if (adminEmails.find(email) == adminEmails.end()) {
-        std::cerr << email << " isn't an admin email!\n";
-        return false;
-    }
-    adminEmails.erase(email);
-    std::ofstream fout("AdminAccount.txt");
-    for (auto &e : adminEmails)
-        fout << e << "\n";
-    fout.close();
-    return true;
-}
+// bool GmailAccount::removeAdminEmail(const std::string &email) {
+//     if (adminEmails.find(email) == adminEmails.end()) {
+//         std::cerr << email << " isn't an admin email!\n";
+//         return false;
+//     }
+//     adminEmails.erase(email);
+//     std::ofstream fout("AdminAccount.txt");
+//     for (auto &e : adminEmails)
+//         fout << e << "\n";
+//     fout.close();
+//     return true;
+// }
 
 GmailAccount::GmailAccount(std::string Username, std::string Password) {
     initializeInfo(Username, Password);
