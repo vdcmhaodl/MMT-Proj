@@ -211,16 +211,6 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     } break;
 
     case WM_DESTROY:{
-        // std::string resultINFO = (MAIL.Window() == NULL ? "SUCCESS" : "FAIL");
-        // std::string resultHELP = (HELP.Window() == NULL ? "SUCCESS" : "FAIL");
-        // std::string resultIP = (IP.Window() == NULL ? "SUCCESS" : "FAIL");
-        // std::string resultLOG = (LOG.Window() == NULL ? "SUCCESS" : "FAIL");
-        // std::string resultEXTRA = (EXTRA.Window() == NULL ? "SUCCESS" : "FAIL");
-        // MessageBoxA(INFO.Window(), (char*)resultINFO.c_str(), "WM_DESTROY", MB_OK);
-        // MessageBoxA(INFO.Window(), (char*)resultHELP.c_str(), "WM_DESTROY", MB_OK);
-        // MessageBoxA(INFO.Window(), (char*)resultIP.c_str(), "WM_DESTROY", MB_OK);
-        // MessageBoxA(INFO.Window(), (char*)resultLOG.c_str(), "WM_DESTROY", MB_OK);
-        // MessageBoxA(INFO.Window(), (char*)resultEXTRA.c_str(), "WM_DESTROY", MB_OK);
         PostQuitMessage(0);
         return 0;
     }

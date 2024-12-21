@@ -532,3 +532,23 @@ Receive new IP update
 
 2024-12-21 11:54:54|IP update: 192.168.2.19 - ASUS-ZENBOOK-of-TranMeen - DELETE
 
+2024-12-21 15:27:40|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 15:27:44|New mail: 192.168.2.46|webcam|record|<nhmt.mp4>|<20>|
+
+2024-12-21 15:27:44|Start resolve command: 192.168.2.46|webcam|record|<nhmt.mp4>|<20>|
+2024-12-21 15:27:44|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 15:28:52|Request webcam - record from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 15:28:08|New mail: 192.168.2.46|application|list|||
+
+2024-12-21 15:28:52|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 15:28:52|Start resolve command: 192.168.2.46|application|list|||
+2024-12-21 15:28:56|Request application - list from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 15:28:56|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 15:28:56|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+

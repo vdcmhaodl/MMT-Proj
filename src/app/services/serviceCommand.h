@@ -29,4 +29,5 @@ public:
 
     static std::string generateFilename(int length);
     static std::string generateFilepath(int length, std::string extension);
+    static std::string generateFilepathWithFolder(std::string filename);
 };

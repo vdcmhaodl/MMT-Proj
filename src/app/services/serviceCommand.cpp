@@ -79,3 +79,9 @@ std::string Command::generateFilepath(int length, std::string extension) {
     folder /= filename;
     return folder.string();
 }
+
+std::string Command::generateFilepathWithFolder(std::string filename) {
+    auto folder = std::filesystem::temp_directory_path();
+    folder /= filename;
+    return folder.string();
+}

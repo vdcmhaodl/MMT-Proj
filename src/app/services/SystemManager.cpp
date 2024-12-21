@@ -53,6 +53,11 @@ std::vector<std::string> Services::getFile(Command command) {
             response += "Cannot get file " + it + "\r\n";
         else {
             response += "Get file " + it + " successfully\r\n";
+
+            std::string filename = std::filesystem::path(it).filename().string();
+            std::string newFilename = Command::generateFilepathWithFolder(filename);
+            CopyFileA(it.c_str(), newFilename.c_str(), TRUE);
+
             listFile.push_back(it);
         }
     }
@@ -151,7 +156,7 @@ bool Services::getFile(const std::string &filePath) {
         return false;
     }
     else {
-        std::cerr << "OKELA!\n";
+        // std::cerr << "OKELA!\n";
         fin.close();
         return true;
     }
