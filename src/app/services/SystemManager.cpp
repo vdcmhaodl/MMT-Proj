@@ -201,6 +201,7 @@ bool Services::listServices(const std::string &saveFile) {
     LPENUM_SERVICE_STATUS_PROCESS services = (LPENUM_SERVICE_STATUS_PROCESS)buffer;
 
     fout << std::setw(35) << std::left << "Service name" << std::setw(65) << std::left << "Display name" << "PID" << "\n";
+    fout << std::string(150, '-') << "\n";
     for (DWORD i = 0; i < servicesCount; i++) {
         fout << std::setw(35) << std::left;
         fout << (char*)services[i].lpServiceName;

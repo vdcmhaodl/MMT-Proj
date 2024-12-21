@@ -56,7 +56,7 @@ void Broadcast::start() {
             socketAPI::update_list(listIP, IP, hostname, status);
             mediator->Forward(new std::any(listIP), "IP", COMPONENT::UI_COMPONENT);
 
-            std::string newMsg = Services::getCurrentTimeString() + "|" + "IP update: " + IP + " - " + hostname + " - " + status;
+            std::string newMsg = Services::getCurrentTimeString() + "|" + "IP update: " + IP + " - " + hostname + " - " + status + "\n";
             mediator->Forward(new std::any(newMsg), "LOG", COMPONENT::UI_COMPONENT);
             // COPYDATASTRUCT cds = wrapperData(socketAPI::createServerMessage(IP, hostname, status), MainWindow::IP_MESSAGE);
             // SendMessageA(win.Window(), WM_COMMAND, MAKEWORD(MainWindow::IP_UPDATE_MESSAGE, 0), 0);
@@ -114,12 +114,12 @@ void Gmail::start() {
         std::queue<Mail> newMail = clientMail.getEmailQueue();
         mtx.unlock();
 
-        std::this_thread::sleep_for(std::chrono::seconds(15));
-
         // std::osyncstream(std::cout) << "NUMBER OF MAIL: " << newMail.size() << '\n';
         if (!newMail.size()) {
+            std::this_thread::sleep_for(std::chrono::seconds(15));
             continue;
         }
+        
         // std::unique_lock<std::mutex> lock(mtx);
         FullCommand FC;
         while(!newMail.empty()) {
@@ -128,7 +128,7 @@ void Gmail::start() {
             FC.command = constructCommand(newMail.front());
             FC.email = newMail.front().sender;
 
-            std::string newMsg = Services::getCurrentTimeString() + "|" + "New mail: " + FC.command.to_string();
+            std::string newMsg = Services::getCurrentTimeString() + "|" + "New mail: " + FC.command.to_string() + "\n";
             mediator->Forward(new std::any(newMsg), "LOG", COMPONENT::UI_COMPONENT);
 
             // std::osyncstream(std::cout) << "[" << "start forwarding" << "]";
@@ -136,6 +136,7 @@ void Gmail::start() {
             // std::osyncstream(std::cout) << "[" << "forward complete?" << "]";
             newMail.pop();
         }
+        std::this_thread::sleep_for(std::chrono::seconds(20));
     }
 }
 
@@ -160,8 +161,8 @@ Command Gmail::constructCommand(Mail &mail) {
     std::getline(ss, stringName);
     std::getline(ss, stringOption);
 
-    std::cout << cleansedContent << "\n" << command.target
-                << "\n" << stringName << "\n" << stringOption << "\n";
+    // std::cout << cleansedContent << "\n" << command.target
+    //             << "\n" << stringName << "\n" << stringOption << "\n";
 
     // std::osyncstream(std::cout) << "[" << command.type << "]" << "[" << command.action << "]" << "[" << command.target << "]" << '\n';
     command.parseString(stringName, command.listName);
@@ -213,8 +214,8 @@ void Gmail::Receive(std::any *ptr, std::string type) {
             mtx.unlock();
         }
     }
-    std::string newMsg = Services::getCurrentTimeString() + "|" + "Request from " + FC.first.account + " success!";
-        mediator->Forward(new std::any(newMsg), "LOG", COMPONENT::UI_COMPONENT);
+    // std::string newMsg = Services::getCurrentTimeString() + "|" + "Request from " + FC.first.account + " success!";
+    // mediator->Forward(new std::any(newMsg), "LOG", COMPONENT::UI_COMPONENT);
     
     delete ptr;
 }
@@ -325,6 +326,17 @@ void Client::resolveCommand(FullCommand FC) {
 
     mediator->Forward(new std::any(std::pair<Email, std::vector<std::string>>(FC.email, listReceiveMsg)), "content", COMPONENT::MAIL_COMPONENT);
     mediator->Forward(new std::any(std::pair<Email, std::vector<std::string>>(FC.email, listReceiveFile)), "file", COMPONENT::MAIL_COMPONENT);
+
+    // notice successfully
+    std::string newMsg = Services::getCurrentTimeString() + "|" + "Request " + FC.command.type + " - " + FC.command.action
+                        + " from " + FC.email.account + " successfully!\n";
+    mediator->Forward(new std::any(newMsg), "LOG", COMPONENT::UI_COMPONENT);
+
+    //delete file
+    for (auto &it : listReceiveFile) {
+        Services::deleteFile(it);
+    }        
+
     // Expect receiving a file
     
     client.disconnect();

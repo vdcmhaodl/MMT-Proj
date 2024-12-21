@@ -33,12 +33,12 @@ help:
 	$(info make main_GUI.exe: Build the client application side (GUI version))
 	$(info make main_terminal.exe: Build the client application side (TUI version))
 
-all: main_server.exe main_GUI.exe # main_terminal.exe clean
+all: ServerApp/main_server.exe ClientApp/main_GUI.exe # main_terminal.exe clean
 
-main_server.exe: $(OBJS_MAIN_SERVER)
+ServerApp/main_server.exe: $(OBJS_MAIN_SERVER)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(STATIC_LDFLAGS)
 
-main_GUI.exe: $(OBJS_MAIN_CLIENT_GUI)
+ClientApp/main_GUI.exe: $(OBJS_MAIN_CLIENT_GUI)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(CURL_FLAGS)
 
 main_terminal.exe: $(OBJS_MAIN_CLIENT_TERMINAL)

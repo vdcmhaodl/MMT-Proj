@@ -67,7 +67,7 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         hInfo = CreateWindowExA(0, "EDIT", logContent.c_str(), 
             WS_CHILD | WS_BORDER | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY, 
-            125, 25, 675, 75, m_hwnd, (HMENU)1, GetModuleHandle(NULL), NULL ); 
+            125, 25, 775, 75, m_hwnd, (HMENU)1, GetModuleHandle(NULL), NULL ); 
         SendMessage(hInfo, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
         
         // HFONT hFont = (HFONT)GetStockObject(ANSI_FIXED_FONT); 
@@ -75,7 +75,7 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         hEdit = CreateWindowExA(0, "EDIT", NULL, 
             WS_CHILD | WS_BORDER | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY, 
-            125, 125, 675, 275, m_hwnd, (HMENU)0, GetModuleHandle(NULL), NULL ); 
+            125, 125, 775, 275, m_hwnd, (HMENU)0, GetModuleHandle(NULL), NULL ); 
         SendMessage(hEdit, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
 
         ReleaseDC(m_hwnd, hdc);
@@ -271,7 +271,7 @@ LRESULT UI::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 void UI::initialize(std::vector<std::string> &signinInput) {
     setMode(AUTOMATIC);
-    MAIL.setFilePath("mail/AdminAccount.txt");
+    MAIL.setFilePath("../mail/AdminAccount.txt");
     HELP.setFilePath("HELP.txt");
     ABOUT.setFilePath("ABOUT.txt");
     // LOG.setFilePath("LOG.txt");

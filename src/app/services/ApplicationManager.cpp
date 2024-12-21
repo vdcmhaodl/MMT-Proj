@@ -2,28 +2,29 @@
 
 
 std::vector<std::string> Services::startApplication(Command command) {
-    std::string filename;
+    std::string response;
 
-    for (auto it : command.listName) {
+    for (auto &it : command.listName) {
         if (!Services::startApplication(it))
-            filename += "Cannot start " + it + "\r\n";
+            response += "Cannot start " + it + "\n";
         else
-            filename += "Start app " + it + " successfully\r\n";
+            response += "Start app " + it + " successfully\n";
     }
-
-    return std::vector<std::string> ({filename});
+    // std::cout << "\n" << response << "\n";
+    return std::vector<std::string> ({response});
 }
 
 std::vector<std::string> Services::stopApplication(Command command) {
-    std::string filename;
+    std::string response;
 
-    for (auto it : command.listName) {
+    for (auto &it : command.listName) {
         if (!Services::stopApplication(it)) 
-            filename += "Cannot stop " + it + "\n";
+            response += "Cannot stop " + it + "\n";
         else
-            filename += "Stop app " + it + " successfully\n";
+            response += "Stop app " + it + " successfully\n";
     }
-    return std::vector<std::string> ({filename});
+    // std::cout << "\n" << response << "\n";
+    return std::vector<std::string> ({response});
 }
 
 std::vector<std::string> Services::listApplications(Command command) {

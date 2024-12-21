@@ -20,12 +20,6 @@ std::vector<std::string> Services::webcamRecord(Command command) {
         if (videoDuration < 0 || videoDuration > VIDEO_MAX_DURATION)
             videoDuration = VIDEO_MAX_DURATION;
 
-        // record video to fileName
-        // if (!Services::webcamRecord(fileName, videoDuration))
-        //     fout << "Fail to record video " << fileName << "\n";
-        // else
-        //     fout << "Record video " << fileName << " successfully\n";
-
         if (!Services::webcamRecord(fileName, videoDuration))
             response += "Fail to record video " + fileName + "\r\n";
         else
@@ -40,16 +34,6 @@ std::vector<std::string> Services::webcamRecord(Command command) {
 
 std::vector<std::string> Services::screenShot(Command command) {
     std::string filename;
-    // filename = Command::generateFilepath(10, ".txt");
-    // std::ofstream fout (filename.c_str());
-
-    // for (auto &it : command.listName) {
-    //     if (!Services::screenShot(it))
-    //         fout << "Fail to screenshot picture " << it << "\n";
-    //     else
-    //         fout << "Screenshot to file " << it << " successfully\n";
-    // }
-    // fout.close();
 
     for (auto &it : command.listName) {
         if (!Services::screenShot(it))

@@ -7,6 +7,7 @@
 #include "UI.h"
 #include "../mail/Gmail.h"
 #include "../share_queue.h"
+#include "../app/services.h"
 #include "mediator.h"
 #include <any>
 
