@@ -8,6 +8,7 @@
 #include <set>
 #include <syncstream>
 
+const std::string client = "mmt23clc007017236@gmail.com";
 const std::string CAcert = "CAcertificate/cacert.pem";
 
 struct Email {

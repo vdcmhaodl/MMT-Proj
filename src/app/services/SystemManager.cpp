@@ -78,7 +78,7 @@ std::vector<std::string> Services::startService(Command command) {
         if (!Services::startService(it))
             filename += "Cannot start service " + it + "\r\n";
         else
-            filename += "Delete service " + it + " successfully\r\n";
+            filename += "Start service " + it + " successfully\r\n";
     }
     return std::vector<std::string> ({filename});
 }
