@@ -13,7 +13,6 @@ struct serverSocket {
     bool listenClient();
 
     bool anyPendingConnection();
-    bool connectClient();
 
     bool disconnect();
     bool cleanup();

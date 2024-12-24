@@ -39,7 +39,6 @@ void P2P_Socket::initialize(char *IP_addr, char *subnetMask) {
     //Set target address 
     ZeroMemory(&sendHints, sizeof(sendHints));
     sendHints.sin_family = AF_INET;
-    // inet_pton(AF_INET, (PCSTR)(multicastIP.c_str()), &sendHints.sin_addr.s_addr);
     sendHints.sin_port = htons(DEFAULT_BROADCAST);
     sendHints.sin_addr.s_addr = socketAPI::getBinaryIP((char*)multicastIP.c_str());
 

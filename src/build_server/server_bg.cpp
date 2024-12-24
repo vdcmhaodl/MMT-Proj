@@ -42,6 +42,7 @@ int startServer() {
     std::osyncstream(std::cout) << "INITIALIZE COMPLETED!\nIP address: " << broadcast.get_true_IP_addr() << "\n";
 
     while(isRunning) {
+        std::osyncstream(std::cout) << "WATING FOR CONNECTION...\n";
         if (!server.anyPendingConnection()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(750));
             continue;
@@ -53,7 +54,7 @@ int startServer() {
 
         executeCommand();
 
-        std::cout << "FINISH CONNECTION!\n";
+        std::osyncstream(std::cout) << "FINISH CONNECTION!\n";
         server.disconnect();
         broadcast.createMessage(STATUS::FREE_SOCKET);
     }
@@ -77,7 +78,7 @@ void executeCommand() {
         // std::string failure = Command::generateFilepath(10, ".txt");
 
         // std::ofstream fout (failure.c_str());
-        // std::cerr << "Invalid command\n";
+        // std::osyncstream(std::cerr) << "Invalid command\n";
         // fout.close();
 
         std::string failure = "Invalid command\n";
@@ -92,7 +93,7 @@ void executeCommand() {
 
     std::string message[2] = {"file", "content"};
     for (auto filename: listFilename) {
-        // std::cout << "filename: " << filename << " " << std::filesystem::exists(filename) << "\n";
+        // std::osyncstream(std::cout) << "filename: " << filename << " " << std::filesystem::exists(filename) << "\n";
         if (std::filesystem::exists(filename)) {
             socketAPI::sendMessage(server.client, message[0]);
             socketAPI::sendFile(server.client, filename);

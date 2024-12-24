@@ -13,7 +13,7 @@ size_t GmailAccount::headerCallback(char* buffer, size_t size, size_t nitems, st
 void GmailAccount::readAdminEmail() {
     std::ifstream fin ("AdminAccount.txt");
     if (!fin.is_open()) {
-        std::cerr << "Fail to read Admin's Email!\n";
+        std::osyncstream(std::cerr) << "Fail to read Admin's Email!\n";
         return;
     }
 
@@ -31,7 +31,7 @@ bool GmailAccount::isValidAdminEmail(const std::string &sender) {
 
 // bool GmailAccount::addAdminEmail(const std::string &email) {
 //     if (adminEmails.find(email) != adminEmails.end()) {
-//         std::cerr << email << " has already been admin email!\n";
+//         std::osyncstream(std::cerr) << email << " has already been admin email!\n";
 //         return false;
 //     }
 //     adminEmails.insert(email);
@@ -43,7 +43,7 @@ bool GmailAccount::isValidAdminEmail(const std::string &sender) {
 
 // bool GmailAccount::removeAdminEmail(const std::string &email) {
 //     if (adminEmails.find(email) == adminEmails.end()) {
-//         std::cerr << email << " isn't an admin email!\n";
+//         std::osyncstream(std::cerr) << email << " isn't an admin email!\n";
 //         return false;
 //     }
 //     adminEmails.erase(email);
@@ -86,7 +86,7 @@ std::queue<std::string> GmailAccount::searchNewEmail() {
         
         res = curl_easy_perform(handle);
         if (res != CURLE_OK) {
-            std::cerr << "Error: " << curl_easy_strerror(res) << "\n";
+            std::osyncstream(std::cerr) << "Error: " << curl_easy_strerror(res) << "\n";
             return qEmailNums;
         }
         // get email numbers
@@ -101,7 +101,7 @@ std::queue<std::string> GmailAccount::searchNewEmail() {
             searchResult.erase(pos1 + 1);
         // if no new email
         if (searchResult == "OK SEARCH completed (Success)") {
-            std::cerr << "No new Email!\n";
+            std::osyncstream(std::cerr) << "No new Email!\n";
             return qEmailNums;
         }
 
@@ -188,7 +188,7 @@ bool GmailAccount::repEmail(const Email &email, const std::string &content, cons
         if (filePath != "") {
             std::ifstream file(filePath.c_str(), std::ios::binary);
             if (!file.is_open()) {
-                std::cerr << "File Error!\n";
+                std::osyncstream(std::cerr) << "File Error!\n";
                 curl_mime_free(mime);
                 curl_slist_free_all(headers);
                 curl_slist_free_all(listRecipients);
@@ -206,7 +206,7 @@ bool GmailAccount::repEmail(const Email &email, const std::string &content, cons
 
         res = curl_easy_perform(handle);
         if (res != CURLE_OK)
-            std::cerr << "ERROR!!!\n" << curl_easy_strerror(res) << "\n";
+            std::osyncstream(std::cerr) << "ERROR!!!\n" << curl_easy_strerror(res) << "\n";
 
         // clean memory
         curl_mime_free(mime);
@@ -264,7 +264,7 @@ bool GmailAccount::sendEmail(const Email& email, const std::string &content, con
         if (filePath != "") {
             std::ifstream file(filePath.c_str(), std::ios::binary);
             if (!file.is_open()) {
-                std::cerr << "File Error!\n";
+                std::osyncstream(std::cerr) << "File Error!\n";
                 curl_mime_free(mime);
                 curl_slist_free_all(headers);
                 curl_slist_free_all(listRecipients);
@@ -281,7 +281,7 @@ bool GmailAccount::sendEmail(const Email& email, const std::string &content, con
 
         res = curl_easy_perform(handle);
         if (res != CURLE_OK)
-            std::cerr << "ERROR!!!\n" << curl_easy_strerror(res) << "\n";
+            std::osyncstream(std::cerr) << "ERROR!!!\n" << curl_easy_strerror(res) << "\n";
 
         // clean memory
         curl_slist_free_all(listRecipients);
@@ -317,14 +317,14 @@ bool GmailAccount::receiveEmail(Email &email, std::string &content, const std::s
         curl_easy_setopt(handle, CURLOPT_HEADERDATA, &email.account);
         res = curl_easy_perform(handle);
         if (res != CURLE_OK) {
-            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << "\n";
+            std::osyncstream(std::cerr) << "curl_easy_perform() failed: " << curl_easy_strerror(res) << "\n";
         }
         pos1 = email.account.find("From", 0);
         pos1 = email.account.find("<", pos1);
         pos2 = email.account.find(">", pos1);
         email.account = email.account.substr(pos1 + 1, pos2 - pos1 - 1);
         if (!isValidAdminEmail(email.account)) {
-            std::cerr << "Not email's admin!\n";
+            std::osyncstream(std::cerr) << "Not email's admin!\n";
             curl_easy_cleanup(handle);
             return false;
         }
@@ -336,7 +336,7 @@ bool GmailAccount::receiveEmail(Email &email, std::string &content, const std::s
         curl_easy_setopt(handle, CURLOPT_HEADERDATA, &email.subject);
         res = curl_easy_perform(handle);
         if (res != CURLE_OK) {
-            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << "\n";
+            std::osyncstream(std::cerr) << "curl_easy_perform() failed: " << curl_easy_strerror(res) << "\n";
         }
         pos1 = email.subject.find(":", 0);
         pos2 = email.subject.find(seperateLine, pos1);
@@ -353,7 +353,7 @@ bool GmailAccount::receiveEmail(Email &email, std::string &content, const std::s
         curl_easy_setopt(handle, CURLOPT_HEADERDATA, &temp);
         res = curl_easy_perform(handle);
         if (res != CURLE_OK) {
-            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << "\n";
+            std::osyncstream(std::cerr) << "curl_easy_perform() failed: " << curl_easy_strerror(res) << "\n";
         }
         pos1 = temp.find("Content-Type", 0);
         if (temp.find("Content-Transfer-Encoding", pos1) != std::string::npos)
@@ -387,7 +387,7 @@ bool GmailAccount::receiveEmail(Email &email, std::string &content, const std::s
         curl_easy_setopt(handle, CURLOPT_HEADERDATA, &email.messageID);
         res = curl_easy_perform(handle);
         if (res != CURLE_OK) {
-            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << "\n";
+            std::osyncstream(std::cerr) << "curl_easy_perform() failed: " << curl_easy_strerror(res) << "\n";
         }
         pos1 = email.messageID.find("Message-ID", 0);
         pos1 = email.messageID.find(" ", pos1) + 1;

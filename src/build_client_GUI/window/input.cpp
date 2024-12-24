@@ -17,8 +17,6 @@ LRESULT InputWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             logFont.lfWeight = FW_BOLD;
             strcpy((char*)logFont.lfFaceName, fontName);
 
-            // printf("%s", (char*)logFont.lfFaceName);
-
             s_hFont = CreateFontIndirect(&logFont);
 
             // Create a static control for the header
@@ -90,22 +88,6 @@ LRESULT InputWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             SendMessage(hwndInput4, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
 
             ReleaseDC(m_hwnd, hdc);
-
-            // Create a combo box for selection
-            // hwndComboBox = CreateWindowW(L"COMBOBOX", NULL,
-            //     WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_BORDER,
-            //     175, 230, 100, 100,
-            //     m_hwnd, (HMENU) 2, NULL, NULL);
-
-            // Add items to the combo box
-            // SendMessageW(hwndComboBox, CB_ADDSTRING, 0, (LPARAM) L"Automatic");
-            // SendMessageW(hwndComboBox, CB_ADDSTRING, 0, (LPARAM) L"Manual");
-
-            // Create a static control for the combo box description
-            // hwndComboDesc = CreateWindowW(L"STATIC", L"Mode:",
-            //     WS_CHILD | WS_VISIBLE,
-            //     50, 230, 100, 25,
-            //     m_hwnd, NULL, NULL, NULL);
             
             hwndButton = CreateWindowExW(0,
                                         L"BUTTON",
@@ -115,12 +97,6 @@ LRESULT InputWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
                                         m_hwnd, (HMENU)INPUT_BUTTON, NULL, NULL);
             SendMessage(hwndButton, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
 
-            // // Set background color to make areas stand out
-            HBRUSH hBrush = CreateSolidBrush(RGB(173, 216, 230)); // Light blue
-            // SetClassLongPtrW(hwndInput1, GCLP_HBRBACKGROUND, (LONG_PTR)hBrush);
-            // SetClassLongPtrW(hwndInput2, GCLP_HBRBACKGROUND, (LONG_PTR)hBrush);
-            // SetClassLongPtrW(hwndInput3, GCLP_HBRBACKGROUND, (LONG_PTR)hBrush);
-            DeleteObject(hBrush);
             break;
         }
     
@@ -143,25 +119,17 @@ LRESULT InputWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             GetWindowTextA(hwndInput4, buffer, 256);
             password = std::string(buffer);
 
-            // Get the selected option from the combo box
-            // int itemIndex = SendMessageA(hwndComboBox, CB_GETCURSEL, 0, 0);
-            // char itemText[256];
-            // SendMessage(hwndComboBox, CB_GETLBTEXT, itemIndex, (LPARAM)itemText);
-            // selectedOption = itemText;
-
             // Clear the child windows
             DestroyWindow(hwndInput1);
             DestroyWindow(hwndInput2);
             DestroyWindow(hwndInput3);
             DestroyWindow(hwndInput4);
-            // DestroyWindow(hwndComboBox);
             DestroyWindow(hwndButton);
             DestroyWindow(hwndHeader);
             DestroyWindow(hwndDesc1);
             DestroyWindow(hwndDesc2);
             DestroyWindow(hwndDesc3);
             DestroyWindow(hwndDesc4);
-            // DestroyWindow(hwndComboDesc);
             inputCollected = true;
 
             // Trigger a repaint to display the collected inputs

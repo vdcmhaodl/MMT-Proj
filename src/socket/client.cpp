@@ -3,7 +3,7 @@
 bool clientSocket::initializeClient(const char *serverIP) {
     ConnectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (ConnectSocket == INVALID_SOCKET) {
-        std::cout << "Error at socket(): " << WSAGetLastError() << '\n';
+        std::osyncstream(std::cout) << "Error at socket(): " << WSAGetLastError() << '\n';
         socketAPI::cleanup();
         return false;
     }
@@ -15,24 +15,18 @@ bool clientSocket::initializeClient(const char *serverIP) {
 
     int iResult = connect(ConnectSocket, (struct sockaddr*)&hints, sizeof(hints));
     if (iResult == SOCKET_ERROR) {
-        std::cout << "connect() failed: " << WSAGetLastError() << '\n';
+        std::osyncstream(std::cout) << "connect() failed: " << WSAGetLastError() << '\n';
         closesocket(ConnectSocket);
         ConnectSocket = INVALID_SOCKET;
     }
 
-    // std::cout << "CONNECT SUCCESS!\n";
-
     return true;
-}
-
-bool clientSocket::connectServer() {
-    return false;
 }
 
 bool clientSocket::disconnect() {
     int iResult = shutdown(ConnectSocket, SD_BOTH);
     if (iResult == SOCKET_ERROR) {
-        std::cout << "shutdown() failed: " << WSAGetLastError() << '\n';
+        std::osyncstream(std::cout) << "shutdown() failed: " << WSAGetLastError() << '\n';
         closesocket(ConnectSocket);
         socketAPI::cleanup();
         return false;
@@ -43,7 +37,7 @@ bool clientSocket::disconnect() {
 bool clientSocket::clientCleanup() {
     int iResult = closesocket(ConnectSocket);
     if (iResult != 0) {
-        std::cout << "closesocket() failed: " << WSAGetLastError() << '\n';
+        std::osyncstream(std::cout) << "closesocket() failed: " << WSAGetLastError() << '\n';
         return false;
     }
     return true;

@@ -4,9 +4,12 @@
 #include <shobjidl.h> 
 #include <string>
 #include <vector>
-
-#define AUTOMATIC 0
-#define MANUAL 1
+#include <fstream>
+#include <commctrl.h>
+#include <syncstream>
+#include <iostream>
+#include <map>
+#include <any>
 
 template <class DERIVED_TYPE> 
 class BaseWindow
@@ -82,6 +85,3 @@ protected:
     int HEIGHT;
     HWND m_hwnd_parent;
 };
-
-COPYDATASTRUCT wrapperData(std::string content, DWORD dataType);
-

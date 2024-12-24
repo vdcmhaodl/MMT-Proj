@@ -23,7 +23,7 @@ void Mediator::Forward(std::string sender, std::string receiver, std::string msg
 
 void Mediator::Forward(std::any *ptr, std::string dest) {
     std::unique_lock<std::recursive_mutex> lock(mtx);
-    // std::cerr << "Forwarding...\n";
+    // std::osyncstream(std::cerr) << "Forwarding...\n";
     for (Participant *participant : listParticipants) {
         if (participant->getName() == dest) {
             participant->Receive(ptr);

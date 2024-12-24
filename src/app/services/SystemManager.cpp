@@ -58,7 +58,7 @@ std::vector<std::string> Services::getFile(Command command) {
             std::string newFilename = Command::generateFilepathWithFolder(filename);
             CopyFileA(it.c_str(), newFilename.c_str(), TRUE);
 
-            listFile.push_back(it);
+            listFile.push_back(newFilename);
         }
     }
     listFile.push_back(response);
@@ -109,7 +109,7 @@ bool Services::listFileAndFolder(const std::string &directory, std::string &file
 
     std::ofstream ofs (filename.c_str());
     if (!ofs.is_open()) {
-        std::cout << "Fail to open file!\n";
+        std::osyncstream(std::cout) << "Fail to open file!\n";
         return false;
     }
     
@@ -156,7 +156,6 @@ bool Services::getFile(const std::string &filePath) {
         return false;
     }
     else {
-        // std::cerr << "OKELA!\n";
         fin.close();
         return true;
     }
@@ -170,7 +169,7 @@ bool Services::listServices(const std::string &saveFile) {
 
     SC_HANDLE scmHandle = OpenSCManager(NULL, NULL, SC_MANAGER_ENUMERATE_SERVICE);
     if (scmHandle == NULL) {
-        std::cerr << "Error opening Service Control Manager: " << GetLastError() << std::endl;
+        std::osyncstream(std::cerr) << "Error opening Service Control Manager: " << GetLastError() << std::endl;
         return false;
     }
 
@@ -178,11 +177,10 @@ bool Services::listServices(const std::string &saveFile) {
     DWORD servicesCount = 0;
     DWORD resumeHandle = 0;
 
-    // Gọi EnumServicesStatusEx để lấy kích thước bộ nhớ cần thiết
     if (!EnumServicesStatusEx(scmHandle, SC_ENUM_PROCESS_INFO, SERVICE_WIN32, SERVICE_ACTIVE, NULL, 0, &bytesNeeded, &servicesCount, &resumeHandle, NULL)) {
         DWORD error = GetLastError();
         if (error != ERROR_MORE_DATA) {
-            std::cerr << "Error calling EnumServicesStatusEx for size calculation: " << error << std::endl;
+            std::osyncstream(std::cerr) << "Error calling EnumServicesStatusEx for size calculation: " << error << std::endl;
             CloseServiceHandle(scmHandle);
             return false;
         }
@@ -190,14 +188,13 @@ bool Services::listServices(const std::string &saveFile) {
 
     LPBYTE buffer = (LPBYTE)LocalAlloc(LMEM_ZEROINIT, bytesNeeded);
     if (buffer == NULL) {
-        std::cerr << "Error allocating memory" << std::endl;
+        std::osyncstream(std::cerr) << "Error allocating memory" << std::endl;
         CloseServiceHandle(scmHandle);
         return false;
     }
 
-    // Gọi lại EnumServicesStatusEx để lấy danh sách dịch vụ
     if (!EnumServicesStatusEx(scmHandle, SC_ENUM_PROCESS_INFO, SERVICE_WIN32, SERVICE_ACTIVE, buffer, bytesNeeded, &bytesNeeded, &servicesCount, &resumeHandle, NULL)) {
-        std::cerr << "Error enumerating services: " << GetLastError() << std::endl;
+        std::osyncstream(std::cerr) << "Error enumerating services: " << GetLastError() << std::endl;
         LocalFree(buffer);
         CloseServiceHandle(scmHandle);
         return false;
@@ -226,13 +223,13 @@ bool Services::startService(const std::string &serviceName)
 {
     SC_HANDLE scmHandle = OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT);
     if (scmHandle == NULL) {
-        std::cerr << "Error opening Service Control Manager: " << GetLastError() << std::endl;
+        std::osyncstream(std::cerr) << "Error opening Service Control Manager: " << GetLastError() << std::endl;
         return false;
     }
 
     SC_HANDLE serviceHandle = OpenServiceA(scmHandle, serviceName.c_str(), SERVICE_START | SERVICE_QUERY_STATUS);
     if (serviceHandle == NULL) {
-        std::cerr << "Error opening service: " << GetLastError() << std::endl;
+        std::osyncstream(std::cerr) << "Error opening service: " << GetLastError() << std::endl;
         CloseServiceHandle(scmHandle);
         return false;
     }
@@ -240,21 +237,20 @@ bool Services::startService(const std::string &serviceName)
     if (!StartService(serviceHandle, 0, NULL)) {
         DWORD dwError = GetLastError();
         if (dwError == ERROR_SERVICE_ALREADY_RUNNING) {
-            std::cout << "Service " << serviceName << " is already running." << std::endl;
+            std::osyncstream(std::cout) << "Service " << serviceName << " is already running." << std::endl;
         } else {
-            std::cerr << "Error starting service: " << dwError << std::endl;
+            std::osyncstream(std::cerr) << "Error starting service: " << dwError << std::endl;
         }
         CloseServiceHandle(serviceHandle);
         CloseServiceHandle(scmHandle);
         return false;
     }
 
-    // Kiểm tra trạng thái dịch vụ
     SERVICE_STATUS_PROCESS ssp;
     DWORD bytesNeeded;
     do {
         if (!QueryServiceStatusEx(serviceHandle, SC_STATUS_PROCESS_INFO, (LPBYTE)&ssp, sizeof(SERVICE_STATUS_PROCESS), &bytesNeeded)) {
-            std::cerr << "Error querying service status: " << GetLastError() << std::endl;
+            std::osyncstream(std::cerr) << "Error querying service status: " << GetLastError() << std::endl;
             CloseServiceHandle(serviceHandle);
             CloseServiceHandle(scmHandle);
             return false;
@@ -262,9 +258,9 @@ bool Services::startService(const std::string &serviceName)
     } while (ssp.dwCurrentState == SERVICE_START_PENDING);
 
     if (ssp.dwCurrentState == SERVICE_RUNNING) {
-        std::cout << "Service " << serviceName << " started successfully!" << std::endl;
+        std::osyncstream(std::cout) << "Service " << serviceName << " started successfully!" << std::endl;
     } else {
-        std::cerr << "Service failed to start." << std::endl;
+        std::osyncstream(std::cerr) << "Service failed to start." << std::endl;
     }
 
     CloseServiceHandle(serviceHandle);
@@ -275,13 +271,13 @@ bool Services::startService(const std::string &serviceName)
 bool Services::stopService(const std::string &serviceName) {
     SC_HANDLE scmHandle = OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT);
     if (scmHandle == NULL) {
-        std::cerr << "Error opening Service Control Manager: " << GetLastError() << std::endl;
+        std::osyncstream(std::cerr) << "Error opening Service Control Manager: " << GetLastError() << std::endl;
         return false;
     }
 
     SC_HANDLE serviceHandle = OpenServiceA(scmHandle, serviceName.c_str(), SERVICE_STOP | SERVICE_QUERY_STATUS);
     if (serviceHandle == NULL) {
-        std::cerr << "Error opening service: " << GetLastError() << std::endl;
+        std::osyncstream(std::cerr) << "Error opening service: " << GetLastError() << std::endl;
         CloseServiceHandle(scmHandle);
         return false;
     }
@@ -290,21 +286,20 @@ bool Services::stopService(const std::string &serviceName) {
     if (!ControlService(serviceHandle, SERVICE_CONTROL_STOP, &status)) {
         DWORD dwError = GetLastError();
         if (dwError == ERROR_SERVICE_NOT_ACTIVE) {
-            std::cout << "Service " << serviceName << " is not running." << std::endl;
+            std::osyncstream(std::cout) << "Service " << serviceName << " is not running." << std::endl;
         } else {
-            std::cerr << "Error stopping service: " << dwError << std::endl;
+            std::osyncstream(std::cerr) << "Error stopping service: " << dwError << std::endl;
         }
         CloseServiceHandle(serviceHandle);
         CloseServiceHandle(scmHandle);
         return false;
     }
 
-    // Kiểm tra trạng thái dịch vụ
     SERVICE_STATUS_PROCESS ssp;
     DWORD bytesNeeded;
     do {
         if (!QueryServiceStatusEx(serviceHandle, SC_STATUS_PROCESS_INFO, (LPBYTE)&ssp, sizeof(SERVICE_STATUS_PROCESS), &bytesNeeded)) {
-            std::cerr << "Error querying service status: " << GetLastError() << std::endl;
+            std::osyncstream(std::cerr) << "Error querying service status: " << GetLastError() << std::endl;
             CloseServiceHandle(serviceHandle);
             CloseServiceHandle(scmHandle);
             return false;
@@ -312,9 +307,9 @@ bool Services::stopService(const std::string &serviceName) {
     } while (ssp.dwCurrentState == SERVICE_STOP_PENDING);
 
     if (ssp.dwCurrentState == SERVICE_STOPPED) {
-        std::cout << "Service " << serviceName << " stopped successfully!" << std::endl;
+        std::osyncstream(std::cout) << "Service " << serviceName << " stopped successfully!" << std::endl;
     } else {
-        std::cerr << "Service failed to stop." << std::endl;
+        std::osyncstream(std::cerr) << "Service failed to stop." << std::endl;
     }
 
     CloseServiceHandle(serviceHandle);

@@ -7,41 +7,24 @@ CURL_FLAGS = -I ../third_party/libcurl/include -L ../third_party/libcurl/lib -lc
 
 SRC_DIR = .
 
-# SRCS := $(wildcard $(SRC_DIR)/*.cpp $(SRC_DIR)/app/*.cpp $(SRC_DIR)/app/services/*.cpp ./mail/*.cpp ./socket/*.cpp)
 SRCS := $(shell find $(SRC_DIR) -name "*.cpp")
-
-SRCS_MAIN_SERVER = $(filter-out $(SRC_DIR)/build_client_GUI/%.cpp $(SRC_DIR)/build_client_terminal/%.cpp $(SRC_DIR)/socket/client.cpp $(SRC_DIR)/mail/Gmail.cpp,$(SRCS))
-SRCS_MAIN_CLIENT_TERMINAL = $(filter-out $(SRC_DIR)/build_server/%.cpp $(SRC_DIR)/build_client_GUI/%.cpp $(SRC_DIR)/socket/server.cpp,$(SRCS))
-SRCS_MAIN_CLIENT_GUI = $(filter-out $(SRC_DIR)/build_server/%.cpp $(SRC_DIR)/build_client_terminal/%.cpp $(SRC_DIR)/socket/server.cpp,$(SRCS))
+SRCS_MAIN_SERVER = $(filter-out $(SRC_DIR)/build_client_GUI/%.cpp $(SRC_DIR)/socket/client.cpp $(SRC_DIR)/mail/Gmail.cpp,$(SRCS))
+SRCS_MAIN_CLIENT = $(filter-out $(SRC_DIR)/build_server/%.cpp $(SRC_DIR)/socket/server.cpp,$(SRCS))
 
 output_file:
 	$(info SRCS: $(SRCS))
 	$(info SERVER: $(SRCS_MAIN_SERVER))
-	$(info CLIENT - GUI: $(SRCS_MAIN_CLIENT_GUI))
-	$(info CLIENT - TERMINAL: $(SRCS_MAIN_CLIENT_TERMINAL))
+	$(info CLIENT - GUI: $(SRCS_MAIN_CLIENT))
 
 OBJS_MAIN_SERVER = $(SRCS_MAIN_SERVER:.cpp=.o)
-OBJS_MAIN_CLIENT_GUI = $(SRCS_MAIN_CLIENT_GUI:.cpp=.o)
-OBJS_MAIN_CLIENT_TERMINAL = $(SRCS_MAIN_CLIENT_TERMINAL:.cpp=.o)
+OBJS_MAIN_CLIENT = $(SRCS_MAIN_CLIENT:.cpp=.o)
 
-help:
-	$(info Uncomment at line 10 to run Makefile in Windows environment)
-	$(info Uncomment at line 11 to run Makefile in Unix environment (kinda))
-	$(info make: Build both the server and the client application (GUI version only))
-	$(info make help: Get help)
-	$(info make main_server.exe: Build the server application side)
-	$(info make main_GUI.exe: Build the client application side (GUI version))
-	$(info make main_terminal.exe: Build the client application side (TUI version))
-
-all: ServerApp/main_server.exe ClientApp/main_GUI.exe # main_terminal.exe clean
+all: ServerApp/main_server.exe ClientApp/main_GUI.exe # clean
 
 ServerApp/main_server.exe: $(OBJS_MAIN_SERVER)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(STATIC_LDFLAGS)
 
-ClientApp/main_GUI.exe: $(OBJS_MAIN_CLIENT_GUI)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(CURL_FLAGS)
-
-main_terminal.exe: $(OBJS_MAIN_CLIENT_TERMINAL)
+ClientApp/main_GUI.exe: $(OBJS_MAIN_CLIENT)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(CURL_FLAGS)
 
 # Object files compilation

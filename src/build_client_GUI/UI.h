@@ -5,9 +5,7 @@
 #include "window/input.h"
 #include "window/list_view.h"
 #include "window/text.h"
-#include "window/extra.h"
 #include "mediator.h"
-#include <any>
 
 #define WM_FRONTEND_NOTIFY (WM_USER + 1)
 
@@ -47,14 +45,6 @@ public:
 
     void initialize(std::vector<std::string> &signinInput);
     void start();
-
-    void Send(std::string msg);
-    void Send(std::string msg, std::string receiver);
     void Receive(std::string msg);
-
-    void Send(std::any *ptr);
-    void Send(std::any *ptr, std::string dest);
-    void Send(std::any *ptr, std::string type, std::string dest);
-    void Receive(std::any *ptr);
     void Receive(std::any *ptr, std::string type);
 };

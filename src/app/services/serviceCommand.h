@@ -9,6 +9,7 @@
 #include <random>
 #include <filesystem>
 #include <syncstream>
+#include <thread>
 
 extern std::mt19937_64 rng;
 

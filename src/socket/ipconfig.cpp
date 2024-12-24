@@ -368,7 +368,7 @@ uint32_t socketAPI::getBinaryAvailableIP() {
 std::string socketAPI::findSuitableIP(std::string IP_sender, std::string subnetMask) {
     std::vector<std::pair<std::string, std::string>> listIP = getAllAddress(AF_INET);
     for (auto &[hostIP, host_subnetMask] : listIP) {
-        // std::cout << hostIP << ' ' << host_subnetMask << '\n';
+        // std::osyncstream(std::cout) << hostIP << ' ' << host_subnetMask << '\n';
         if (host_subnetMask == subnetMask && socketAPI::sameSubnet((char*)IP_sender.c_str(), (char*)hostIP.c_str(), (char*)subnetMask.c_str())) {
             return hostIP;
         }

@@ -1,12 +1,6 @@
 #pragma once
 
 #include "base_window.h"
-#include <commctrl.h>
-#include <map>
-#include <string>
-#include <any>
-#include <syncstream>
-#include <iostream>
 
 using ListViewData = std::map<std::string, std::pair<std::string, std::string>>;
 
@@ -18,7 +12,7 @@ class ListViewWindow : public BaseWindow<ListViewWindow>
 private:
     HWND hWndListView = NULL;
     ListViewData list_IP_addr;
-    
+    HFONT s_hFont = NULL;
 public:
     static const int UPDATE_LIST_VIEW = 5;
     ListViewWindow(int WIDTH = 640, int HEIGHT = 360);

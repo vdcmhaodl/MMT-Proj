@@ -43,14 +43,8 @@ public:
     void initialize(std::vector<std::string> &signinInput);
     void start();
 
-    // void Send(std::string msg);
-    // void Send(std::string msg, std::string receiver);
     void Receive(std::string msg);
     void Receive(std::string msg, std::string sender);
-
-    // void Send(Visitor* visitor);
-    // void Send(Visitor* visitor, std::string dest);
-    // void Receive(Visitor* visitor);
 };
 
 class Gmail : public Participant {
@@ -66,15 +60,10 @@ public:
 
     Command constructCommand(Mail &mail);
 
-    // void Send(std::string msg);
-    // void Send(std::string msg, std::string receiver);
     void Receive(std::string msg);
     void Receive(std::any *ptr);
     void Receive(std::any *ptr, std::string type);
 
-    // void Send(Visitor* visitor);
-    // void Send(Visitor* visitor, std::string dest);
-    // void Receive(Visitor* visitor);
 };
 
 class Client : public Participant {
@@ -90,15 +79,9 @@ public:
     void start();
     void resolveCommand(FullCommand FC);
 
-    // void Send(std::string msg);
-    // void Send(std::string msg, std::string receiver);
     void Receive(std::string msg);
     void Receive(std::any *ptr);
     void Receive(std::any *ptr, std::string type);
-
-    // void Send(Visitor* visitor);
-    // void Send(Visitor* visitor, std::string dest);
-    // void Receive(Visitor* visitor);
 };
 
 std::vector<std::string> getInputInfo();

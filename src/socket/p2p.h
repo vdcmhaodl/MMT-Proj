@@ -1,8 +1,6 @@
 #pragma once
 #include "socket.h"
 #include "ipconfig.h"
-#include <tuple>
-#include <thread>
 
 extern std::string multicastIP;
 

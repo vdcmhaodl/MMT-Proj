@@ -1,3 +1,8 @@
+/*
+    This is a modified version of an implementation in this 
+    https://www.justsoftwaresolutions.co.uk/threading/implementing-a-thread-safe-queue-using-condition-variables.html
+    article to avoid using Boost library.
+*/
 #pragma once
 #include <mutex>
 #include <condition_variable>

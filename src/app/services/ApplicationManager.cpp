@@ -10,7 +10,6 @@ std::vector<std::string> Services::startApplication(Command command) {
         else
             response += "Start app " + it + " successfully\n";
     }
-    // std::cout << "\n" << response << "\n";
     return std::vector<std::string> ({response});
 }
 
@@ -23,7 +22,6 @@ std::vector<std::string> Services::stopApplication(Command command) {
         else
             response += "Stop app " + it + " successfully\n";
     }
-    // std::cout << "\n" << response << "\n";
     return std::vector<std::string> ({response});
 }
 
@@ -34,7 +32,7 @@ std::vector<std::string> Services::listApplications(Command command) {
     if (!Services::listApplications(wFileName)) {
         return std::vector<std::string> ({"Failed to list applications"});
     }
-    std::cerr << "listApp successfully\n";
+    std::osyncstream(std::cerr) << "listApp successfully\n";
     
     return std::vector<std::string> ({filename});
 }
@@ -97,7 +95,6 @@ bool Services::listApplications(const std::wstring &filename) {
 
     return true;
 }
-
 
 std::string ReadCMD(const char* cmd) {
     std::array<char, 128> buffer;

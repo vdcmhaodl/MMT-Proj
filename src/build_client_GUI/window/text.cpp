@@ -28,8 +28,21 @@ LRESULT TextWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg)
     {
     case WM_CREATE: {
+        const char* fontName = "Consolas";
+        const long nFontSize = 13;
+
+        HDC hdc = GetDC(m_hwnd);
+        LOGFONT logFont = {0};
+        logFont.lfHeight = -MulDiv(nFontSize, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+        logFont.lfWeight = FW_NORMAL;
+        strcpy((char*)logFont.lfFaceName, fontName);
+
+        // printf("%s", (char*)logFont.lfFaceName);
+
+        s_hFont = CreateFontIndirect(&logFont);
+        
         std::ifstream logFile(filepath.c_str()); 
-        // std::cerr << "filepath: " << filepath << '\n';
+        // std::osyncstream(std::cerr) << "filepath: " << filepath << '\n';
         std::string line;
         std::string logContent; 
 
@@ -48,8 +61,9 @@ LRESULT TextWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         logFile.close(); 
         hEdit = CreateWindowExA(0, "EDIT", logContent.c_str(), 
         WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY, clientRect.left, clientRect.top, width, height, m_hwnd, (HMENU)1, GetModuleHandle(NULL), NULL ); 
-        HFONT hFont = (HFONT)GetStockObject(ANSI_FIXED_FONT); 
-        SendMessageA(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
+        // HFONT hFont = (HFONT)GetStockObject(ANSI_FIXED_FONT); 
+        SendMessage(hEdit, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
+        ReleaseDC(m_hwnd, hdc);
     } break;
 
     case WM_TEXT_APPEND: {

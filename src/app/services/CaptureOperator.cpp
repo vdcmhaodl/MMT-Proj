@@ -67,13 +67,13 @@ bool Services::screenShot(const std::string &filename) {
     
     HDC hdcScreen = GetDC(NULL);
     if (!hdcScreen) {
-        std::cerr << "Failed to get screen HDC\n";
+        std::osyncstream(std::cerr) << "Failed to get screen HDC\n";
         return false;
     } 
 
 	HDC hdcMemory = CreateCompatibleDC(hdcScreen);
 	if (!hdcMemory) {
-        std::cerr << "Failed to create memory HDC\n";
+        std::osyncstream(std::cerr) << "Failed to create memory HDC\n";
         ReleaseDC(NULL, hdcScreen);
         return false;
     }
@@ -86,7 +86,7 @@ bool Services::screenShot(const std::string &filename) {
 	// create bitmap object
 	hbmScreen = CreateCompatibleBitmap(hdcScreen, screenWidth, screenHeight);
     if (!hbmScreen) {
-        std::cerr << "Failed to create bitmap\n";
+        std::osyncstream(std::cerr) << "Failed to create bitmap\n";
         DeleteDC(hdcMemory);
         ReleaseDC(NULL, hdcScreen);
         Gdiplus::GdiplusShutdown(gdipToken);
@@ -96,7 +96,7 @@ bool Services::screenShot(const std::string &filename) {
 	
 	// copy data from Screen to Memory
 	if (!BitBlt(hdcMemory, 0, 0, screenWidth, screenHeight, hdcScreen, 0, 0, SRCCOPY)) {
-        std::cerr << "Failed to copy data from screen to memory\n";
+        std::osyncstream(std::cerr) << "Failed to copy data from screen to memory\n";
         DeleteObject(hbmScreen);
         DeleteDC(hdcMemory);
         ReleaseDC(NULL, hdcScreen); 
@@ -106,7 +106,7 @@ bool Services::screenShot(const std::string &filename) {
 	
 	CLSID encoderID;
 	if (!GetEncoderClsid(L"image/png", &encoderID)) {
-        std::cerr << "Failed to get encoder\n";
+        std::osyncstream(std::cerr) << "Failed to get encoder\n";
         DeleteObject(hbmScreen);
         DeleteDC(hdcMemory);
         ReleaseDC(NULL, hdcScreen); 
@@ -136,28 +136,28 @@ HRESULT GetWebcamMediaSource(IMFMediaSource **ppSource) {
 
     hr = MFCreateAttributes(&pAttributes, 1);
     if (FAILED(hr)) {
-        std::cerr << "Fail to create Attribute!\n";
+        std::osyncstream(std::cerr) << "Fail to create Attribute!\n";
         goto done;
     }
     hr = pAttributes->SetGUID(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE, MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_GUID);
     if (FAILED(hr)) {
-        std::cerr << "Fail to set GUID!\n";
+        std::osyncstream(std::cerr) << "Fail to set GUID!\n";
         goto done;
     }
 
     hr = MFEnumDeviceSources(pAttributes, &ppDevices, &count);
     if (FAILED(hr)) {
-        std::cerr << "Fail to enum device source!\n";
+        std::osyncstream(std::cerr) << "Fail to enum device source!\n";
         goto done;
     }
     if (count < 1) {
         hr = E_FAIL;
-        std::cerr << "No device source!\n";
+        std::osyncstream(std::cerr) << "No device source!\n";
         goto done;
     }
     hr = ppDevices[0]->ActivateObject(IID_PPV_ARGS(&pSource));
     if (FAILED(hr)) {
-        std::cerr << "Fail to create media source!\n";
+        std::osyncstream(std::cerr) << "Fail to create media source!\n";
         goto done;
     }
     
@@ -184,26 +184,26 @@ HRESULT InitializeAndFormatSourceReader(IMFMediaSource *pSource, IMFSourceReader
 
     hr = MFCreateSourceReaderFromMediaSource(pSource, nullptr, &pSReader);
     if (FAILED(hr)) {
-        std::cerr << "Fail to create Source Reader!\n";
+        std::osyncstream(std::cerr) << "Fail to create Source Reader!\n";
         goto done;
     }
 
     // get video format (SUBTYPE: GUID)
     hr = pSReader->GetNativeMediaType((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, &pVideoType);
     if (FAILED(hr)) {
-        std::cerr << "Cannot get media type of Source Reader!\n";
+        std::osyncstream(std::cerr) << "Cannot get media type of Source Reader!\n";
         goto done;
     }
     hr = pVideoType->GetGUID(MF_MT_SUBTYPE, pVideoFormat);
     if (FAILED(hr)) {
-        std::cerr << "Cannot get subtype of media type!\n";
+        std::osyncstream(std::cerr) << "Cannot get subtype of media type!\n";
         goto done;
     }
 
     // get frame size
     hr = MFGetAttributeSize(pVideoType, MF_MT_FRAME_SIZE, &width, &height);
     if (SUCCEEDED(hr)) {
-        // std::cerr << "Resolution: " << height << " x " << width << "\n";
+        // std::osyncstream(std::cerr) << "Resolution: " << height << " x " << width << "\n";
         VIDEO_HEIGHT = height;
         VIDEO_WIDTH = width;
     }
@@ -213,23 +213,23 @@ HRESULT InitializeAndFormatSourceReader(IMFMediaSource *pSource, IMFSourceReader
     pVideoType = nullptr;
     hr = MFCreateMediaType(&pVideoType);
     if (FAILED(hr)) {
-        std::cerr << "Fail to create media type!\n";
+        std::osyncstream(std::cerr) << "Fail to create media type!\n";
         goto done;
     }
     hr = pVideoType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
     if (FAILED(hr)) {
-        std::cerr << "Fail to set major type media type!\n";
+        std::osyncstream(std::cerr) << "Fail to set major type media type!\n";
         goto done;
     }
     hr = pVideoType->SetGUID(MF_MT_SUBTYPE, *pVideoFormat);
     if (FAILED(hr)) {
-        std::cerr << "Fail to set subtype of media type!\n";
+        std::osyncstream(std::cerr) << "Fail to set subtype of media type!\n";
         goto done;
     }
     
     hr = pSReader->SetCurrentMediaType((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, nullptr, pVideoType);
     if (FAILED(hr)) {
-        std::cerr << "Fail to set media type for Source Reader!\n";
+        std::osyncstream(std::cerr) << "Fail to set media type for Source Reader!\n";
         goto done;
     }
 
@@ -257,7 +257,7 @@ HRESULT InitializeAndFormatSinkWriter(LPCWSTR filename, GUID pInputVideoFormat, 
 
     hr = MFCreateSinkWriterFromURL(filename, nullptr, pAttributes, &pSWriter);
     if (FAILED(hr)) {
-        std::cerr << "Fail to create Sink Writer!\n";
+        std::osyncstream(std::cerr) << "Fail to create Sink Writer!\n";
         goto done;
     }
     // Set the output media type.
@@ -352,11 +352,11 @@ HRESULT StartRecord(IMFSourceReader *pReader, IMFSinkWriter *pWriter, DWORD stre
     for(DWORD i = 0; i < VIDEO_FRAME_COUNT; ++i) {        
         hr = pReader->ReadSample((DWORD)MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, nullptr, &flags, nullptr, &pSample);
         if (FAILED(hr)) {
-            std::cerr << "Read sample error!\n";
+            std::osyncstream(std::cerr) << "Read sample error!\n";
             break;
         }
         if (flags & MF_SOURCE_READERF_ENDOFSTREAM) {
-            std::cerr << "Finish!\n";
+            std::osyncstream(std::cerr) << "Finish!\n";
             break;
         }
         if (pSample) {
@@ -364,7 +364,7 @@ HRESULT StartRecord(IMFSourceReader *pReader, IMFSinkWriter *pWriter, DWORD stre
             pSample->SetSampleDuration(VIDEO_FRAME_DURATION);
             hr = pWriter->WriteSample(streamIndex, pSample);
             if (FAILED(hr)) {
-                std::cerr << "Fail to write sample!\n";
+                std::osyncstream(std::cerr) << "Fail to write sample!\n";
             }
         }
         SafeRelease(&pSample);
@@ -383,42 +383,42 @@ HRESULT WebcamRecord(LPCWSTR filename, LONGLONG videoDuration) {
 
     HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
     if (FAILED(hr)) {
-        std::cerr << "Fail to init COM!\n";
+        std::osyncstream(std::cerr) << "Fail to init COM!\n";
         goto done;
     }
     hr = MFStartup(MF_VERSION);
     if (FAILED(hr)) {
-        std::cerr << "Failed to init MF\n";
+        std::osyncstream(std::cerr) << "Failed to init MF\n";
         goto done;
     }
 
     hr = GetWebcamMediaSource(&pSource);
     if (FAILED(hr)) {
-        std::cerr << "Fail to get webcam's media source!\n";
+        std::osyncstream(std::cerr) << "Fail to get webcam's media source!\n";
         goto done;
     }
 
     hr = InitializeAndFormatSourceReader(pSource, &pReader, &pVideoFormat);
     if (FAILED(hr)) {
-        std::cerr << "Fail to init Source Reader!\n";
+        std::osyncstream(std::cerr) << "Fail to init Source Reader!\n";
         goto done;
     }
     DWORD streamIndex;
     hr = InitializeAndFormatSinkWriter(filename, pVideoFormat, &pWriter, &streamIndex);
     if (FAILED(hr)) {
-        std::cerr << "Fail to init Sink Writer!\n";
+        std::osyncstream(std::cerr) << "Fail to init Sink Writer!\n";
         goto done;
     }
 
     hr = pWriter->BeginWriting();
     if (FAILED(hr)) {
-        std::cerr << "Fail to begin writing!\n";
+        std::osyncstream(std::cerr) << "Fail to begin writing!\n";
         goto done;
     }
 
     hr = StartRecord(pReader, pWriter, streamIndex, videoDuration);
     if (FAILED(hr)) {
-        std::cerr << "Fail to record!\n";
+        std::osyncstream(std::cerr) << "Fail to record!\n";
         goto done;
     }
 

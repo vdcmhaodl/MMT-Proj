@@ -4,7 +4,7 @@
 bool serverSocket::initializeServer(std::string IP) {
     char hostname[256]{};
     if (gethostname(hostname, sizeof(hostname)) == SOCKET_ERROR) {
-        std::cout << "gethostname() failed: " << WSAGetLastError() << '\n';
+        std::osyncstream(std::cout) << "gethostname() failed: " << WSAGetLastError() << '\n';
         socketAPI::cleanup();
         return false;
     }
@@ -21,7 +21,7 @@ bool serverSocket::initializeServer(std::string IP) {
 
     int iResult = bind(listenSocket, (sockaddr*)&hints, sizeof(hints));
     if (iResult == SOCKET_ERROR) {
-        std::cout << "bind failed with error: " << WSAGetLastError() << '\n';
+        std::osyncstream(std::cout) << "bind failed with error: " << WSAGetLastError() << '\n';
         closesocket(listenSocket);
         socketAPI::cleanup();
         return false;
@@ -33,7 +33,7 @@ bool serverSocket::initializeServer(std::string IP) {
 bool serverSocket::listenClient() {
     #define MAXIMUM_CLIENT_CONNECT 1
     if (listen(listenSocket, MAXIMUM_CLIENT_CONNECT) == SOCKET_ERROR) {
-        std::cout << "listen() failed: " << WSAGetLastError() << '\n';
+        std::osyncstream(std::cout) << "listen() failed: " << WSAGetLastError() << '\n';
         closesocket(listenSocket);
         socketAPI::cleanup();
         return false;
@@ -65,7 +65,6 @@ bool serverSocket::anyPendingConnection() {
 
     if (client == INVALID_SOCKET) { 
         if (WSAGetLastError() == WSAEWOULDBLOCK) {
-            // No pending connections; continue loop 
             // std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "No pending connections. Checking again..." << std::endl; 
             // Sleep for a short time before checking again continue; 
             } else { 
@@ -78,14 +77,10 @@ bool serverSocket::anyPendingConnection() {
     return true;
 }
 
-bool serverSocket::connectClient() {
-    return true;
-}
-
 bool serverSocket::disconnect() {
     int iResult = shutdown(client, SD_BOTH);
     if (iResult == SOCKET_ERROR) {
-        std::cout << "shutdown() failed: " << WSAGetLastError() << '\n';
+        std::osyncstream(std::cout) << "shutdown() failed: " << WSAGetLastError() << '\n';
         closesocket(client);
         socketAPI::cleanup();
         return false;
@@ -93,7 +88,7 @@ bool serverSocket::disconnect() {
 
     iResult = closesocket(client);
     if (iResult != 0) {
-        std::cout << "closesocket() failed: " << WSAGetLastError() << '\n';
+        std::osyncstream(std::cout) << "closesocket() failed: " << WSAGetLastError() << '\n';
         return false;
     }
 
@@ -107,7 +102,7 @@ bool serverSocket::cleanup() {
     if (listenSocket != INVALID_SOCKET){
         iResult = closesocket(listenSocket);
         if (iResult != 0) {
-            std::cout << "closesocket() failed: " << WSAGetLastError() << '\n';
+            std::osyncstream(std::cout) << "closesocket() failed: " << WSAGetLastError() << '\n';
             return false;
         }
     }
@@ -115,7 +110,7 @@ bool serverSocket::cleanup() {
     if (client != INVALID_SOCKET){
         iResult = closesocket(client);
         if (iResult != 0) {
-            std::cout << "closesocket() failed: " << WSAGetLastError() << '\n';
+            std::osyncstream(std::cout) << "closesocket() failed: " << WSAGetLastError() << '\n';
             return false;
         }
     }

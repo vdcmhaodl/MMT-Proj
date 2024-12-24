@@ -7,14 +7,14 @@ bool socketAPI::initializeSocket() {
     int result = WSAStartup(MAKEWORD(2, 2), &wsadata);
     if (result != 0) {
         /* Failed to initialize */
-        std::cout << "WSAStartup failed: " << result;
+        std::osyncstream(std::cout) << "WSAStartup failed: " << result;
         return false;
     }
 
     if (LOBYTE(wsadata.wVersion) != 2 || HIBYTE(wsadata.wVersion) != 2) {
         /* Tell the user that we could not find a usable */
         /* WinSock DLL.                                  */
-        std::cout << "Could not find a usable version of Winsock.dll\n";
+        std::osyncstream(std::cout) << "Could not find a usable version of Winsock.dll\n";
         WSACleanup();
         return false;
     }
@@ -25,7 +25,7 @@ bool socketAPI::initializeSocket() {
 bool socketAPI::cleanup() {
     int result = WSACleanup();
     if (result != 0) {
-        std::cout << "Error: " << WSAGetLastError() << '\n';
+        std::osyncstream(std::cout) << "Error: " << WSAGetLastError() << '\n';
         return false;
     }
     return true;
@@ -38,10 +38,10 @@ uint32_t socketAPI::getBinaryIP(char IPv4_address[]) {
         return sa.S_un.S_addr;
     }
     if (result == 0) {
-        std::cout << "Invalid!\n";
+        std::osyncstream(std::cout) << "Invalid!\n";
     }
     if (result == -1) {
-        std::cout << "inet_pton() failed: " << WSAGetLastError() << '\n';
+        std::osyncstream(std::cout) << "inet_pton() failed: " << WSAGetLastError() << '\n';
     }
     return false;
 }
@@ -95,16 +95,6 @@ bool socketAPI::sendMessage(SOCKET &connectSocket, std::string &message) {
         byteSent += iResult;
     } while (byteSent < (int)message.size());
 
-    // uint32_t respond;
-    // iResult = recv(connectSocket, (char*)&respond, sizeof(uint32_t), 0); 
-    // if (iResult == SOCKET_ERROR) { 
-    //     std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "recv() failed: " << WSAGetLastError() << '\n'; 
-    //     cleanup(); 
-    //     return false; 
-    // }
-    // respond = ntohl(respond);
-
-    // return (respond == 200);
     return true;
 }
 
@@ -124,20 +114,11 @@ bool socketAPI::receiveMessage(SOCKET &connectSocket, std::string &message) {
             byteRecv += iResult;
         }
         else if (iResult != 0) {
-            std::cout << "recv() failed: " << WSAGetLastError() << '\n';
+            std::osyncstream(std::cout) << "recv() failed: " << WSAGetLastError() << '\n';
             cleanup();
             return false;
         }
     } while(iResult > 0 && byteRecv < (int)dataLength);
-
-    // uint32_t respond = (byteRecv == (int)dataLength ? 200 : 400);
-    // respond = htonl(respond); 
-    // iResult = send(connectSocket, (char*)&respond, sizeof(uint32_t), 0);
-    // if (iResult == SOCKET_ERROR) {
-    //     std::osyncstream(std::cout) << std::this_thread::get_id() << ' ' << "send() failed: " << WSAGetLastError() << '\n';
-    //     cleanup();
-    //     return false;
-    // }
 
     return (byteRecv == (int)dataLength);
 }
@@ -151,7 +132,7 @@ bool socketAPI::sendFile(SOCKET &connectSocket, std::string &pathFile) {
                                FILE_ATTRIBUTE_NORMAL,
                                NULL);
     if (hFile == INVALID_HANDLE_VALUE) {
-        std::cout << "CreateFile() failed!\n";
+        std::osyncstream(std::cout) << "CreateFile() failed!\n";
         return false;
     }
 
@@ -171,7 +152,7 @@ bool socketAPI::sendFile(SOCKET &connectSocket, std::string &pathFile) {
     uint32_t __sizeFile = htonl(sizeFile.QuadPart);
     int iResult = send(connectSocket, (char*)&__sizeFile, sizeof(uint32_t), 0);
     if (iResult == SOCKET_ERROR) {
-        std::cout << "send() failed: " << WSAGetLastError() << '\n';
+        std::osyncstream(std::cout) << "send() failed: " << WSAGetLastError() << '\n';
         closesocket(connectSocket);
         cleanup();
         return false;
@@ -180,22 +161,12 @@ bool socketAPI::sendFile(SOCKET &connectSocket, std::string &pathFile) {
     iResult = TransmitFile(connectSocket, hFile, 0, 0, NULL, NULL, 0);
     CloseHandle(hFile);
     if (!iResult) {
-        std::cout << "TransmitFile() failed: " << WSAGetLastError() << '\n';
+        std::osyncstream(std::cout) << "TransmitFile() failed: " << WSAGetLastError() << '\n';
         closesocket(connectSocket);
         cleanup();
         return false;
     }
 
-    // uint32_t respond;
-    // iResult = recv(connectSocket, (char*)&respond, sizeof(uint32_t), 0); 
-    // if (iResult == SOCKET_ERROR) { 
-    //     std::cout << "recv() failed: " << WSAGetLastError() << '\n'; 
-    //     closesocket(connectSocket);
-    //     cleanup(); 
-    //     return false; 
-    // }
-    // respond = ntohl(respond);
-    // return (respond == 200);
     return true;
 }
 
@@ -215,7 +186,7 @@ bool socketAPI::receiveFile(SOCKET &connectSocket, std::string &pathFile) {
                                FILE_ATTRIBUTE_NORMAL,
                                NULL);
     if (hFile == INVALID_HANDLE_VALUE) {
-        std::cout << "CreateFile() failed!\n";
+        std::osyncstream(std::cout) << "CreateFile() failed!\n";
         return false;
     }
     CloseHandle(hFile);
@@ -228,14 +199,11 @@ bool socketAPI::receiveFile(SOCKET &connectSocket, std::string &pathFile) {
 
     std::ofstream fout(pathFile.c_str(), std::ios::binary);
     if (!fout.is_open()) {
-        std::cout << "Cannot open file!\n";
+        std::osyncstream(std::cout) << "Cannot open file!\n";
         return false;
     }
     fout.write((char*)&content[0], sizeof(char) * content.size());
     fout.close();
-    //
-    // pathFile = filename;
-    //
     return true;
 }
 
@@ -290,13 +258,11 @@ std::vector<std::string> socketAPI::getaddrinfo_IP(const char *nodename, const c
         return std::vector<std::string>();
     }
 
-    // std::cout << "AVAILABLE:\n";
     char IP[INET_ADDRSTRLEN];
     std::vector<std::string> listIP;
     for (ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
         getIPaddr(ptr->ai_addr, IP);
         listIP.emplace_back(IP);
-        // std::cout << IP << '\n';
     }
 
     freeaddrinfo(result);
@@ -316,7 +282,6 @@ uint32_t socketAPI::getBinaryAvailableIP(const char *nodename, const char *servn
 std::string socketAPI::findSuitableIP(const char *nodename, const char *servname, const addrinfo *hints, std::string IP_sender, std::string subnetMask) {
     std::vector<std::string> listIP = getaddrinfo_IP(nodename, servname, hints);
     for (auto &hostIP : listIP) {
-        // std::cout << "IP Address: " << hostIP << '\n';
         if (socketAPI::sameSubnet((char*)IP_sender.c_str(), (char*)hostIP.c_str(), (char*)subnetMask.c_str())) {
             return hostIP;
         }

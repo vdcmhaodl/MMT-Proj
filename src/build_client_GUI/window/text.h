@@ -1,10 +1,6 @@
 #pragma once
 
 #include "base_window.h"
-#include <fstream>
-#include <iostream>
-#include <any>
-#include <syncstream>
 
 #define WM_TEXT_APPEND (WM_USER + 4)
 
@@ -14,6 +10,7 @@ private:
     std::string filepath;
     HWND hEdit = NULL;
     static const DWORD UPDATE_MESSAGE = 1;
+    HFONT s_hFont = NULL;
 public:
     void setFilePath(std::string filePath);
     TextWindow(int WIDTH = 640, int HEIGHT = 360);

@@ -52,6 +52,17 @@ LRESULT ListViewWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg)
     {
     case WM_CREATE: {
+            const char* fontName = "Consolas";
+            const long nFontSize = 13;
+
+            HDC hdc = GetDC(m_hwnd);
+            LOGFONT logFont = {0};
+            logFont.lfHeight = -MulDiv(nFontSize, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+            logFont.lfWeight = FW_NORMAL;
+            strcpy((char*)logFont.lfFaceName, fontName);
+
+            s_hFont = CreateFontIndirect(&logFont);
+
             // Initialize common controls
             INITCOMMONCONTROLSEX icex;
             icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
@@ -64,10 +75,12 @@ LRESULT ListViewWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             int height = clientRect.bottom - clientRect.top;
 
             // Create the List-View control
-            hWndListView = CreateWindowExA(0, WC_LISTVIEW, "",
+            hWndListView = CreateWindowExA(0, WC_LISTVIEWA, "",
                                         WS_CHILD | WS_VISIBLE | LVS_REPORT,
                                         clientRect.left, clientRect.top, width, height,
                                         m_hwnd, (HMENU)1, GetModuleHandle(NULL), NULL);
+            
+            SendMessage(hWndListView, WM_SETFONT, (WPARAM)s_hFont, (LPARAM)MAKELONG(TRUE, 0));
 
             // Initialize the List-View columns
             InitListView();
@@ -75,7 +88,9 @@ LRESULT ListViewWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             // Update the List-View with example data
             UpdateListView();
 
-            SendMessage(m_hwnd_parent, WM_IP_REQUEST, 0, 0);
+            SendMessageA(m_hwnd_parent, WM_IP_REQUEST, 0, 0);
+
+            ReleaseDC(m_hwnd, hdc);
         }
             break;
     case WM_COMMAND: {

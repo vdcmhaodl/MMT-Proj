@@ -6,8 +6,8 @@
 #include <string>
 #include <queue>
 #include <set>
+#include <syncstream>
 
-const std::string trojan = "mmt23clc007017236@gmail.com";
 const std::string CAcert = "CAcertificate/cacert.pem";
 
 struct Email {

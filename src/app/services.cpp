@@ -32,10 +32,6 @@ bool Services::getHelp(std::string &help) {
     return true;
 }
 
-// bool Services::getIP() {
-
-// }
-
 std::vector<std::string> Services::getHelp(Command command) {
     std::string help = "FAIL to get HELP!";
     Services::getHelp(help);
@@ -51,7 +47,3 @@ std::string Services::getCurrentTimeString() {
     oss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S");            // Format time as string
     return oss.str();
 }
-
-// std::vector<std::string> getIP(Command command) {
-
-// }
