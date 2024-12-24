@@ -29,31 +29,6 @@ bool GmailAccount::isValidAdminEmail(const std::string &sender) {
     return (adminEmails.find(sender) != adminEmails.end());
 }
 
-// bool GmailAccount::addAdminEmail(const std::string &email) {
-//     if (adminEmails.find(email) != adminEmails.end()) {
-//         std::cerr << email << " has already been admin email!\n";
-//         return false;
-//     }
-//     adminEmails.insert(email);
-//     std::ofstream fout("AdminAccount.txt", std::ios::app);
-//     fout << email << "\n";
-//     fout.close();
-//     return true;
-// }
-
-// bool GmailAccount::removeAdminEmail(const std::string &email) {
-//     if (adminEmails.find(email) == adminEmails.end()) {
-//         std::cerr << email << " isn't an admin email!\n";
-//         return false;
-//     }
-//     adminEmails.erase(email);
-//     std::ofstream fout("AdminAccount.txt");
-//     for (auto &e : adminEmails)
-//         fout << e << "\n";
-//     fout.close();
-//     return true;
-// }
-
 GmailAccount::GmailAccount(std::string Username, std::string Password) {
     initializeInfo(Username, Password);
 }
@@ -401,3 +376,28 @@ bool GmailAccount::receiveEmail(Email &email, std::string &content, const std::s
     }
     return (res == CURLE_OK);
 }
+
+// bool GmailAccount::addAdminEmail(const std::string &email) {
+//     if (adminEmails.find(email) != adminEmails.end()) {
+//         std::cerr << email << " has already been admin email!\n";
+//         return false;
+//     }
+//     adminEmails.insert(email);
+//     std::ofstream fout("AdminAccount.txt", std::ios::app);
+//     fout << email << "\n";
+//     fout.close();
+//     return true;
+// }
+
+// bool GmailAccount::removeAdminEmail(const std::string &email) {
+//     if (adminEmails.find(email) == adminEmails.end()) {
+//         std::cerr << email << " isn't an admin email!\n";
+//         return false;
+//     }
+//     adminEmails.erase(email);
+//     std::ofstream fout("AdminAccount.txt");
+//     for (auto &e : adminEmails)
+//         fout << e << "\n";
+//     fout.close();
+//     return true;
+// }

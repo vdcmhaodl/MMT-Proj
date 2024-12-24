@@ -560,3 +560,497 @@ Receive new IP update
 
 2024-12-21 16:35:30|Start resolve command: |help|get|||
 2024-12-21 16:35:33|Start resolve command: |IP|get|||
+2024-12-21 16:55:16|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 16:55:56|New mail: |help|get|||
+
+2024-12-21 16:55:56|New mail: |IP|get|||
+
+2024-12-21 16:55:56|New mail: 192.168.2.46|system|restart|||
+
+2024-12-21 16:55:56|Start resolve command: |help|get|||
+2024-12-21 16:55:56|New mail: 192.168.2.46|webcam|record|<Record.mp4>|<20>|
+
+2024-12-21 16:55:59|Start resolve command: |IP|get|||
+2024-12-21 16:55:56|New mail: 192.168.2.46|screen|shot|<ScreenShot.png>||
+
+2024-12-21 16:55:59|New mail: 192.168.2.46|application|list|||
+
+2024-12-21 16:55:59|New mail: 192.168.2.46|application|start|<Zalo><edge>||
+
+2024-12-21 16:56:02|Start resolve command: 192.168.2.46|system|restart|||
+2024-12-21 16:56:02|New mail: 192.168.2.46|application|stop|<zalo>||
+
+2024-12-21 16:56:02|New mail: 192.168.2.46|service|list|||
+
+2024-12-21 16:56:02|New mail: 192.168.2.46|service|stop|<spooler>||
+
+2024-12-21 16:56:02|New mail: 192.168.2.46|file|list|<D:\Test>||
+
+2024-12-21 16:56:02|New mail: 192.168.2.46|file|get|<D:\Test\AVL.h>||
+
+2024-12-21 16:56:02|New mail: 192.168.2.46|file|delete|<D:\Test\main.exe>||
+
+2024-12-21 16:56:02|New mail: 192.168.2.46|service|start|<Spooler>||
+
+2024-12-21 16:56:06|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 16:56:06|Request system - restart from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 16:56:06|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 16:56:06|Start resolve command: 192.168.2.46|webcam|record|<Record.mp4>|<20>|
+2024-12-21 16:56:06|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 16:56:11|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 16:59:20|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 17:00:00|New mail: |help|get|||
+
+2024-12-21 17:00:00|New mail: |IP|get|||
+
+2024-12-21 17:00:01|New mail: 192.168.2.46|webcam|record|<Record.mp4>|<20>|
+
+2024-12-21 17:00:01|New mail: 192.168.2.46|screen|shot|<ScreenShot.png>||
+
+2024-12-21 17:00:01|New mail: 192.168.2.46|application|list|||
+
+2024-12-21 17:00:01|New mail: 192.168.2.46|application|start|<Zalo><edge>||
+
+2024-12-21 17:00:01|New mail: 192.168.2.46|application|stop|<zalo>||
+
+2024-12-21 17:00:01|New mail: 192.168.2.46|service|list|||
+
+2024-12-21 17:00:01|New mail: 192.168.2.46|service|stop|<spooler>||
+
+2024-12-21 17:00:01|New mail: 192.168.2.46|file|list|<D:\Test>||
+
+2024-12-21 17:00:01|New mail: 192.168.2.46|file|get|<D:\Test\AVL.h>||
+
+2024-12-21 17:00:01|Start resolve command: |help|get|||
+2024-12-21 17:00:04|Start resolve command: |IP|get|||
+2024-12-21 17:00:07|Start resolve command: 192.168.2.46|webcam|record|<Record.mp4>|<20>|
+2024-12-21 17:00:01|New mail: 192.168.2.46|file|delete|<D:\Test\main.exe>||
+
+2024-12-21 17:00:07|New mail: 192.168.2.46|service|start|<Spooler>||
+
+2024-12-21 17:00:08|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 17:01:12|Request webcam - record from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 17:01:12|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 17:01:12|Start resolve command: 192.168.2.46|screen|shot|<ScreenShot.png>||
+2024-12-21 17:01:17|Request screen - shot from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 17:01:17|Start resolve command: 192.168.2.46|application|list|||
+2024-12-21 17:01:17|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 17:01:17|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 17:01:21|Request application - list from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 17:01:21|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 17:01:21|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 17:01:21|Start resolve command: 192.168.2.46|application|start|<Zalo><edge>||
+2024-12-21 17:01:22|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 17:01:29|Request application - start from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 17:01:29|Start resolve command: 192.168.2.46|application|stop|<zalo>||
+2024-12-21 17:01:29|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 17:01:29|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 17:01:36|Request application - stop from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 17:01:36|Start resolve command: 192.168.2.46|service|list|||
+2024-12-21 17:01:36|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 17:01:40|Request service - list from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 17:01:40|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 17:01:40|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 17:01:40|Start resolve command: 192.168.2.46|service|stop|<spooler>||
+2024-12-21 17:01:44|Request service - stop from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 17:01:44|Start resolve command: 192.168.2.46|file|list|<D:\Test>||
+2024-12-21 17:01:44|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 17:01:44|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 17:01:47|Request file - list from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 17:01:47|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 17:01:47|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 17:01:47|Start resolve command: 192.168.2.46|file|get|<D:\Test\AVL.h>||
+2024-12-21 17:01:55|Request file - get from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 17:01:55|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 17:01:55|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 17:01:55|Start resolve command: 192.168.2.46|file|delete|<D:\Test\main.exe>||
+2024-12-21 17:01:59|Request file - delete from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 17:01:59|Start resolve command: 192.168.2.46|service|start|<Spooler>||
+2024-12-21 17:01:59|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 17:01:59|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 17:02:03|Request service - start from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 17:02:03|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 17:02:03|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 17:05:45|New mail: 192.168.2.46|screen|capture|<screen.png>||
+
+2024-12-21 17:05:45|Start resolve command: 192.168.2.46|screen|capture|<screen.png>||
+2024-12-21 17:05:45|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 17:05:53|Request screen - capture from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 17:05:48|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 17:12:47|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 17:12:52|New mail: 192.168.2.46|keylogger|hook||<20>|
+
+2024-12-21 17:12:52|Start resolve command: 192.168.2.46|keylogger|hook||<20>|
+2024-12-21 17:16:26|IP update: 192.168.2.19 - ASUS-ZENBOOK-of-TranMeen - FREE
+
+2024-12-21 17:16:31|New mail: 192.168.2.46|keylogger|hook||<20>|
+
+2024-12-21 17:16:31|Start resolve command: 192.168.2.46|keylogger|hook||<20>|
+2024-12-21 17:16:31|Cannot find the target IP 192.168.2.46|keylogger|hook||<20>|
+2024-12-21 17:17:40|New mail: 192.168.2.46|keylogger|hook||<20>|
+
+2024-12-21 17:17:40|Start resolve command: 192.168.2.46|keylogger|hook||<20>|
+2024-12-21 17:17:40|Cannot find the target IP 192.168.2.46|keylogger|hook||<20>|
+2024-12-21 17:18:26|New mail: 192.168.2.19|keylogger|hook||<20>|
+
+2024-12-21 17:18:26|Start resolve command: 192.168.2.19|keylogger|hook||<20>|
+2024-12-21 17:18:27|IP update: 192.168.2.19 - ASUS-ZENBOOK-of-TranMeen - CONNECTING
+
+2024-12-21 17:18:55|Request keylogger - hook from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 17:18:55|IP update: 192.168.2.19 - ASUS-ZENBOOK-of-TranMeen - FREE
+
+2024-12-21 17:19:29|IP update: 192.168.2.19 - ASUS-ZENBOOK-of-TranMeen - DELETE
+
+2024-12-21 17:19:39|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 17:19:56|New mail: 192.168.2.46|keylogger|hook||<20>|
+
+2024-12-21 17:19:56|Start resolve command: 192.168.2.46|keylogger|hook||<20>|
+2024-12-21 17:19:57|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 17:20:24|Request keylogger - hook from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 17:20:24|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 18:26:58|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 18:29:17|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - DELETE
+
+2024-12-21 18:29:28|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 18:30:42|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 18:35:33|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - DELETE
+
+2024-12-21 18:42:00|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 18:43:51|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - DELETE
+
+2024-12-21 18:46:36|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 18:48:12|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - DELETE
+
+2024-12-21 18:48:28|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 18:52:46|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - DELETE
+
+2024-12-21 18:53:02|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:10:20|New mail: 192.168.2.46|webcam|record|<Record.mp4>|<10>|
+
+2024-12-21 19:10:20|Start resolve command: 192.168.2.46|webcam|record|<Record.mp4>|<10>|
+2024-12-21 19:10:24|Request webcam - record from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 19:10:24|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 19:10:24|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:13:36|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:14:02|New mail: 192.168.2.46|webcam|record|<Record.mp4>|<10>|
+
+2024-12-21 19:14:02|Start resolve command: 192.168.2.46|webcam|record|<Record.mp4>|<10>|
+2024-12-21 19:14:03|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 19:14:39|Request webcam - record from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 19:14:17|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:15:06|New mail: 192.168.2.46|webcam|record|<Record.mp4>|<10>|
+
+2024-12-21 19:15:06|Start resolve command: 192.168.2.46|webcam|record|<Record.mp4>|<10>|
+2024-12-21 19:15:07|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 19:17:22|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:21:02|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:24:22|New mail: 192.168.2.46|webcam|record|<webcam.mp4>|<10>|
+
+2024-12-21 19:24:22|Start resolve command: 192.168.2.46|webcam|record|<webcam.mp4>|<10>|
+2024-12-21 19:24:26|Request webcam - record from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 19:24:26|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 19:24:26|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:28:03|New mail: 192.168.2.46|webcam|record|<webcam.mp4>|<10>|
+
+2024-12-21 19:28:03|Start resolve command: 192.168.2.46|webcam|record|<webcam.mp4>|<10>|
+2024-12-21 19:28:03|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 19:29:29|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:31:45|New mail: 192.168.2.46|webcam|record|<webcam.mp4>|<10>|
+
+2024-12-21 19:31:45|Start resolve command: 192.168.2.46|webcam|record|<webcam.mp4>|<10>|
+2024-12-21 19:31:45|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 19:32:21|Request webcam - record from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 19:32:21|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:35:47|New mail: |IP|get|||
+
+2024-12-21 19:35:47|New mail: |help|get|||
+
+2024-12-21 19:35:47|Start resolve command: |IP|get|||
+2024-12-21 19:35:50|Start resolve command: |help|get|||
+2024-12-21 19:36:12|New mail: 192.168.2.46|file|list|<D:\Test>||
+
+2024-12-21 19:36:12|Start resolve command: 192.168.2.46|file|list|<D:\Test>||
+2024-12-21 19:36:15|Request file - list from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 19:36:15|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 19:36:15|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:36:37|New mail: 192.168.2.46|file|get|<D:\Test\matrix.cpp>||
+
+2024-12-21 19:36:37|Start resolve command: 192.168.2.46|file|get|<D:\Test\matrix.cpp>||
+2024-12-21 19:36:44|Request file - get from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 19:36:44|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 19:36:44|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:37:01|New mail: 192.168.2.46|file|delete|<D:\Test\test2.exe>||
+
+2024-12-21 19:37:01|Start resolve command: 192.168.2.46|file|delete|<D:\Test\test2.exe>||
+2024-12-21 19:37:05|Request file - delete from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 19:37:05|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 19:37:05|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:38:43|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - DELETE
+
+2024-12-21 19:49:53|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:51:24|New mail: 192.168.2.46|application|list|<listApp.txt>||
+
+2024-12-21 19:51:24|Start resolve command: 192.168.2.46|application|list|<listApp.txt>||
+2024-12-21 19:51:25|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 19:51:29|Request application - list from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 19:51:29|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:51:54|New mail: 192.168.2.46|service|list|<listService.txt>||
+
+2024-12-21 19:51:54|New mail: 192.168.2.46|screen|capture|<capture.png>||
+
+2024-12-21 19:51:54|Start resolve command: 192.168.2.46|service|list|<listService.txt>||
+2024-12-21 19:51:57|Request service - list from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 19:51:57|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 19:51:57|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:51:58|Start resolve command: 192.168.2.46|screen|capture|<capture.png>||
+2024-12-21 19:51:58|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 19:55:36|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:56:51|New mail: 192.168.2.46|application|list|<listApp.txt>||
+
+2024-12-21 19:56:51|Start resolve command: 192.168.2.46|application|list|<listApp.txt>||
+2024-12-21 19:56:55|Request application - list from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 19:56:55|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 19:56:55|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 19:59:47|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:01:23|New mail: 192.168.2.46|application|list|||
+
+2024-12-21 20:01:23|New mail: 192.168.2.46|service|list|||
+
+2024-12-21 20:01:23|Start resolve command: 192.168.2.46|application|list|||
+2024-12-21 20:01:27|Request application - list from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 20:01:27|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 20:01:27|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:01:27|Start resolve command: 192.168.2.46|service|list|||
+2024-12-21 20:01:30|Request service - list from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 20:01:30|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 20:01:30|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:03:37|New mail: 192.168.2.46|service|list|||
+
+2024-12-21 20:03:37|Start resolve command: 192.168.2.46|service|list|||
+2024-12-21 20:03:42|Request service - list from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 20:03:42|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 20:03:42|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:04:38|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:09:00|New mail: |application|list|||
+
+2024-12-21 20:09:00|Start resolve command: |application|list|||
+2024-12-21 20:09:00|Cannot find the target IP |application|list|||
+2024-12-21 20:09:25|New mail: 192.168.2.46|service|list|||
+
+2024-12-21 20:09:25|Start resolve command: 192.168.2.46|service|list|||
+2024-12-21 20:09:25|Cannot find the target IP 192.168.2.46|service|list|||
+2024-12-21 20:11:43|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:11:49|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - DELETE
+
+2024-12-21 20:11:58|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:13:13|New mail: 192.168.2.46|application|list|||
+
+2024-12-21 20:13:13|New mail: 192.168.2.46|service|list|||
+
+2024-12-21 20:13:13|Start resolve command: 192.168.2.46|application|list|||
+2024-12-21 20:13:17|Request application - list from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 20:13:17|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 20:13:17|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:13:17|Start resolve command: 192.168.2.46|service|list|||
+2024-12-21 20:13:21|Request service - list from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 20:13:21|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 20:13:21|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:14:45|New mail: 192.168.2.46|screen|capture|<sreencapture.png>||
+
+2024-12-21 20:14:45|Start resolve command: 192.168.2.46|screen|capture|<sreencapture.png>||
+2024-12-21 20:14:45|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 20:14:53|Request screen - capture from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 20:14:49|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:19:09|New mail: 192.168.2.46|application|start|<notion>||
+
+2024-12-21 20:19:09|Start resolve command: 192.168.2.46|application|start|<notion>||
+2024-12-21 20:19:10|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 20:19:15|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:19:15|Request application - start from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 20:20:18|New mail: 192.168.2.46|application|stop|<notion>||
+
+2024-12-21 20:20:18|Start resolve command: 192.168.2.46|application|stop|<notion>||
+2024-12-21 20:20:19|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 20:20:23|Request application - stop from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 20:20:23|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:23:39|New mail: 192.168.2.46|service|stop|<spooler><wsearch>||
+
+2024-12-21 20:23:39|Start resolve command: 192.168.2.46|service|stop|<spooler><wsearch>||
+2024-12-21 20:23:39|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 20:23:43|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:23:43|Request service - stop from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 20:26:58|New mail: 192.168.2.46|service|start|<spooler><wsearch>||
+
+2024-12-21 20:26:58|Start resolve command: 192.168.2.46|service|start|<spooler><wsearch>||
+2024-12-21 20:26:59|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 20:27:02|Request service - start from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 20:27:02|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:28:29|New mail: 192.168.2.46|service|stop|<spooler><wsearch>||
+
+2024-12-21 20:28:29|Start resolve command: 192.168.2.46|service|stop|<spooler><wsearch>||
+2024-12-21 20:28:33|Request service - stop from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 20:28:33|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 20:28:33|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:31:48|New mail: 192.168.2.46|keylogger|hook|<hook>||
+
+2024-12-21 20:31:48|Start resolve command: 192.168.2.46|keylogger|hook|<hook>||
+2024-12-21 20:31:49|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 20:35:27|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:36:37|New mail: 192.168.2.46|keylogger|hook||<20>|
+
+2024-12-21 20:36:37|Start resolve command: 192.168.2.46|keylogger|hook||<20>|
+2024-12-21 20:36:38|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 20:37:06|Request keylogger - hook from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 20:37:06|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:39:06|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - DELETE
+
+2024-12-21 20:39:27|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:40:04|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+
+2024-12-21 20:43:04|New mail: 192.168.2.46|system|restart|||
+
+2024-12-21 20:43:04|Start resolve command: 192.168.2.46|system|restart|||
+2024-12-21 20:43:05|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - CONNECTING
+
+2024-12-21 20:43:08|Request system - restart from trancongminh2022a@gmail.com successfully!
+
+2024-12-21 20:43:08|IP update: 192.168.2.46 - LAPTOP-J59FV9NK - FREE
+

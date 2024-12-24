@@ -1,9 +1,9 @@
 HELP:
 
 EMAIL FORMAT:
-    To:      <ClientEmail@gmail.com>
-    Subject: <Type> - <Action>
-    Content: <IPv4 address>
+    To:      ClientEmail@gmail.com
+    Subject: Type - Action
+    Content: IPv4 address
              <Name>
              <Optional>
 
@@ -25,4 +25,4 @@ STOP SERVICE with specific NAME_SERVICE             service         stop        
 LIST FILES in specific DIRECTORY                    file            list            DIRECTORY               
 GET FILE from specific FILEPATH                     file            get             FILEPATH                
 DELETE FILE with specific FILEPATH                  file            delete          FILEPATH                
-KEYLOGGER HOOK                                      keylogger       hook                            TIME                                    
+KEYLOGGER HOOK                                      keylogger       hook                            TIME        

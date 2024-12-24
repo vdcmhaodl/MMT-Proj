@@ -116,7 +116,7 @@ void Gmail::start() {
 
         // std::osyncstream(std::cout) << "NUMBER OF MAIL: " << newMail.size() << '\n';
         if (!newMail.size()) {
-            std::this_thread::sleep_for(std::chrono::seconds(15));
+            std::this_thread::sleep_for(std::chrono::seconds(20));
             continue;
         }
         
